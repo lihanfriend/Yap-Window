@@ -415,15 +415,33 @@
   margin-top: auto;
 }
 
+#formatting-bar {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 5px;
+  align-items: center;
+}
+
+#formatting-bar button, 
+#formatting-bar select, 
+#formatting-bar input[type="color"] {
+  padding: 4px 6px;
+  font-size: 14px;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+  background: ${isDark ? "#555" : "#eee"};
+  color: ${isDark ? "#fff" : "#333"};
+  cursor: pointer;
+}
+
 #message-input {
-	width: 80%;
-	padding: 10px;
-	border-radius: 5px;
-	border: 1px solid ${isDark ? "#555" : "#ccc"};
-	margin-top: auto;
-	margin-bottom: auto;
-	color: ${isDark ? "#ddd" : "black"};
-	background-color: ${isDark ? "#333" : "#fff"};
+  min-height: 50px;
+  border: 1px solid ${isDark ? "#555" : "#ccc"};
+  border-radius: 5px;
+  padding: 8px;
+  overflow-y: auto;
+  background: ${isDark ? "#333" : "#fff"};
+  color: ${isDark ? "#ddd" : "#333"};
 }
 
 #send-button {
@@ -634,11 +652,25 @@
     <div id="right-sidebar">
       <div id="messages">
       </div>
-      <div id="message-send">
-        <p id="typing-indicator"></p>
-        <input type="text" id="message-input" autocomplete="off" placeholder="Yap away..."/>
-        <button id="send-button">Send</button>
-      </div>
+	<div id="message-send">
+	  <div id="formatting-bar">
+	    <button id="bold-btn">B</button>
+	    <button id="italic-btn">I</button>
+	    <button id="underline-btn">U</button>
+	    <button id="strike-btn">S</button>
+	    <input type="color" id="color-picker">
+	    <input type="color" id="highlight-picker">
+	    <select id="font-size-selector">
+	      <option value="12px">12</option>
+	      <option value="14px">14</option>
+	      <option value="16px" selected>16</option>
+	      <option value="18px">18</option>
+	      <option value="20px">20</option>
+	    </select>
+	  </div>
+	  <div id="message-input" contenteditable="true" placeholder="Yap away..."></div>
+	  <button id="send-button">Send</button>
+	</div>
     </div>
   </div>
 </div>
