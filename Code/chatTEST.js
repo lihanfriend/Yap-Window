@@ -2018,8 +2018,8 @@ ${chatHistory}`;
 
       loadMemberOptions();
     }
-
-    submitButton.addEventListener("click", async function () {
+    submitButton.removeEventListener("click", createChannelHandler);
+    async function createChannelHandler() {
       const name = channelName.value.trim();
       const type = channelType.value;
       const description = channelDescription.value.trim();
@@ -2082,14 +2082,20 @@ ${chatHistory}`;
         channelName.value = "";
         channelDescription.value = "";
         channelType.value = "Public";
+        await fetchChatList();
+        await loadMessages(name);
+        currentChat = name;
         document.getElementById("channel-screen").classList.add("hidden");
         chatScreen.style.display = "flex";
+        resetForm();
         resetForm();
       } catch (error) {
         console.error("Error creating/modifying channel:", error);
         alert("Error creating/modifying channel. Please try again.");
       }
-    });
+    }
+    
+    submitButton.addEventListener("click", createChannelHandler);
 
     backButton.addEventListener("click", async function () {
       resetForm();
@@ -2135,6 +2141,8 @@ ${chatHistory}`;
                 chatScreen.style.display = "flex";
                 resetForm();
                 alert(`Channel "${channelNameToDelete}" has been deleted.`);
+                fetchChatList();
+                loadMessages("General");
               })
               .catch((error) => {
                 console.error("Error in deletion process:", error);
