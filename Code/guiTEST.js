@@ -6,9 +6,7 @@
   function toggleDarkMode() {
     isDark = !isDark;
     localStorage.setItem("bookmarklet-mode", isDark ? "dark" : "light");
-    document.getElementById("dark-mode").textContent = isDark
-      ? "Light Mode"
-      : "Dark Mode";
+    document.getElementById("dark-mode").textContent = ${isDark ? "☀️" : "🌙"};
     updateColor();
   }
   document.addEventListener("keydown", (e) => {
@@ -614,11 +612,11 @@
 </div>
 <div id="chat-screen" class="chat hidden">
   <div id="settings-bar">
-    <button id="customize-profile" class="setting-button">Profile</button>
-    <button id="dark-mode" class="setting-button">${isDark ? "Light Mode" : "Dark Mode"}</button>
-    <button id="read-all" class="setting-button">Read All</button>
-    <button id="hide-left-sidebar" class="setting-button">Hide Left Sidebar</button>
-    <button id="modify-channel" class="setting-button" style="display: none">Modify Channel</button>
+    <button id="customize-profile" class="setting-button">👤</button>
+    <button id="dark-mode" class="setting-button">${isDark ? "☀️" : "🌙"}</button>
+    <button id="read-all" class="setting-button">📖</button>
+    <button id="hide-left-sidebar" class="setting-button">☰</button>
+    <button id="modify-channel" class="setting-button" style="display: none">✏️</button>
   </div>
   <div id="lower-chat" class="chat">
     <div id="left-sidebar">
