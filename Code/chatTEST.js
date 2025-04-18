@@ -2,6 +2,7 @@
   var readMessages = {};
   var readAll = true;
   var isDark = false;
+  let pendingFormOptions = null;
   const BOT_USERS = {
     AI: "[AI]",
     RNG: "[RNG]",
@@ -2030,6 +2031,7 @@ ${chatHistory}`;
     });
   }
   async function createChannelHandler() {
+    const { isModifying, existingChannelName } = pendingFormOptions;
         const channelType = document.getElementById("channel-type");
     const channelMembers = document.getElementById("channel-members");
     const channelName = document.getElementById("channel-name");
@@ -2117,6 +2119,7 @@ ${chatHistory}`;
   }
 
   function deleteChannelHandler() {
+    const { isModifying, existingChannelName } = pendingFormOptions;
     const channelType = document.getElementById("channel-type");
     const channelMembers = document.getElementById("channel-members");
     const channelName = document.getElementById("channel-name");
