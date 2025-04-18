@@ -406,13 +406,12 @@
 	font-size: 8px;
 	color: ${isDark ? "#888" : "#666"};
 }
+
 #message-send {
-  padding: 10px;
-  background-color: ${isDark ? "#444" : "#f1f1f1"};
   display: flex;
-  justify-content: center;
+  flex-direction: column;
   align-items: center;
-  margin-top: auto;
+  width: 100%;
 }
 
 #formatting-bar {
@@ -420,12 +419,13 @@
   gap: 6px;
   margin-bottom: 5px;
   align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
 }
 
 #formatting-bar button, 
-#formatting-bar select, 
-#formatting-bar input[type="color"] {
-  padding: 4px 6px;
+#formatting-bar select {
+  padding: 4px 8px;
   font-size: 14px;
   border-radius: 4px;
   border: 1px solid #ccc;
@@ -434,14 +434,26 @@
   cursor: pointer;
 }
 
+#formatting-bar .color-tool {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+#formatting-bar .tool-icon {
+  font-size: 18px;
+}
+
 #message-input {
-  min-height: 50px;
+  width: 90%;
+  min-height: 80px;
   border: 1px solid ${isDark ? "#555" : "#ccc"};
   border-radius: 5px;
   padding: 8px;
   overflow-y: auto;
   background: ${isDark ? "#333" : "#fff"};
   color: ${isDark ? "#ddd" : "#333"};
+  margin-bottom: 8px;
 }
 
 #send-button {
