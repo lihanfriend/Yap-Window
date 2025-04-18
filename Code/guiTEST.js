@@ -6,7 +6,7 @@
   function toggleDarkMode() {
     isDark = !isDark;
     localStorage.setItem("bookmarklet-mode", isDark ? "dark" : "light");
-    document.getElementById("dark-mode").textContent = ${isDark ? "☀️" : "🌙"};
+    document.getElementById("dark-mode").textContent = `${isDark ? "☀️" : "🌙"}`;
     updateColor();
   }
   document.addEventListener("keydown", (e) => {
