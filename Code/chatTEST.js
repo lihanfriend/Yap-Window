@@ -1810,19 +1810,19 @@ ${chatHistory}`;
     const membersList = document.getElementById("members-list");
     const deleteButton = document.getElementById("delete-channel");
     const memberSearch = document.getElementById("member-search");
-      channelType.value = "Public";
-      membersContainer.style.display = "none";
-      membersList.innerHTML = "";
-      selectedMembers.innerHTML = "";
-      if (!submitButton.clicked) {
-        channelName.value = "";
-        channelDescription.value = "";
-      }
-      deleteButton.style.display = "none";
-      channelName.disabled = false;
-      previousChannelType = "Public";
-      originalMembers = "";
+    channelType.value = "Public";
+    membersContainer.style.display = "none";
+    membersList.innerHTML = "";
+    selectedMembers.innerHTML = "";
+    if (!submitButton.clicked) {
+      channelName.value = "";
+      channelDescription.value = "";
     }
+    deleteButton.style.display = "none";
+    channelName.disabled = false;
+    previousChannelType = "Public";
+    originalMembers = "";
+  }
 
   async function handleChannelForm(
     isModifying = false,
@@ -2031,7 +2031,7 @@ ${chatHistory}`;
       loadMemberOptions();
     }
     pendingFormOptions = { isModifying, existingChannelName, originalMembers };
-    
+
     submitButton.onclick = createChannelHandler;
     deleteButton.onclick = deleteChannelHandler;
 
@@ -2042,8 +2042,9 @@ ${chatHistory}`;
     });
   }
   async function createChannelHandler() {
-    const { isModifying, existingChannelName, originalMembers } = pendingFormOptions;
-        const channelType = document.getElementById("channel-type");
+    const { isModifying, existingChannelName, originalMembers } =
+      pendingFormOptions;
+    const channelType = document.getElementById("channel-type");
     const channelMembers = document.getElementById("channel-members");
     const channelName = document.getElementById("channel-name");
     const channelDescription = document.getElementById("channel-description");
@@ -2117,7 +2118,8 @@ ${chatHistory}`;
       channelDescription.value = "";
       channelType.value = "Public";
       await fetchChatList();
-      await loadMessages(name);
+      await populateSidebar();
+      selectServer(name);
       currentChat = name;
       document.getElementById("channel-screen").classList.add("hidden");
       chatScreen.style.display = "flex";
@@ -2130,7 +2132,8 @@ ${chatHistory}`;
   }
 
   function deleteChannelHandler() {
-    const { isModifying, existingChannelName, originalMembers } = pendingFormOptions;
+    const { isModifying, existingChannelName, originalMembers } =
+      pendingFormOptions;
     const channelType = document.getElementById("channel-type");
     const channelMembers = document.getElementById("channel-members");
     const channelName = document.getElementById("channel-name");
@@ -2247,6 +2250,18 @@ ${chatHistory}`;
         }
       }
     });
+  }
+
+  async function selectServer(channelName) {
+    const servers = document.querySelectorAll(".server");
+    servers.forEach((server) => {
+      if (server.textContent.trim() === channelName) {
+        server.classList.add("selected");
+      } else {
+        server.classList.remove("selected");
+      }
+    });
+    await loadMessages(channelName);
   }
 
   /* Load existing messages */
