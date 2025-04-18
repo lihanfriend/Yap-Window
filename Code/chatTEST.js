@@ -1799,6 +1799,17 @@ ${chatHistory}`;
     }
   };
   function resetForm() {
+    const channelType = document.getElementById("channel-type");
+    const channelMembers = document.getElementById("channel-members");
+    const channelName = document.getElementById("channel-name");
+    const channelDescription = document.getElementById("channel-description");
+    const submitButton = document.getElementById("submit-channel");
+    const backButton = document.getElementById("back-channel");
+    const membersContainer = document.getElementById("members-container");
+    const selectedMembers = document.getElementById("selected-members");
+    const membersList = document.getElementById("members-list");
+    const deleteButton = document.getElementById("delete-channel");
+    const memberSearch = document.getElementById("member-search");
       channelType.value = "Public";
       membersContainer.style.display = "none";
       membersList.innerHTML = "";
