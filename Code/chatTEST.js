@@ -2018,7 +2018,8 @@ ${chatHistory}`;
 
       loadMemberOptions();
     }
-
+    pendingFormOptions = { isModifying, existingChannelName };
+    
     submitButton.onclick = createChannelHandler;
     deleteButton.onclick = deleteChannelHandler;
 
