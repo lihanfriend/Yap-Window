@@ -1615,10 +1615,10 @@ ${chatHistory}`;
 
   const messageInput = document.getElementById("message-input");
   messageInput.addEventListener("input", (e) => {
-    e.target.value = convertHtmlToEmoji(
+    e.target.innterHTML = convertHtmlToEmoji(
       joypixels.shortnameToImage(e.target.value),
     );
-    e.target.value = e.target.value.substring(0, 1000);
+    e.target.innerHTML = e.target.value.substring(0, 1000);
   });
 
   /* Add Enter key functionality */
