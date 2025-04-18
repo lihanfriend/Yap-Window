@@ -1250,13 +1250,13 @@
   /* Function to send a message */
   async function sendMessage() {
     const messagesRef = ref(database, `Chats/${currentChat}`);
-    const message = document.getElementById("message-input").innerHTML.trim();
+    let message = document.getElementById("message-input").innerHTML.trim();
     if (!message) return;
     message = convertHtmlToEmoji(joypixels.shortnameToImage(message));
 
     if (message) {
       messageInput.value = "";
-      if (message.toLowerCase().startsWith("/ai ")) {
+      if (document.getElementById("message-input").textContent.toLowerCase().startsWith("/ai ")) {
         let d = Date.now();
         const question = message.substring(4).trim();
 
@@ -1332,7 +1332,7 @@ ${chatHistory}`;
           Message: aiReply,
           Date: d,
         });
-      } else if (message.toLowerCase().startsWith("/eod")) {
+      } else if (document.getElementById("message-input").textContent.toLowerCase().startsWith("/eod")) {
         const parts = message.split(" ");
         let yesChance = 45;
         let noChance = 45;
@@ -1383,7 +1383,7 @@ ${chatHistory}`;
           Message: `${result}`,
           Date: Date.now(),
         });
-      } else if (message.toLowerCase().startsWith("/coinflip")) {
+      } else if (document.getElementById("message-input").textContent.toLowerCase().startsWith("/coinflip")) {
         const parts = message.split(" ");
         let headsChance = 50;
         let tailsChance = 50;
@@ -1421,7 +1421,7 @@ ${chatHistory}`;
           Message: `🎲 Coin flip result: ${result}`,
           Date: Date.now(),
         });
-      } else if (message.toLowerCase().startsWith("/roll ")) {
+      } else if (document.getElementById("message-input").textContent.toLowerCase().startsWith("/roll ")) {
         const sides = parseInt(message.split(" ")[1]);
 
         const userMessageRef = push(messagesRef);
@@ -1448,7 +1448,7 @@ ${chatHistory}`;
           Message: `🎲 Rolling a ${sides}-sided die: ${result}`,
           Date: Date.now(),
         });
-      } else if (message.toLowerCase().startsWith("/snake")) {
+      } else if (document.getElementById("message-input").textContent.toLowerCase().startsWith("/snake")) {
         const temp_email =
           typeof email !== "undefined"
             ? email.replace(/\./g, "*")
