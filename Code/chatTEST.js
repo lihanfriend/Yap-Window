@@ -591,7 +591,7 @@
           messageDiv.appendChild(headerInfo);
 
           const messageContent = document.createElement("p");
-          messageContent.textContent = message.Message;
+          messageContent.innerHTML = message.Message;
           messageContent.style.marginTop = "5px";
           messageDiv.appendChild(messageContent);
 
@@ -1250,8 +1250,8 @@
   /* Function to send a message */
   async function sendMessage() {
     const messagesRef = ref(database, `Chats/${currentChat}`);
-    const messageInput = document.getElementById("message-input");
-    let message = messageInput.value.trim();
+    const message = document.getElementById("message-input").innerHTML.trim();
+    if (!messageHtml) return;
     message = convertHtmlToEmoji(joypixels.shortnameToImage(message));
 
     if (message) {
@@ -1627,6 +1627,53 @@ ${chatHistory}`;
       sendMessage();
     }
   });
+
+  function wrapSelection(tag, style = "") {
+  const selection = window.getSelection();
+  if (!selection.rangeCount) return;
+  const range = selection.getRangeAt(0);
+  const span = document.createElement(tag === "span" ? "span" : tag);
+  if (style) span.style.cssText = style;
+  range.surroundContents(span);
+}
+
+document.getElementById("bold-btn").onclick = () => wrapSelection("b");
+document.getElementById("italic-btn").onclick = () => wrapSelection("i");
+document.getElementById("underline-btn").onclick = () => wrapSelection("u");
+document.getElementById("strike-btn").onclick = () => wrapSelection("s");
+
+document.getElementById("color-picker").oninput = (e) => {
+  wrapSelection("span", `color: ${e.target.value}`);
+};
+
+document.getElementById("highlight-picker").oninput = (e) => {
+  wrapSelection("span", `background-color: ${e.target.value}`);
+};
+
+document.getElementById("font-size-selector").onchange = (e) => {
+  wrapSelection("span", `font-size: ${e.target.value}`);
+};
+
+
+document.getElementById("message-input").addEventListener("keydown", (e) => {
+  if (e.ctrlKey && e.key === "b") {
+    e.preventDefault();
+    wrapSelection("b");
+  }
+  if (e.ctrlKey && e.key === "i") {
+    e.preventDefault();
+    wrapSelection("i");
+  }
+  if (e.ctrlKey && e.key === "u") {
+    e.preventDefault();
+    wrapSelection("u");
+  }
+  if (e.ctrlKey && e.key === "s") {
+    e.preventDefault();
+    wrapSelection("s");
+  }
+});
+
 
   async function markAllMessagesAsRead() {
     try {
