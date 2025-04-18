@@ -1251,7 +1251,7 @@
   async function sendMessage() {
     const messagesRef = ref(database, `Chats/${currentChat}`);
     const message = document.getElementById("message-input").innerHTML.trim();
-    if (!messageHtml) return;
+    if (!message) return;
     message = convertHtmlToEmoji(joypixels.shortnameToImage(message));
 
     if (message) {
