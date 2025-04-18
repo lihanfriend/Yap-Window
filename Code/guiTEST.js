@@ -410,63 +410,97 @@
 #message-send {
   display: flex;
   flex-direction: column;
-  align-items: center;
   width: 100%;
+  padding: 5px;
 }
 
 #formatting-bar {
   display: flex;
-  gap: 6px;
+  gap: 4px;
   margin-bottom: 5px;
   align-items: center;
   justify-content: center;
   flex-wrap: wrap;
 }
 
-#formatting-bar button, 
-#formatting-bar select {
-  padding: 4px 8px;
-  font-size: 14px;
-  border-radius: 4px;
-  border: 1px solid #ccc;
-  background: ${isDark ? "#555" : "#eee"};
+#formatting-bar button {
+  width: 26px;
+  height: 26px;
+  font-size: 13px;
+  border: 1px solid ${isDark ? "#555" : "#ccc"};
+  background: ${isDark ? "#444" : "#eee"};
   color: ${isDark ? "#fff" : "#333"};
+  border-radius: 3px;
   cursor: pointer;
+  padding: 0;
 }
 
-#formatting-bar .color-tool {
+#message-send-row {
   display: flex;
+  gap: 5px;
   align-items: center;
-  gap: 4px;
-}
-
-#formatting-bar .tool-icon {
-  font-size: 18px;
 }
 
 #message-input {
-  width: 90%;
-  min-height: 80px;
+  flex-grow: 1;
+  min-height: 28px;
+  max-height: 100px;
   border: 1px solid ${isDark ? "#555" : "#ccc"};
   border-radius: 5px;
-  padding: 8px;
+  padding: 5px;
   overflow-y: auto;
   background: ${isDark ? "#333" : "#fff"};
   color: ${isDark ? "#ddd" : "#333"};
-  margin-bottom: 8px;
 }
 
 #send-button {
-	padding: 10px 30px;
-	background-color: ${isDark ? "#4a4a4a" : "#00796b"};
-	color: white;
-	border: none;
-	border-radius: 5px;
-	cursor: pointer;
-	margin-top: auto;
-	margin-bottom: auto;
-	margin-left: 10px;
+  height: 40px;
+  padding: 0 16px;
+  border-radius: 5px;
+  border: none;
+  background: ${isDark ? "#4a4a4a" : "#00796b"};
+  color: white;
+  cursor: pointer;
 }
+
+/* Color picker */
+.color-picker-container {
+  position: relative;
+  cursor: pointer;
+}
+
+.color-grid {
+  display: none;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  padding: 4px;
+  background: ${isDark ? "#333" : "#fff"};
+  border: 1px solid ${isDark ? "#555" : "#ccc"};
+  border-radius: 4px;
+  grid-template-columns: repeat(5, 20px);
+  gap: 4px;
+  z-index: 10;
+}
+
+.color-grid div {
+  width: 20px;
+  height: 20px;
+  border-radius: 3px;
+  cursor: pointer;
+  border: 1px solid #ccc;
+  position: relative;
+}
+
+.color-grid div.selected::after {
+  content: "✓";
+  color: white;
+  font-size: 14px;
+  position: absolute;
+  top: 2px;
+  left: 5px;
+}
+
 
 #send-button:hover {
 	background-color: ${isDark ? "#3a3a3a" : "#004d40"};
@@ -670,18 +704,19 @@
 	    <button id="italic-btn">I</button>
 	    <button id="underline-btn">U</button>
 	    <button id="strike-btn">S</button>
-	    <input type="color" id="color-picker">
-	    <input type="color" id="highlight-picker">
-	    <select id="font-size-selector">
-	      <option value="12px">12</option>
-	      <option value="14px">14</option>
-	      <option value="16px" selected>16</option>
-	      <option value="18px">18</option>
-	      <option value="20px">20</option>
-	    </select>
+	    <div class="color-picker-container" id="text-color-picker">
+	      🖍️
+	      <div class="color-grid" id="text-color-grid"></div>
+	    </div>
+	    <div class="color-picker-container" id="highlight-color-picker">
+	      🖌️
+	      <div class="color-grid" id="highlight-color-grid"></div>
+	    </div>
 	  </div>
-	  <div id="message-input" contenteditable="true" placeholder="Yap away..."></div>
-	  <button id="send-button">Send</button>
+	  <div id="message-send-row">
+	    <div id="message-input" contenteditable="true" placeholder="Type a message..."></div>
+	    <button id="send-button">Send</button>
+	  </div>
 	</div>
     </div>
   </div>
