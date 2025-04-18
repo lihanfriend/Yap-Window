@@ -2018,7 +2018,6 @@ ${chatHistory}`;
 
       loadMemberOptions();
     }
-    submitButton.removeEventListener("click", createChannelHandler);
     async function createChannelHandler() {
       const name = channelName.value.trim();
       const type = channelType.value;
@@ -2087,14 +2086,14 @@ ${chatHistory}`;
         currentChat = name;
         document.getElementById("channel-screen").classList.add("hidden");
         chatScreen.style.display = "flex";
-        resetForm();
+        updateModifyButtonVisibility();
         resetForm();
       } catch (error) {
         console.error("Error creating/modifying channel:", error);
         alert("Error creating/modifying channel. Please try again.");
       }
     }
-    
+    submitButton.removeEventListener("click", createChannelHandler);
     submitButton.addEventListener("click", createChannelHandler);
 
     backButton.addEventListener("click", async function () {
@@ -2102,8 +2101,6 @@ ${chatHistory}`;
       document.getElementById("channel-screen").classList.add("hidden");
       chatScreen.style.display = "flex";
     });
-
-    deleteButton.removeEventListener("click", deleteChannelHandler);
 
     function deleteChannelHandler() {
       if (isModifying) {
@@ -2143,6 +2140,7 @@ ${chatHistory}`;
                 alert(`Channel "${channelNameToDelete}" has been deleted.`);
                 fetchChatList();
                 loadMessages("General");
+                updateModifyButtonVisibility();
               })
               .catch((error) => {
                 console.error("Error in deletion process:", error);
@@ -2155,7 +2153,7 @@ ${chatHistory}`;
         }
       }
     }
-
+    deleteButton.removeEventListener("click", deleteChannelHandler);
     deleteButton.addEventListener("click", deleteChannelHandler);
   }
 
