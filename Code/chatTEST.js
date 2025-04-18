@@ -2018,145 +2018,136 @@ ${chatHistory}`;
 
       loadMemberOptions();
     }
-    async function createChannelHandler() {
-      const name = channelName.value.trim();
-      const type = channelType.value;
-      const description = channelDescription.value.trim();
 
-      if (!name) {
-        alert("Please enter a channel name");
-        return;
-      }
-
-      if (!isModifying) {
-        const chatInfoRef = ref(database, `Chat Info/${name}`);
-        const snapshot = await get(chatInfoRef);
-        if (snapshot.exists()) {
-          alert(
-            "A channel with this name already exists. Please choose a different name.",
-          );
-          return;
-        }
-      }
-
-      let members = [];
-      members.push(email.replace(/\./g, "*"));
-
-      if (type === "Private") {
-        const selectedMemberElements =
-          document.querySelectorAll(".selected-member");
-        if (selectedMemberElements.length === 0) {
-          alert("Please select at least one member for private channel");
-          return;
-        }
-        members = members.concat(
-          Array.from(selectedMemberElements).map((el) =>
-            el.textContent
-              .trim()
-              .replace(/×$/, "")
-              .replace(/\./g, "*")
-              .trim()
-              .replace(/\s+/g, ""),
-          ),
-        );
-      }
-
-      const channelData = {
-        Description: description || "No description provided",
-
-        Members:
-          type === "Private"
-            ? members.join(",")
-            : isModifying && originalMembers && originalMembers !== "None"
-              ? originalMembers
-              : email.replace(/\./g, "*"),
-        Type: type,
-        Creator: email.replace(/\./g, "*"),
-      };
-
-      try {
-        const newChannelRef = ref(database, `Chat Info/${name}`);
-        await set(newChannelRef, channelData);
-
-        channelName.value = "";
-        channelDescription.value = "";
-        channelType.value = "Public";
-        await fetchChatList();
-        await loadMessages(name);
-        currentChat = name;
-        document.getElementById("channel-screen").classList.add("hidden");
-        chatScreen.style.display = "flex";
-        updateModifyButtonVisibility();
-        resetForm();
-      } catch (error) {
-        console.error("Error creating/modifying channel:", error);
-        alert("Error creating/modifying channel. Please try again.");
-      }
-    }
-    submitButton.removeEventListener("click", createChannelHandler);
-    submitButton.addEventListener("click", createChannelHandler);
+    submitButton.onclick = createChannelHandler;
+    deleteButton.onclick = deleteChannelHandler;
 
     backButton.addEventListener("click", async function () {
       resetForm();
       document.getElementById("channel-screen").classList.add("hidden");
       chatScreen.style.display = "flex";
     });
+  }
+  async function createChannelHandler() {
+    const name = channelName.value.trim();
+    const type = channelType.value;
+    const description = channelDescription.value.trim();
 
-    function deleteChannelHandler() {
-      if (isModifying) {
-        const channelNameToDelete = channelName.value.trim();
-        if (!channelNameToDelete) {
-          alert("Channel name is missing");
-          return;
-        }
+    if (!name) {
+      alert("Please enter a channel name");
+      return;
+    }
 
-        if (
-          confirm(
-            `Are you sure you want to delete channel "${channelNameToDelete}"?`,
-          )
-        ) {
-          try {
-            const channelRef = ref(
-              database,
-              `Chat Info/${channelNameToDelete}`,
-            );
-            remove(channelRef)
-              .then(() => {
-                console.log("Chat Info deleted successfully");
+    if (!isModifying) {
+      const chatInfoRef = ref(database, `Chat Info/${name}`);
+      const snapshot = await get(chatInfoRef);
+      if (snapshot.exists()) {
+        alert(
+          "A channel with this name already exists. Please choose a different name.",
+        );
+        return;
+      }
+    }
 
-                const messagesRef = ref(
-                  database,
-                  `Chats/${channelNameToDelete}`,
-                );
-                return remove(messagesRef);
-              })
-              .then(() => {
-                console.log("Messages deleted successfully");
-                document
-                  .getElementById("channel-screen")
-                  .classList.add("hidden");
-                chatScreen.style.display = "flex";
-                resetForm();
-                alert(`Channel "${channelNameToDelete}" has been deleted.`);
-                fetchChatList();
-                loadMessages("General");
-                updateModifyButtonVisibility();
-              })
-              .catch((error) => {
-                console.error("Error in deletion process:", error);
-                alert("Error deleting channel. Please try again.");
-              });
-          } catch (error) {
-            console.error("Error initiating delete:", error);
-            alert("Error deleting channel. Please try again.");
-          }
+    let members = [];
+    members.push(email.replace(/\./g, "*"));
+
+    if (type === "Private") {
+      const selectedMemberElements =
+        document.querySelectorAll(".selected-member");
+      if (selectedMemberElements.length === 0) {
+        alert("Please select at least one member for private channel");
+        return;
+      }
+      members = members.concat(
+        Array.from(selectedMemberElements).map((el) =>
+          el.textContent
+            .trim()
+            .replace(/×$/, "")
+            .replace(/\./g, "*")
+            .trim()
+            .replace(/\s+/g, ""),
+        ),
+      );
+    }
+
+    const channelData = {
+      Description: description || "No description provided",
+
+      Members:
+        type === "Private"
+          ? members.join(",")
+          : isModifying && originalMembers && originalMembers !== "None"
+            ? originalMembers
+            : email.replace(/\./g, "*"),
+      Type: type,
+      Creator: email.replace(/\./g, "*"),
+    };
+
+    try {
+      const newChannelRef = ref(database, `Chat Info/${name}`);
+      await set(newChannelRef, channelData);
+
+      channelName.value = "";
+      channelDescription.value = "";
+      channelType.value = "Public";
+      await fetchChatList();
+      await loadMessages(name);
+      currentChat = name;
+      document.getElementById("channel-screen").classList.add("hidden");
+      chatScreen.style.display = "flex";
+      updateModifyButtonVisibility();
+      resetForm();
+    } catch (error) {
+      console.error("Error creating/modifying channel:", error);
+      alert("Error creating/modifying channel. Please try again.");
+    }
+  }
+
+  function deleteChannelHandler() {
+    if (isModifying) {
+      const channelNameToDelete = channelName.value.trim();
+      if (!channelNameToDelete) {
+        alert("Channel name is missing");
+        return;
+      }
+
+      if (
+        confirm(
+          `Are you sure you want to delete channel "${channelNameToDelete}"?`,
+        )
+      ) {
+        try {
+          const channelRef = ref(database, `Chat Info/${channelNameToDelete}`);
+          remove(channelRef)
+            .then(() => {
+              console.log("Chat Info deleted successfully");
+
+              const messagesRef = ref(database, `Chats/${channelNameToDelete}`);
+              return remove(messagesRef);
+            })
+            .then(() => {
+              console.log("Messages deleted successfully");
+              document.getElementById("channel-screen").classList.add("hidden");
+              chatScreen.style.display = "flex";
+              resetForm();
+              alert(`Channel "${channelNameToDelete}" has been deleted.`);
+              fetchChatList();
+              loadMessages("General");
+              currentChat = "General";
+              updateModifyButtonVisibility();
+            })
+            .catch((error) => {
+              console.error("Error in deletion process:", error);
+              alert("Error deleting channel. Please try again.");
+            });
+        } catch (error) {
+          console.error("Error initiating delete:", error);
+          alert("Error deleting channel. Please try again.");
         }
       }
     }
-    deleteButton.removeEventListener("click", deleteChannelHandler);
-    deleteButton.addEventListener("click", deleteChannelHandler);
   }
-
   document
     .getElementById("create-new-server")
     .addEventListener("click", function () {
