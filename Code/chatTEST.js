@@ -1798,6 +1798,21 @@ ${chatHistory}`;
       alert("Failed to update profile. Please try again.");
     }
   };
+  function resetForm() {
+      channelType.value = "Public";
+      membersContainer.style.display = "none";
+      membersList.innerHTML = "";
+      selectedMembers.innerHTML = "";
+      if (!submitButton.clicked) {
+        channelName.value = "";
+        channelDescription.value = "";
+      }
+      deleteButton.style.display = "none";
+      channelName.disabled = false;
+      previousChannelType = "Public";
+      originalMembers = "";
+    }
+
   async function handleChannelForm(
     isModifying = false,
     existingChannelName = null,
@@ -1818,21 +1833,6 @@ ${chatHistory}`;
 
     let originalMembers = "";
     let previousChannelType = "Public";
-
-    function resetForm() {
-      channelType.value = "Public";
-      membersContainer.style.display = "none";
-      membersList.innerHTML = "";
-      selectedMembers.innerHTML = "";
-      if (!submitButton.clicked) {
-        channelName.value = "";
-        channelDescription.value = "";
-      }
-      deleteButton.style.display = "none";
-      channelName.disabled = false;
-      previousChannelType = "Public";
-      originalMembers = "";
-    }
 
     resetForm();
 
