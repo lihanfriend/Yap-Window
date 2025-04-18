@@ -2019,7 +2019,7 @@ ${chatHistory}`;
 
       loadMemberOptions();
     }
-    pendingFormOptions = { isModifying, existingChannelName };
+    pendingFormOptions = { isModifying, existingChannelName, originalMembers };
     
     submitButton.onclick = createChannelHandler;
     deleteButton.onclick = deleteChannelHandler;
@@ -2031,7 +2031,7 @@ ${chatHistory}`;
     });
   }
   async function createChannelHandler() {
-    const { isModifying, existingChannelName } = pendingFormOptions;
+    const { isModifying, existingChannelName, originalMembers } = pendingFormOptions;
         const channelType = document.getElementById("channel-type");
     const channelMembers = document.getElementById("channel-members");
     const channelName = document.getElementById("channel-name");
@@ -2119,7 +2119,7 @@ ${chatHistory}`;
   }
 
   function deleteChannelHandler() {
-    const { isModifying, existingChannelName } = pendingFormOptions;
+    const { isModifying, existingChannelName, originalMembers } = pendingFormOptions;
     const channelType = document.getElementById("channel-type");
     const channelMembers = document.getElementById("channel-members");
     const channelName = document.getElementById("channel-name");
