@@ -2118,7 +2118,6 @@ ${chatHistory}`;
       channelDescription.value = "";
       channelType.value = "Public";
       await fetchChatList();
-      await populateSidebar();
       selectServer(name);
       currentChat = name;
       document.getElementById("channel-screen").classList.add("hidden");
