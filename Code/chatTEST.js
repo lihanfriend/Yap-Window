@@ -2029,6 +2029,17 @@ ${chatHistory}`;
     });
   }
   async function createChannelHandler() {
+        const channelType = document.getElementById("channel-type");
+    const channelMembers = document.getElementById("channel-members");
+    const channelName = document.getElementById("channel-name");
+    const channelDescription = document.getElementById("channel-description");
+    const submitButton = document.getElementById("submit-channel");
+    const backButton = document.getElementById("back-channel");
+    const membersContainer = document.getElementById("members-container");
+    const selectedMembers = document.getElementById("selected-members");
+    const membersList = document.getElementById("members-list");
+    const deleteButton = document.getElementById("delete-channel");
+    const memberSearch = document.getElementById("member-search");
     const name = channelName.value.trim();
     const type = channelType.value;
     const description = channelDescription.value.trim();
@@ -2105,6 +2116,17 @@ ${chatHistory}`;
   }
 
   function deleteChannelHandler() {
+    const channelType = document.getElementById("channel-type");
+    const channelMembers = document.getElementById("channel-members");
+    const channelName = document.getElementById("channel-name");
+    const channelDescription = document.getElementById("channel-description");
+    const submitButton = document.getElementById("submit-channel");
+    const backButton = document.getElementById("back-channel");
+    const membersContainer = document.getElementById("members-container");
+    const selectedMembers = document.getElementById("selected-members");
+    const membersList = document.getElementById("members-list");
+    const deleteButton = document.getElementById("delete-channel");
+    const memberSearch = document.getElementById("member-search");
     if (isModifying) {
       const channelNameToDelete = channelName.value.trim();
       if (!channelNameToDelete) {
