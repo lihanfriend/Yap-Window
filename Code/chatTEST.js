@@ -1697,7 +1697,6 @@ ${chatHistory}`;
       rightSidebar.style.width = "100%";
       rightSidebar.style.left = "0";
 
-      hideSidebarButton.textContent = "Show Left Sidebar";
       isSidebarHidden = true;
     } else {
       leftSidebar.style.transition = "all 0.3s ease";
@@ -1709,7 +1708,6 @@ ${chatHistory}`;
       rightSidebar.style.width = "80%";
       rightSidebar.style.left = "20%";
 
-      hideSidebarButton.textContent = "Hide Left Sidebar";
       isSidebarHidden = false;
     }
   });
