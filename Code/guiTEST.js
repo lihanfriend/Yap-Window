@@ -349,6 +349,7 @@
 	justify-content: space-between;
 	height: 100%;
 	padding-left: 10px;
+ 	padding: 0 10px 0 10px;
 	background-color: ${isDark ? "#333" : "#fff"};
 	color: ${isDark ? "#ddd" : "#333"};
 	min-width: 0;
