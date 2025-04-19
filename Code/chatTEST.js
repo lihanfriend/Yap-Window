@@ -809,7 +809,7 @@
           }
 
           initialLoad = false;
-
+          document.getElementById("messages").scrollTop = 2000000
           setTimeout(async () => {
             await scrollToFirstUnread(chatName);
           }, 100);
