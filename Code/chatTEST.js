@@ -58,78 +58,85 @@
     updateFavicon();
   }
 
-  async function scrollToFirstUnread(chatName) {
-    const messagesDiv = document.getElementById("messages");
+async function scrollToFirstUnread(chatName) {
+  const messagesDiv = document.getElementById("messages");
 
-    await new Promise((resolve) => {
-      const checkMessages = () => {
-        if (messagesDiv.children.length > 0) {
-          resolve();
-        } else {
-          setTimeout(checkMessages, 50);
-        }
-      };
-      checkMessages();
-    });
-
-    async function findFirstUnread() {
-      const unreadMessages = Array.from(
-        document.querySelectorAll(".message.unread"),
-      );
-      return unreadMessages.length > 0 ? unreadMessages[0] : null;
-    }
-
-    async function ensureFullyLoaded(targetMessage) {
-      const MAX_TRIES = 50;
-      let tries = 0;
-
-      while (tries < MAX_TRIES) {
-        if (targetMessage && document.body.contains(targetMessage)) {
-          const rect = targetMessage.getBoundingClientRect();
-          if (rect.top > 0) break;
-        }
-
-        messagesDiv.scrollTop = 0;
-        await new Promise((resolve) => setTimeout(resolve, 100));
-        tries++;
+  await new Promise((resolve) => {
+    const checkMessages = () => {
+      if (messagesDiv.children.length > 0) {
+        resolve();
+      } else {
+        setTimeout(checkMessages, 50);
       }
-    }
-
-    const firstUnread = await findFirstUnread();
-    if (!firstUnread) {
-      console.log("No unread messages found.");
-      return;
-    }
-
-    await ensureFullyLoaded(firstUnread);
-
-    const smoothScrollToUnread = () => {
-      const targetPosition =
-        firstUnread.offsetTop - messagesDiv.clientHeight / 3;
-      const start = messagesDiv.scrollTop;
-      const distance = targetPosition - start;
-      const duration = 500;
-      let startTime = null;
-
-      const ease = (t) => (t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t);
-
-      function animate(time) {
-        if (!startTime) startTime = time;
-        const elapsed = time - startTime;
-        const progress = Math.min(elapsed / duration, 1);
-
-        messagesDiv.scrollTop = start + distance * ease(progress);
-
-        if (progress < 1) {
-          requestAnimationFrame(animate);
-        }
-      }
-
-      requestAnimationFrame(animate);
     };
+    checkMessages();
+  });
 
-    smoothScrollToUnread();
+  const findLatestUnreadFromOthers = () => {
+    const allMessages = Array.from(messagesDiv.querySelectorAll(".message"));
+    for (let i = allMessages.length - 1; i >= 0; i--) {
+      const msg = allMessages[i];
+      if (
+        msg.classList.contains("received") || msg.classList.contains("Eliana") || msg.classList.contains("bot")
+      ) {
+        if (msg.classList.contains("unread")) {
+          return msg;
+        } else {
+          return null; 
+        }
+      }
+    }
+    return null;
+  };
+
+  let targetMessage = findLatestUnreadFromOthers();
+  if (!targetMessage) return; 
+
+  const scrollToMessage = async () => {
+    let keepTrying = true;
+
+    while (keepTrying) {
+      const targetPosition = targetMessage.offsetTop - messagesDiv.clientHeight / 3;
+      const startPosition = messagesDiv.scrollTop;
+      const distance = targetPosition - startPosition;
+      const duration = 500;
+      let start = null;
+
+      await new Promise((resolveScroll) => {
+        function animateScroll(currentTime) {
+          if (!start) start = currentTime;
+          const progress = Math.min((currentTime - start) / duration, 1);
+
+          const ease = (t) => (t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t);
+          messagesDiv.scrollTop = startPosition + distance * ease(progress);
+
+          if (progress < 1) {
+            requestAnimationFrame(animateScroll);
+          } else {
+            resolveScroll();
+          }
+        }
+        requestAnimationFrame(animateScroll);
+      });
+
+      await new Promise((resolve) => setTimeout(resolve, 50));
+
+      const newTarget = findLatestUnreadFromOthers();
+      if (!newTarget || newTarget === targetMessage) {
+        keepTrying = false;
+      } else {
+        targetMessage = newTarget; 
+      }
+    }
+  };
+
+  try {
+    await scrollToMessage();
+  } catch (error) {
+    console.error("Error during smooth scroll:", error);
+    targetMessage.scrollIntoView({ block: "center", behavior: "smooth" });
   }
+}
   async function updateFavicon() {
     const currentUrl = window.location.href;
     const hasUnreadMessages = !readAll;
