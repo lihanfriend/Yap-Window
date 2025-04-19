@@ -57,33 +57,44 @@
     });
     updateFavicon();
   }
-async function scrollToFirstUnread(chatName) {
-  console.log("scrollToFirstUnread called for chat:", chatName);
+async function scrollUntilUnreadAppears(chatName) {
+  console.log("scrollUntilUnreadAppears called for chat:", chatName);
 
   const messagesDiv = document.getElementById("messages");
 
-  await new Promise((resolve) => setTimeout(resolve, 500));
-  console.log("Waited 500ms, now checking messages...");
+  function findFirstUnread() {
+    const allMessages = Array.from(messagesDiv.querySelectorAll(".message"));
+    console.log("Total messages currently:", allMessages.length);
 
-  const allMessages = Array.from(messagesDiv.querySelectorAll(".message"));
-  console.log("Total messages after wait:", allMessages.length);
-
-  let firstUnread = null;
-  for (let i = 0; i < allMessages.length; i++) {
-    const msg = allMessages[i];
-    if (msg.classList.contains("unread")) {
-      console.log("Found unread message at index", i, ":", msg);
-      firstUnread = msg;
-      break;
+    for (let i = 0; i < allMessages.length; i++) {
+      const msg = allMessages[i];
+      if (msg.classList.contains("unread")) {
+        console.log("Found unread message at index", i, ":", msg);
+        return msg;
+      }
     }
+    return null;
   }
 
-  if (firstUnread) {
-    console.log("Scrolling to first unread message...");
-    firstUnread.scrollIntoView({ block: "center", behavior: "auto" });
-  } else {
-    console.log("No unread messages found. Not scrolling.");
+  let tries = 0;
+  const maxTries = 30; 
+
+  while (tries < maxTries) {
+    const unread = findFirstUnread();
+    if (unread) {
+      console.log("Unread message found! Scrolling to it...");
+      unread.scrollIntoView({ block: "center", behavior: "auto" });
+      return;
+    }
+
+    console.log("No unread yet. Scrolling to top to load more...");
+    messagesDiv.scrollTop = 0; 
+
+    await new Promise((resolve) => setTimeout(resolve, 600));
+    tries++;
   }
+
+  console.log("Gave up after max tries. No unread message found.");
 }
   
   async function updateFavicon() {
