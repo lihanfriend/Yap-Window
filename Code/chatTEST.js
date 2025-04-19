@@ -1831,7 +1831,7 @@ ${chatHistory}`;
   
     messageInput.style.height = "auto";
   
-    messageInput.style.height = Math.max(input.style.height, 28) + "px";
+    messageInput.style.height = Math.max(messageInput.style.height, 28) + "px";
   
     hideAllColorGrids(); 
   }
