@@ -59,82 +59,41 @@
   }
 
 async function scrollToFirstUnread(chatName) {
+  console.log("scrollToFirstUnread called for chat:", chatName);
+
   const messagesDiv = document.getElementById("messages");
 
   await new Promise((resolve) => {
     const checkMessages = () => {
       if (messagesDiv.children.length > 0) {
+        console.log("Messages loaded:", messagesDiv.children.length);
         resolve();
       } else {
+        console.log("Waiting for messages to load...");
         setTimeout(checkMessages, 50);
       }
     };
     checkMessages();
   });
 
-  const findLatestUnreadFromOthers = () => {
-    const allMessages = Array.from(messagesDiv.querySelectorAll(".message"));
-    for (let i = allMessages.length - 1; i >= 0; i--) {
-      const msg = allMessages[i];
-      if (
-        msg.classList.contains("received") || msg.classList.contains("Eliana") || msg.classList.contains("bot")
-      ) {
-        if (msg.classList.contains("unread")) {
-          return msg;
-        } else {
-          return null; 
-        }
-      }
+  const allMessages = Array.from(messagesDiv.querySelectorAll(".message"));
+  console.log("Total messages found:", allMessages.length);
+
+  let firstUnread = null;
+  for (let i = 0; i < allMessages.length; i++) {
+    const msg = allMessages[i];
+    if (msg.classList.contains("unread")) {
+      console.log("Found unread message at index", i, ":", msg);
+      firstUnread = msg;
+      break;
     }
-    return null;
-  };
+  }
 
-  let targetMessage = findLatestUnreadFromOthers();
-  if (!targetMessage) return; 
-
-  const scrollToMessage = async () => {
-    let keepTrying = true;
-
-    while (keepTrying) {
-      const targetPosition = targetMessage.offsetTop - messagesDiv.clientHeight / 3;
-      const startPosition = messagesDiv.scrollTop;
-      const distance = targetPosition - startPosition;
-      const duration = 500;
-      let start = null;
-
-      await new Promise((resolveScroll) => {
-        function animateScroll(currentTime) {
-          if (!start) start = currentTime;
-          const progress = Math.min((currentTime - start) / duration, 1);
-
-          const ease = (t) => (t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t);
-          messagesDiv.scrollTop = startPosition + distance * ease(progress);
-
-          if (progress < 1) {
-            requestAnimationFrame(animateScroll);
-          } else {
-            resolveScroll();
-          }
-        }
-        requestAnimationFrame(animateScroll);
-      });
-
-      await new Promise((resolve) => setTimeout(resolve, 50));
-
-      const newTarget = findLatestUnreadFromOthers();
-      if (!newTarget || newTarget === targetMessage) {
-        keepTrying = false;
-      } else {
-        targetMessage = newTarget; 
-      }
-    }
-  };
-
-  try {
-    await scrollToMessage();
-  } catch (error) {
-    console.error("Error during smooth scroll:", error);
-    targetMessage.scrollIntoView({ block: "center", behavior: "smooth" });
+  if (firstUnread) {
+    console.log("Scrolling to first unread message...");
+    firstUnread.scrollIntoView({ block: "center", behavior: "auto" });
+  } else {
+    console.log("No unread messages found. Not scrolling.");
   }
 }
   async function updateFavicon() {
