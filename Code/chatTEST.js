@@ -72,46 +72,35 @@
       checkMessages();
     });
 
-    async function findFirstUnread() {
+    async function findUnreadMessage() {
       let unreadMessages = Array.from(
         document.querySelectorAll(".message.unread"),
       );
-      if (unreadMessages.length === 0) return null;
-      return unreadMessages[0];
+      if (unreadMessages.length === 0) {
+        messagesDiv.scrollTop = 0;
+        await new Promise((resolve) => setTimeout(resolve, 300));
+        unreadMessages = Array.from(
+          document.querySelectorAll(".message.unread"),
+        );
+      }
+      return unreadMessages.length > 0 ? unreadMessages[0] : null;
     }
 
-    let firstUnread = await findFirstUnread();
-    if (!firstUnread) return;
+    let firstUnread = await findUnreadMessage();
 
-    const scrollToElement = (element) => {
-      const targetPosition = element.offsetTop - messagesDiv.clientHeight / 3;
-      messagesDiv.scrollTop = targetPosition;
-    };
-
-    let attempts = 0;
-    const MAX_ATTEMPTS = 20; // prevent infinite loop
-
-    while (attempts < MAX_ATTEMPTS) {
-      firstUnread = await findFirstUnread();
-      if (!firstUnread) break;
-
-      const unreadPosition = firstUnread.offsetTop;
-      const visibleTop = messagesDiv.scrollTop;
-      const visibleBottom = visibleTop + messagesDiv.clientHeight;
-
-      if (unreadPosition >= visibleTop && unreadPosition <= visibleBottom) {
-        // It's already visible!
+    while (!firstUnread) {
+      messagesDiv.scrollTop = 0;
+      await new Promise((resolve) => setTimeout(resolve, 300));
+      firstUnread = await findUnreadMessage();
+      if (!firstUnread) {
         break;
       }
-
-      // Scroll towards it
-      scrollToElement(firstUnread);
-
-      // Give time for possible load-more
-      await new Promise((resolve) => setTimeout(resolve, 300));
-
-      attempts++;
     }
+
+    if (!firstUnread) return;
+
+    const targetPosition = firstUnread.offsetTop - messagesDiv.clientHeight / 3;
+    messagesDiv.scrollTo({ top: targetPosition, behavior: "smooth" });
   }
 
   async function updateFavicon() {
@@ -546,6 +535,12 @@
       const username = message.User;
       const lastReadMessage = readMessages[chatName] || "";
 
+      const wasNearBottom =
+        messagesDiv.scrollHeight -
+          messagesDiv.scrollTop -
+          messagesDiv.clientHeight <=
+        20;
+
       let adjacentMessageDiv = null;
       const timeThreshold = 5 * 60 * 1000;
 
@@ -641,6 +636,12 @@
         }
 
         adjacentMessageDiv = messageDiv;
+      }
+
+      if (!prepend && wasNearBottom) {
+        requestAnimationFrame(() => {
+          messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        });
       }
 
       appendedMessages.add(message.id);
