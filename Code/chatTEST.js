@@ -8,6 +8,8 @@
     AI: "[AI]",
     RNG: "[RNG]",
     EOD: "[EOD]",
+    ADMIN: "[ADMIN]",
+    SNAKE: "[Snake Game]"
   };
   const email = auth.currentUser.email;
 
@@ -94,45 +96,58 @@ async function scrollToFirstUnread(chatName) {
 
   if (!firstUnread) return;
 
-  function smoothScrollToElement(element) {
-    const targetPosition = element.offsetTop - messagesDiv.clientHeight / 3;
-    const startPosition = messagesDiv.scrollTop;
-    const distance = targetPosition - startPosition;
-    const duration = 500;
-    let start = null;
+async function scrollToFirstUnread(chatName) {
+  const messagesDiv = document.getElementById("messages");
 
-    const animation = (currentTime) => {
-      if (!start) start = currentTime;
-      const progress = (currentTime - start) / duration;
-
-      if (progress < 1) {
-        const ease = (t) => (t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t);
-        const currentPosition = startPosition + distance * ease(progress);
-        messagesDiv.scrollTop = currentPosition;
-        window.requestAnimationFrame(animation);
+  await new Promise((resolve) => {
+    const checkMessages = () => {
+      if (messagesDiv.children.length > 0) {
+        resolve();
       } else {
-        messagesDiv.scrollTop = targetPosition;
+        setTimeout(checkMessages, 50);
       }
     };
-
-    window.requestAnimationFrame(animation);
-  }
-
-  try {
-    smoothScrollToElement(firstUnread);
-  } catch (error) {
-    console.error("Error during smooth scroll:", error);
-    firstUnread.scrollIntoView({ block: "center", behavior: "smooth" });
-  }
-
-  await new Promise((resolve) => setTimeout(resolve, 100));
-
-  const unreadMessages = document.querySelectorAll(".message.unread");
-  unreadMessages.forEach((msg) => {
-    if (!msg.classList.contains("unread")) {
-      msg.classList.add("unread");
-    }
+    checkMessages();
   });
+
+  async function findFirstUnread() {
+    let unreadMessages = Array.from(
+      document.querySelectorAll(".message.unread"),
+    );
+    if (unreadMessages.length === 0) return null;
+    return unreadMessages[0];
+  }
+
+  let firstUnread = await findFirstUnread();
+  if (!firstUnread) return;
+
+  const scrollToElement = (element) => {
+    const targetPosition = element.offsetTop - messagesDiv.clientHeight / 3;
+    messagesDiv.scrollTop = targetPosition;
+  };
+
+  let attempts = 0;
+  const MAX_ATTEMPTS = 20; 
+
+  while (attempts < MAX_ATTEMPTS) {
+    firstUnread = await findFirstUnread();
+    if (!firstUnread) break;
+
+    const unreadPosition = firstUnread.offsetTop;
+    const visibleTop = messagesDiv.scrollTop;
+    const visibleBottom = visibleTop + messagesDiv.clientHeight;
+
+    if (unreadPosition >= visibleTop && unreadPosition <= visibleBottom) {
+
+      break;
+    }
+
+    scrollToElement(firstUnread);
+
+    await new Promise((resolve) => setTimeout(resolve, 300));
+
+    attempts++;
+  }
 }
 
   async function updateFavicon() {
@@ -431,13 +446,13 @@ async function scrollToFirstUnread(chatName) {
 
   async function getUsernameFromEmail(userEmail) {
     if (!userEmail) return "";
+    if (["[AI]","[EOD]","[RNG]","[ADMIN]","[Snake Game]"].contains(userEmail)) return userEmail
     const formattedEmail = userEmail.replace(/\./g, "*");
     const userRef = ref(database, `Accounts/${formattedEmail}/Username`);
     try {
       const snapshot = await get(userRef);
       return snapshot.exists() ? snapshot.val() : userEmail.split("@")[0];
     } catch (error) {
-      console.error("Error fetching username:", error);
       return userEmail.split("@")[0];
     }
   }
