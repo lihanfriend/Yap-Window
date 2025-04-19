@@ -1779,33 +1779,31 @@ ${chatHistory}`;
 
   document.getElementById("font-size-selector").onchange = (e) => {
     const size = e.target.value;
-
-    saveSelection();
-    restoreSelection();
-
     const selection = window.getSelection();
     if (!selection.rangeCount) return;
-
+  
     const range = selection.getRangeAt(0);
-
+  
     if (size === "normal") {
       document.execCommand("removeFormat");
       return;
     }
-
+  
+    const selectedText = selection.toString();
+  
+    range.deleteContents();
+  
     const span = document.createElement("span");
     span.style.fontSize = size;
-
-    try {
-      range.surroundContents(span);
-    } catch (err) {
-      document.execCommand(
-        "insertHTML",
-        false,
-        `<span style="font-size: ${size};">${selection.toString()}</span>`,
-      );
-    }
-  };
+    span.textContent = selectedText;
+  
+    range.insertNode(span);
+  
+    selection.removeAllRanges();
+    const newRange = document.createRange();
+    newRange.setStartAfter(span);
+    selection.addRange(newRange);
+};
 
   function wrapSelectedText(wrapperNode) {
     const selection = window.getSelection();
