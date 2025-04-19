@@ -732,7 +732,7 @@
   </div>
 </div>
 <div id="channel-screen" class="screen hidden">
-    <h2>Create/Customize Channel</h2>
+    <h2 id="channel-screen-title">Create/Customize Channel</h2>
     <label for="channel-name">Channel Name</label>
     <input id="channel-name" type="text" placeholder="Name your channel..." required>
     
