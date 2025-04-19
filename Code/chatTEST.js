@@ -1285,8 +1285,6 @@
     message = div.innerHTML;
 
     if (message) {
-      resetMessageInput();
-      hideAllColorGrids();
       if (
         document
           .getElementById("message-input")
@@ -1612,8 +1610,6 @@ ${chatHistory}`;
         });
       }
 
-      document.getElementById("message-input").innerHTML = "";
-
       const snapshot = await get(messagesRef);
       const messages = snapshot.val() || {};
 
@@ -1624,6 +1620,8 @@ ${chatHistory}`;
       }
     }
     document.getElementById("bookmarklet-gui").scrollTop = 0;
+        resetMessageInput();
+      hideAllColorGrids();
   }
   function convertHtmlToEmoji(inputString) {
     return inputString.replace(
@@ -1678,59 +1676,87 @@ document
         e.inputType === "insertFromPaste" ||
         (e.inputType === "insertText" && (e.data === " " || e.data === "\n"))
       ) {
+
         const selection = window.getSelection();
-        const selectionRange =
-          selection.rangeCount > 0 ? selection.getRangeAt(0) : null;
-        if (selectionRange) {
-          const cursorNode = selectionRange.startContainer;
-          const cursorOffset = selectionRange.startOffset;
+        const range = selection.getRangeAt(0);
 
-          processLinksInInput();
+        const messageInput = document.getElementById("message-input");
+        const preCaretRange = range.cloneRange();
+        preCaretRange.selectNodeContents(messageInput);
+        preCaretRange.setEnd(range.endContainer, range.endOffset);
+        const caretPosition = preCaretRange.toString().length;
 
-          let message = document
-            .getElementById("message-input")
-            .innerHTML.substring(0, 2500);
+        processLinksInInput();
 
-            message = convertHtmlToEmoji(joypixels.shortnameToImage(message));
+        let message = document
+          .getElementById("message-input")
+          .innerHTML.substring(0, 2500);
 
-          try {
-            setTimeout(() => {
-              placeCaretAfterNode(cursorNode, cursorOffset);
-            }, 0);
-          } catch (err) {
-            console.log("Error restoring cursor:", err);
-          }
+        if (typeof convertHtmlToEmoji === 'function' && typeof joypixels !== 'undefined') {
+          message = convertHtmlToEmoji(joypixels.shortnameToImage(message));
         }
+
+        setTimeout(() => {
+          setCursorPositionInContentEditable(messageInput, caretPosition);
+        }, 0);
       }
     });
 
-  function placeCaretAfterNode(originalNode, originalOffset) {
-    const messageInput = document.getElementById("message-input");
+  function setCursorPositionInContentEditable(element, position) {
+
+    const textNodeMapping = [];
+    let totalLength = 0;
+
+    function mapTextNodes(node) {
+      if (node.nodeType === 3) { 
+        const length = node.nodeValue.length;
+        textNodeMapping.push({
+          node: node,
+          start: totalLength,
+          end: totalLength + length
+        });
+        totalLength += length;
+      } else if (node.nodeType === 1) { 
+        for (let i = 0; i < node.childNodes.length; i++) {
+          mapTextNodes(node.childNodes[i]);
+        }
+      }
+    }
+
+    mapTextNodes(element);
+
+    let targetNode = null;
+    let targetOffset = 0;
+
+    for (let i = 0; i < textNodeMapping.length; i++) {
+      const item = textNodeMapping[i];
+      if (position >= item.start && position <= item.end) {
+        targetNode = item.node;
+        targetOffset = position - item.start;
+        break;
+      }
+    }
+
+    if (!targetNode) {
+      const lastMapping = textNodeMapping[textNodeMapping.length - 1];
+      if (lastMapping) {
+        targetNode = lastMapping.node;
+        targetOffset = lastMapping.node.length;
+      } else {
+
+        targetNode = document.createTextNode("");
+        element.appendChild(targetNode);
+        targetOffset = 0;
+      }
+    }
+
     const selection = window.getSelection();
     const range = document.createRange();
-    if (document.contains(originalNode)) {
-      try {
-        if (originalNode.nodeType === 3) {
-          const offset = Math.min(originalNode.length, originalOffset);
-          range.setStart(originalNode, offset);
-          range.collapse(true);
-        } else if (originalNode.nodeType === 1) {
-          if (originalNode.childNodes.length > originalOffset) {
-            range.setStartAfter(originalNode.childNodes[originalOffset - 1]);
-          } else {
-            range.setStartAfter(originalNode);
-          }
-          range.collapse(true);
-        }
-        selection.removeAllRanges();
-        selection.addRange(range);
-        messageInput.focus();
-      } catch (err) {
-        messageInput.focus();
-      }
-    } else {
-      messageInput.focus();
-    }
+    range.setStart(targetNode, targetOffset);
+    range.collapse(true);
+    selection.removeAllRanges();
+    selection.addRange(range);
+    element.focus();
   }
 
   function processLinksInInput() {
@@ -1800,6 +1826,10 @@ document
     }
     return `<a href="${href}" target="_blank" rel="noopener noreferrer">${url}</a>`;
   }
+
+  window.addEventListener('DOMContentLoaded', function() {
+    processLinksInInput();
+  });
   let savedSelection = null;
 
   function saveSelection() {
