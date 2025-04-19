@@ -3,6 +3,7 @@
   var readAll = true;
   var isDark = false;
   let pendingFormOptions = null;
+  let isSending = false;
   const BOT_USERS = {
     AI: "[AI]",
     RNG: "[RNG]",
@@ -416,6 +417,20 @@
 
     updateReadAllStatus();
   }
+
+  async function getUsernameFromEmail(userEmail) {
+  if (!userEmail) return "";
+  const formattedEmail = userEmail.replace(/\./g, '*');
+  const userRef = ref(database, `Accounts/${formattedEmail}/Username`);
+  try {
+    const snapshot = await get(userRef);
+    return snapshot.exists() ? snapshot.val() : userEmail.split('@')[0];
+  } catch (error) {
+    console.error("Error fetching username:", error);
+    return userEmail.split('@')[0]; 
+  }
+}
+  
   async function loadMessages(chatName) {
     document.getElementById("bookmarklet-gui").scrollTop = 0;
     const messagesDiv = document.getElementById("messages");
@@ -457,22 +472,20 @@
         if (oldestLoadedIndex > 0) {
           const oldScrollHeight = messagesDiv.scrollHeight;
           const oldScrollTop = messagesDiv.scrollTop;
-          const oldClientHeight = messagesDiv.clientHeight;
-
+        
           const olderMessages = loadedMessages.slice(
             Math.max(0, oldestLoadedIndex - MESSAGES_PER_LOAD),
-            oldestLoadedIndex,
-          );
-
+            oldestLoadedIndex
+          ).sort((a, b) => new Date(a.Date) - new Date(b.Date));
+        
           await appendMessages(olderMessages, true);
-          oldestLoadedIndex = Math.max(
-            0,
-            oldestLoadedIndex - MESSAGES_PER_LOAD,
-          );
-
-          const newScrollHeight = messagesDiv.scrollHeight;
-          const heightDifference = newScrollHeight - oldScrollHeight;
-          messagesDiv.scrollTop = oldScrollTop + heightDifference;
+          oldestLoadedIndex = Math.max(0, oldestLoadedIndex - MESSAGES_PER_LOAD);
+        
+          requestAnimationFrame(() => {
+            const newScrollHeight = messagesDiv.scrollHeight;
+            const heightDifference = newScrollHeight - oldScrollHeight;
+            messagesDiv.scrollTop = oldScrollTop + heightDifference;
+          });
         }
         isLoadingMore = false;
       }
@@ -524,8 +537,9 @@
 
       const fragment = document.createDocumentFragment();
 
-      const messagesToProcess = prepend ? newMessages : [...newMessages];
-      messagesToProcess.sort((a, b) => new Date(a.Date) - new Date(b.Date));
+        const messagesToProcess = [...newMessages].sort((a, b) => 
+    new Date(a.Date) - new Date(b.Date)
+  );
 
       if (!prepend && messagesDiv.children.length > 0) {
         lastMessageDiv = messagesDiv.lastChild;
@@ -587,9 +601,17 @@
 
           const headerInfo = document.createElement("p");
           headerInfo.className = "send-info";
-          headerInfo.textContent = `${username}   ${formatDate(message.Date)}`;
+          
+          headerInfo.textContent = `${email}   ${formatDate(message.Date)}`;
           messageDiv.appendChild(headerInfo);
-
+          
+          getUsernameFromEmail(email).then(displayName => {
+            if (displayName && displayName !== email) {
+              headerInfo.textContent = `${displayName} (${email}) ${formatDate(message.Date)}`;
+            } else {
+              headerInfo.textContent = `${email} ${formatDate(message.Date)}`;
+            }
+          });
           const messageContent = document.createElement("p");
           messageContent.innerHTML = message.Message;
           messageContent.style.marginTop = "5px";
@@ -1248,12 +1270,18 @@
   }
 
   async function sendMessage() {
+    if (isSending) return;
+    isSending = true;
+    sendButton.disabled = true;
     removeFakeHighlights();
     const messagesRef = ref(database, `Chats/${currentChat}`);
     let message = document
       .getElementById("message-input")
       .innerHTML.substring(0, 2500);
-    if (!document.getElementById("message-input").textContent.substring(0, 2500)) return;
+    if (
+      !document.getElementById("message-input").textContent.substring(0, 2500)
+    )
+      return;
     message = joypixels.shortnameToImage(message);
     const div = document.createElement("div");
     div.innerHTML = message;
@@ -1622,6 +1650,8 @@ ${chatHistory}`;
     document.getElementById("bookmarklet-gui").scrollTop = 0;
     resetMessageInput();
     hideAllColorGrids();
+    isSending = false;
+    sendButton.disabled = false;
   }
 
   function formatDate(timestamp) {
@@ -1683,8 +1713,7 @@ ${chatHistory}`;
           .getElementById("message-input")
           .innerHTML.substring(0, 2500);
 
-          message = joypixels.shortnameToImage(message);
-    
+        message = joypixels.shortnameToImage(message);
 
         setTimeout(() => {
           setCursorPositionInContentEditable(messageInput, caretPosition);
@@ -2042,20 +2071,20 @@ ${chatHistory}`;
     .getElementById("message-input")
     .addEventListener("input", adjustInputHeight);
 
-function adjustInputHeight() {
-  const input = document.getElementById("message-input");
-  input.style.height = "auto";
-  input.style.maxHeight = "108px";
-}
+  function adjustInputHeight() {
+    const input = document.getElementById("message-input");
+    input.style.height = "auto";
+    input.style.maxHeight = "108px";
+  }
 
-function resetMessageInput() {
-  const messageInput = document.getElementById("message-input");
-  messageInput.innerHTML = "";
-  messageInput.textContent = "";
+  function resetMessageInput() {
+    const messageInput = document.getElementById("message-input");
+    messageInput.innerHTML = "";
+    messageInput.textContent = "";
 
-  messageInput.style.height = ""; 
-  hideAllColorGrids();
-}
+    messageInput.style.height = "";
+    hideAllColorGrids();
+  }
 
   document
     .getElementById("message-input")
@@ -2100,19 +2129,19 @@ function resetMessageInput() {
   const cancelLink = document.getElementById("cancel-link");
   let linkRange = null;
 
-function positionLinkDialog() {
-  const linkDialog = document.getElementById("link-dialog");
-  const guiContainer = document.getElementById("bookmarklet-gui");
+  function positionLinkDialog() {
+    const linkDialog = document.getElementById("link-dialog");
+    const guiContainer = document.getElementById("bookmarklet-gui");
 
-  const guiRect = guiContainer.getBoundingClientRect();
+    const guiRect = guiContainer.getBoundingClientRect();
 
-  const left = (guiRect.width - linkDialog.offsetWidth) / 2;
-  const top = (guiRect.height - linkDialog.offsetHeight) / 2;
+    const left = (guiRect.width - linkDialog.offsetWidth) / 2;
+    const top = (guiRect.height - linkDialog.offsetHeight) / 2;
 
-  linkDialog.style.position = "absolute";
-  linkDialog.style.left = `${left}px`;
-  linkDialog.style.top = `${top}px`;
-}
+    linkDialog.style.position = "absolute";
+    linkDialog.style.left = `${left}px`;
+    linkDialog.style.top = `${top}px`;
+  }
 
   linkBtn.addEventListener("click", function () {
     const selection = window.getSelection();
