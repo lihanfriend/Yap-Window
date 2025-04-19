@@ -72,37 +72,64 @@
       checkMessages();
     });
 
-    async function findUnreadMessage() {
-      let unreadMessages = Array.from(
+    async function findFirstUnread() {
+      const unreadMessages = Array.from(
         document.querySelectorAll(".message.unread"),
       );
-      if (unreadMessages.length === 0) {
-        messagesDiv.scrollTop = 0;
-        await new Promise((resolve) => setTimeout(resolve, 300));
-        unreadMessages = Array.from(
-          document.querySelectorAll(".message.unread"),
-        );
-      }
       return unreadMessages.length > 0 ? unreadMessages[0] : null;
     }
 
-    let firstUnread = await findUnreadMessage();
+    async function ensureFullyLoaded(targetMessage) {
+      const MAX_TRIES = 50;
+      let tries = 0;
 
-    while (!firstUnread) {
-      messagesDiv.scrollTop = 0;
-      await new Promise((resolve) => setTimeout(resolve, 300));
-      firstUnread = await findUnreadMessage();
-      if (!firstUnread) {
-        break;
+      while (tries < MAX_TRIES) {
+        if (targetMessage && document.body.contains(targetMessage)) {
+          const rect = targetMessage.getBoundingClientRect();
+          if (rect.top > 0) break;
+        }
+
+        messagesDiv.scrollTop = 0;
+        await new Promise((resolve) => setTimeout(resolve, 100));
+        tries++;
       }
     }
 
-    if (!firstUnread) return;
+    const firstUnread = await findFirstUnread();
+    if (!firstUnread) {
+      console.log("No unread messages found.");
+      return;
+    }
 
-    const targetPosition = firstUnread.offsetTop - messagesDiv.clientHeight / 3;
-    messagesDiv.scrollTo({ top: targetPosition, behavior: "smooth" });
+    await ensureFullyLoaded(firstUnread);
+
+    const smoothScrollToUnread = () => {
+      const targetPosition =
+        firstUnread.offsetTop - messagesDiv.clientHeight / 3;
+      const start = messagesDiv.scrollTop;
+      const distance = targetPosition - start;
+      const duration = 500;
+      let startTime = null;
+
+      const ease = (t) => (t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t);
+
+      function animate(time) {
+        if (!startTime) startTime = time;
+        const elapsed = time - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+
+        messagesDiv.scrollTop = start + distance * ease(progress);
+
+        if (progress < 1) {
+          requestAnimationFrame(animate);
+        }
+      }
+
+      requestAnimationFrame(animate);
+    };
+
+    smoothScrollToUnread();
   }
-
   async function updateFavicon() {
     const currentUrl = window.location.href;
     const hasUnreadMessages = !readAll;
