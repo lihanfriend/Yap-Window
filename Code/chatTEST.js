@@ -419,18 +419,18 @@
   }
 
   async function getUsernameFromEmail(userEmail) {
-  if (!userEmail) return "";
-  const formattedEmail = userEmail.replace(/\./g, '*');
-  const userRef = ref(database, `Accounts/${formattedEmail}/Username`);
-  try {
-    const snapshot = await get(userRef);
-    return snapshot.exists() ? snapshot.val() : userEmail.split('@')[0];
-  } catch (error) {
-    console.error("Error fetching username:", error);
-    return userEmail.split('@')[0]; 
+    if (!userEmail) return "";
+    const formattedEmail = userEmail.replace(/\./g, "*");
+    const userRef = ref(database, `Accounts/${formattedEmail}/Username`);
+    try {
+      const snapshot = await get(userRef);
+      return snapshot.exists() ? snapshot.val() : userEmail.split("@")[0];
+    } catch (error) {
+      console.error("Error fetching username:", error);
+      return userEmail.split("@")[0];
+    }
   }
-}
-  
+
   async function loadMessages(chatName) {
     document.getElementById("bookmarklet-gui").scrollTop = 0;
     const messagesDiv = document.getElementById("messages");
@@ -458,7 +458,7 @@
     let loadedMessages = [];
     let isLoadingMore = false;
     let initialLoad = true;
-    let oldestLoadedIndex = null;
+    let oldestLoadedTimestamp = null;
     const MESSAGES_PER_LOAD = 100;
 
     messagesDiv.addEventListener("scroll", async () => {
@@ -469,23 +469,26 @@
       ) {
         isLoadingMore = true;
 
-        if (oldestLoadedIndex > 0) {
+        if (oldestLoadedTimestamp) {
           const oldScrollHeight = messagesDiv.scrollHeight;
           const oldScrollTop = messagesDiv.scrollTop;
-        
-          const olderMessages = loadedMessages.slice(
-            Math.max(0, oldestLoadedIndex - MESSAGES_PER_LOAD),
-            oldestLoadedIndex
-          ).sort((a, b) => new Date(a.Date) - new Date(b.Date));
-        
-          await appendMessages(olderMessages, true);
-          oldestLoadedIndex = Math.max(0, oldestLoadedIndex - MESSAGES_PER_LOAD);
-        
-          requestAnimationFrame(() => {
-            const newScrollHeight = messagesDiv.scrollHeight;
-            const heightDifference = newScrollHeight - oldScrollHeight;
-            messagesDiv.scrollTop = oldScrollTop + heightDifference;
-          });
+
+          const olderMessages = loadedMessages
+            .filter((msg) => new Date(msg.Date) < oldestLoadedTimestamp)
+            .sort((a, b) => new Date(a.Date) - new Date(b.Date))
+            .slice(0, MESSAGES_PER_LOAD);
+
+          if (olderMessages.length > 0) {
+            oldestLoadedTimestamp = new Date(olderMessages[0].Date);
+
+            await appendMessages(olderMessages, true);
+
+            requestAnimationFrame(() => {
+              const newScrollHeight = messagesDiv.scrollHeight;
+              const heightDifference = newScrollHeight - oldScrollHeight;
+              messagesDiv.scrollTop = oldScrollTop + heightDifference;
+            });
+          }
         }
         isLoadingMore = false;
       }
@@ -537,9 +540,9 @@
 
       const fragment = document.createDocumentFragment();
 
-        const messagesToProcess = [...newMessages].sort((a, b) => 
-    new Date(a.Date) - new Date(b.Date)
-  );
+      const messagesToProcess = [...newMessages].sort(
+        (a, b) => new Date(a.Date) - new Date(b.Date),
+      );
 
       if (!prepend && messagesDiv.children.length > 0) {
         lastMessageDiv = messagesDiv.lastChild;
@@ -601,11 +604,11 @@
 
           const headerInfo = document.createElement("p");
           headerInfo.className = "send-info";
-          
+
           headerInfo.textContent = `${username}   ${formatDate(message.Date)}`;
           messageDiv.appendChild(headerInfo);
-          
-          getUsernameFromEmail(username).then(displayName => {
+
+          getUsernameFromEmail(username).then((displayName) => {
             if (displayName && displayName !== username) {
               headerInfo.textContent = `${displayName} (${username}) ${formatDate(message.Date)}`;
             } else {
@@ -643,10 +646,7 @@
       }
 
       if (prepend) {
-        const oldScrollHeight = messagesDiv.scrollHeight;
         messagesDiv.insertBefore(fragment, messagesDiv.firstChild);
-        const newScrollHeight = messagesDiv.scrollHeight;
-        messagesDiv.scrollTop += newScrollHeight - oldScrollHeight;
       } else {
         messagesDiv.appendChild(fragment);
         if (initialLoad || wasNearBottom) {
@@ -673,16 +673,19 @@
         if (initialLoad) {
           messagesDiv.innerHTML = "";
           appendedMessages.clear();
+
           const recentMessages = sortedMessages.slice(-MESSAGES_PER_LOAD);
-          oldestLoadedIndex = Math.max(
-            0,
-            sortedMessages.length - MESSAGES_PER_LOAD,
-          );
-          await appendMessages(recentMessages);
-          initialLoad = false;
-          setTimeout(async () => {
-            await scrollToFirstUnread(chatName);
-          }, 100);
+
+          if (recentMessages.length > 0) {
+            oldestLoadedTimestamp = new Date(recentMessages[0].Date);
+
+            await appendMessages(recentMessages);
+            initialLoad = false;
+
+            setTimeout(async () => {
+              await scrollToFirstUnread(chatName);
+            }, 100);
+          }
         } else {
           const wasNearBottom =
             messagesDiv.scrollHeight -
@@ -695,7 +698,7 @@
             .pop();
 
           if (lastDisplayedMessage) {
-            const lastMessageId = lastDisplayedMessage.dataset.messageId;
+            const lastMessageId = lastDisplayedMessage.dataset.lastMessageId;
             const lastMessageIndex = sortedMessages.findIndex(
               (msg) => msg.id === lastMessageId,
             );
