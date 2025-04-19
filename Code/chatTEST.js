@@ -1773,6 +1773,7 @@ ${chatHistory}`;
     document.getElementById("bookmarklet-gui").scrollTop = 0;
     resetMessageInput();
     hideAllColorGrids();
+    messagesDiv.scrollTop = messagesDiv.scrollHeight;
     isSending = false;
     sendButton.disabled = false;
   }
