@@ -1674,34 +1674,67 @@ ${chatHistory}`;
   document
     .getElementById("message-input")
     .addEventListener("input", function (e) {
-      if (e.inputType === "insertFromPaste" || e.inputType === "insertText") {
+      if (
+        e.inputType === "insertFromPaste" ||
+        (e.inputType === "insertText" && (e.data === " " || e.data === "\n"))
+      ) {
         const selection = window.getSelection();
-        const savedRange =
-          selection.rangeCount > 0
-            ? selection.getRangeAt(0).cloneRange()
-            : null;
-        const cursorPosition = savedRange ? savedRange.startOffset : 0;
+        const selectionRange =
+          selection.rangeCount > 0 ? selection.getRangeAt(0) : null;
 
-        processLinksInInput();
-        let message = document
-          .getElementById("message-input")
-          .innerHTML.substring(0, 2500);
-        message = convertHtmlToEmoji(joypixels.shortnameToImage(message));
+        if (selectionRange) {
+          const cursorNode = selectionRange.startContainer;
+          const cursorOffset = selectionRange.startOffset;
 
-        if (savedRange) {
+          processLinksInInput();
+          let message = document
+            .getElementById("message-input")
+            .innerHTML.substring(0, 2500);
+          message = convertHtmlToEmoji(joypixels.shortnameToImage(message));
+
           try {
-            selection.removeAllRanges();
-            selection.addRange(savedRange);
+            setTimeout(() => {
+              placeCaretAfterNode(cursorNode, cursorOffset);
+            }, 0);
           } catch (err) {
-            messageInput.focus();
+            console.log("Error restoring cursor:", err);
           }
         }
       }
     });
 
+  function placeCaretAfterNode(originalNode, originalOffset) {
+    const messageInput = document.getElementById("message-input");
+    const selection = window.getSelection();
+    const range = document.createRange();
+
+    if (document.contains(originalNode)) {
+      try {
+        if (originalNode.nodeType === 3) {
+          const offset = Math.min(originalNode.length, originalOffset);
+          range.setStart(originalNode, offset);
+          range.collapse(true);
+        } else if (originalNode.nodeType === 1) {
+          if (originalNode.childNodes.length > originalOffset) {
+            range.setStartAfter(originalNode.childNodes[originalOffset - 1]);
+          } else {
+            range.setStartAfter(originalNode);
+          }
+          range.collapse(true);
+        }
+
+        selection.removeAllRanges();
+        selection.addRange(range);
+        messageInput.focus();
+      } catch (err) {
+        messageInput.focus();
+      }
+    } else {
+      messageInput.focus();
+    }
+  }
+
   function processLinksInInput() {
-    const urlRegex =
-      /(https?:\/\/[^\s]+)|((www\.)?([a-zA-Z0-9]([a-zA-Z0-9-]*[a-zA-Z0-9])?\.)+[a-zA-Z]{2,}\b(\/[^\s]*)?)/gi;
     const messageInput = document.getElementById("message-input");
 
     const div = document.createElement("div");
@@ -1721,44 +1754,31 @@ ${chatHistory}`;
 
     for (const textNode of nodesToProcess) {
       const text = textNode.nodeValue;
-      const matches = [...text.matchAll(urlRegex)];
 
-      if (matches.length > 0) {
-        const fragment = document.createDocumentFragment();
-        let lastIndex = 0;
+      if (text.endsWith(" ") || text.endsWith("\n")) {
+        const words = text.split(/(\s+)/);
+        let hasLinks = false;
 
-        for (const match of matches) {
-          if (match.index > lastIndex) {
-            fragment.appendChild(
-              document.createTextNode(text.substring(lastIndex, match.index)),
-            );
+        for (let i = 0; i < words.length; i += 2) {
+          const word = words[i];
+          if (word && isValidUrl(word)) {
+            hasLinks = true;
+            words[i] = createLinkMarkup(word);
           }
-
-          const url = match[0];
-          const link = document.createElement("a");
-          let href = url;
-
-          if (!url.startsWith("http://") && !url.startsWith("https://")) {
-            href = "https://" + url;
-          }
-
-          link.href = href;
-          link.textContent = url;
-          link.target = "_blank";
-          link.rel = "noopener noreferrer";
-          fragment.appendChild(link);
-
-          lastIndex = match.index + url.length;
         }
 
-        if (lastIndex < text.length) {
-          fragment.appendChild(
-            document.createTextNode(text.substring(lastIndex)),
-          );
-        }
+        if (hasLinks) {
+          const fragment = document.createDocumentFragment();
+          const tempDiv = document.createElement("div");
+          tempDiv.innerHTML = words.join("");
 
-        textNode.parentNode.replaceChild(fragment, textNode);
-        changed = true;
+          while (tempDiv.firstChild) {
+            fragment.appendChild(tempDiv.firstChild);
+          }
+
+          textNode.parentNode.replaceChild(fragment, textNode);
+          changed = true;
+        }
       }
     }
 
@@ -1770,6 +1790,22 @@ ${chatHistory}`;
         messageInput.innerHTML = newValue;
       }
     }
+  }
+
+  function isValidUrl(text) {
+    const urlPattern =
+      /^(https?:\/\/)?((www\.)?([a-zA-Z0-9]([a-zA-Z0-9-]*[a-zA-Z0-9])?\.)+[a-zA-Z]{2,})(\S*)?$/i;
+    return urlPattern.test(text);
+  }
+
+  function createLinkMarkup(url) {
+    let href = url;
+
+    if (!url.startsWith("http://") && !url.startsWith("https://")) {
+      href = "https://" + url;
+    }
+
+    return `<a href="${href}" target="_blank" rel="noopener noreferrer">${url}</a>`;
   }
 
   let savedSelection = null;
