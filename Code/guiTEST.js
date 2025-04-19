@@ -412,6 +412,7 @@
   flex-direction: column;
   width: 100%;
   padding: 5px;
+border-top: 1px solid #ccc;
 }
 
 #formatting-bar {
@@ -470,17 +471,15 @@
 }
 
 .color-grid {
-  display: none;
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 5px;
   position: absolute;
-  top: 100%;
-  left: 0;
-  padding: 4px;
-  background: ${isDark ? "#333" : "#fff"};
-  border: 1px solid ${isDark ? "#555" : "#ccc"};
-  border-radius: 4px;
-  grid-template-columns: repeat(5, 20px);
-  gap: 4px;
-  z-index: 10;
+  bottom: 40px;
+  background: white;
+  border: 1px solid #ccc;
+  padding: 5px;
+  z-index: 1000;
 }
 
 .color-grid div {
