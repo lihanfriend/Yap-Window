@@ -602,14 +602,14 @@
           const headerInfo = document.createElement("p");
           headerInfo.className = "send-info";
           
-          headerInfo.textContent = `${email}   ${formatDate(message.Date)}`;
+          headerInfo.textContent = `${username}   ${formatDate(message.Date)}`;
           messageDiv.appendChild(headerInfo);
           
-          getUsernameFromEmail(email).then(displayName => {
-            if (displayName && displayName !== email) {
-              headerInfo.textContent = `${displayName} (${email}) ${formatDate(message.Date)}`;
+          getUsernameFromEmail(username).then(displayName => {
+            if (displayName && displayName !== username) {
+              headerInfo.textContent = `${displayName} (${username}) ${formatDate(message.Date)}`;
             } else {
-              headerInfo.textContent = `${email} ${formatDate(message.Date)}`;
+              headerInfo.textContent = `${username} ${formatDate(message.Date)}`;
             }
           });
           const messageContent = document.createElement("p");
