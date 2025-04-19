@@ -1255,6 +1255,8 @@
 
     if (message) {
       document.getElementById("message-input").innerHTML = "";
+      messageInput.style.height = "28px";
+      hideAllColorGrids();
       if (
         document
           .getElementById("message-input")
@@ -1713,6 +1715,7 @@ ${chatHistory}`;
       .querySelectorAll(".color-grid")
       .forEach((g) => (g.style.display = "none"));
   }
+  hideAllColorGrids()
 
   document.getElementById("text-color-picker").onclick = (e) => {
     e.stopPropagation();
@@ -1748,18 +1751,27 @@ ${chatHistory}`;
   };
 
   document.getElementById("font-size-selector").onchange = (e) => {
-    saveSelection();
-    restoreSelection();
-    const size = e.target.value;
-    document.execCommand("fontSize", false, "7");
-    const fontElements = document
-      .getElementById("message-input")
-      .getElementsByTagName("font");
-    for (let i = 0; i < fontElements.length; i++) {
-      fontElements[i].removeAttribute("size");
-      fontElements[i].style.fontSize = size;
-    }
-  };
+  const size = e.target.value;
+
+  saveSelection();
+  restoreSelection();
+
+  if (size === "normal") {
+    document.execCommand("removeFormat");
+  } else {
+    const span = document.createElement("span");
+    span.style.fontSize = size;
+    wrapSelectedText(span);
+  }
+};
+
+function wrapSelectedText(wrapperNode) {
+  const selection = window.getSelection();
+  if (!selection.rangeCount) return;
+
+  const range = selection.getRangeAt(0);
+  range.surroundContents(wrapperNode);
+}
 
   document.getElementById("message-input").addEventListener("keydown", (e) => {
     if (e.ctrlKey) {
