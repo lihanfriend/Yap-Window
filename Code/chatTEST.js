@@ -9,7 +9,7 @@
     RNG: "[RNG]",
     EOD: "[EOD]",
     ADMIN: "[ADMIN]",
-    SNAKE: "[Snake Game]"
+    SNAKE: "[Snake Game]",
   };
   const email = auth.currentUser.email;
 
@@ -58,96 +58,61 @@
     updateFavicon();
   }
 
-async function scrollToFirstUnread(chatName) {
+  async function scrollToFirstUnread(chatName) {
+    const messagesDiv = document.getElementById("messages");
 
-  await new Promise((resolve) => {
-    const checkMessages = () => {
-      if (messagesDiv.children.length > 0) {
-        resolve();
-      } else {
-        setTimeout(checkMessages, 50);
-      }
-    };
-    checkMessages();
-  });
+    await new Promise((resolve) => {
+      const checkMessages = () => {
+        if (messagesDiv.children.length > 0) {
+          resolve();
+        } else {
+          setTimeout(checkMessages, 50);
+        }
+      };
+      checkMessages();
+    });
 
-  async function findUnreadMessage() {
-    return Array.from(document.querySelectorAll(".message.unread"))[0] || null;
-  }
-
-  let firstUnread = await findUnreadMessage();
-
-  while (!firstUnread) {
-    console.log("No unread message found, trying to load more...");
-
-    messagesDiv.scrollTop = 0;
-
-    await new Promise((resolve) => setTimeout(resolve, 300));
-
-    firstUnread = await findUnreadMessage();
-
-    const firstMessage = messagesDiv.firstChild;
-    if (firstMessage && firstMessage.dataset.messageId === loadedMessages[0]?.id) {
-      console.log("Reached the earliest message, no unread found.");
-      break;
-    }
-  }
-
-  if (!firstUnread) return;
-
-async function scrollToFirstUnread(chatName) {
-  const messagesDiv = document.getElementById("messages");
-
-  await new Promise((resolve) => {
-    const checkMessages = () => {
-      if (messagesDiv.children.length > 0) {
-        resolve();
-      } else {
-        setTimeout(checkMessages, 50);
-      }
-    };
-    checkMessages();
-  });
-
-  async function findFirstUnread() {
-    let unreadMessages = Array.from(
-      document.querySelectorAll(".message.unread"),
-    );
-    if (unreadMessages.length === 0) return null;
-    return unreadMessages[0];
-  }
-
-  let firstUnread = await findFirstUnread();
-  if (!firstUnread) return;
-
-  const scrollToElement = (element) => {
-    const targetPosition = element.offsetTop - messagesDiv.clientHeight / 3;
-    messagesDiv.scrollTop = targetPosition;
-  };
-
-  let attempts = 0;
-  const MAX_ATTEMPTS = 20; 
-
-  while (attempts < MAX_ATTEMPTS) {
-    firstUnread = await findFirstUnread();
-    if (!firstUnread) break;
-
-    const unreadPosition = firstUnread.offsetTop;
-    const visibleTop = messagesDiv.scrollTop;
-    const visibleBottom = visibleTop + messagesDiv.clientHeight;
-
-    if (unreadPosition >= visibleTop && unreadPosition <= visibleBottom) {
-
-      break;
+    async function findFirstUnread() {
+      let unreadMessages = Array.from(
+        document.querySelectorAll(".message.unread"),
+      );
+      if (unreadMessages.length === 0) return null;
+      return unreadMessages[0];
     }
 
-    scrollToElement(firstUnread);
+    let firstUnread = await findFirstUnread();
+    if (!firstUnread) return;
 
-    await new Promise((resolve) => setTimeout(resolve, 300));
+    const scrollToElement = (element) => {
+      const targetPosition = element.offsetTop - messagesDiv.clientHeight / 3;
+      messagesDiv.scrollTop = targetPosition;
+    };
 
-    attempts++;
+    let attempts = 0;
+    const MAX_ATTEMPTS = 20; // prevent infinite loop
+
+    while (attempts < MAX_ATTEMPTS) {
+      firstUnread = await findFirstUnread();
+      if (!firstUnread) break;
+
+      const unreadPosition = firstUnread.offsetTop;
+      const visibleTop = messagesDiv.scrollTop;
+      const visibleBottom = visibleTop + messagesDiv.clientHeight;
+
+      if (unreadPosition >= visibleTop && unreadPosition <= visibleBottom) {
+        // It's already visible!
+        break;
+      }
+
+      // Scroll towards it
+      scrollToElement(firstUnread);
+
+      // Give time for possible load-more
+      await new Promise((resolve) => setTimeout(resolve, 300));
+
+      attempts++;
+    }
   }
-}
 
   async function updateFavicon() {
     const currentUrl = window.location.href;
@@ -445,7 +410,10 @@ async function scrollToFirstUnread(chatName) {
 
   async function getUsernameFromEmail(userEmail) {
     if (!userEmail) return "";
-    if (["[AI]","[EOD]","[RNG]","[ADMIN]","[Snake Game]"].contains(userEmail)) return userEmail
+    if (
+      ["[AI]", "[EOD]", "[RNG]", "[ADMIN]", "[Snake Game]"].contains(userEmail)
+    )
+      return userEmail;
     const formattedEmail = userEmail.replace(/\./g, "*");
     const userRef = ref(database, `Accounts/${formattedEmail}/Username`);
     try {
@@ -834,7 +802,7 @@ async function scrollToFirstUnread(chatName) {
           }
 
           initialLoad = false;
-          document.getElementById("messages").scrollTop = 2000000
+          document.getElementById("messages").scrollTop = 2000000;
           setTimeout(async () => {
             await scrollToFirstUnread(chatName);
           }, 100);
