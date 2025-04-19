@@ -1620,8 +1620,8 @@ ${chatHistory}`;
       }
     }
     document.getElementById("bookmarklet-gui").scrollTop = 0;
-        resetMessageInput();
-      hideAllColorGrids();
+    resetMessageInput();
+    hideAllColorGrids();
   }
   function convertHtmlToEmoji(inputString) {
     return inputString.replace(
@@ -1668,15 +1668,13 @@ ${chatHistory}`;
     }
   });
 
-document
+  document
     .getElementById("message-input")
     .addEventListener("input", function (e) {
-
       if (
         e.inputType === "insertFromPaste" ||
         (e.inputType === "insertText" && (e.data === " " || e.data === "\n"))
       ) {
-
         const selection = window.getSelection();
         const range = selection.getRangeAt(0);
 
@@ -1692,7 +1690,10 @@ document
           .getElementById("message-input")
           .innerHTML.substring(0, 2500);
 
-        if (typeof convertHtmlToEmoji === 'function' && typeof joypixels !== 'undefined') {
+        if (
+          typeof convertHtmlToEmoji === "function" &&
+          typeof joypixels !== "undefined"
+        ) {
           message = convertHtmlToEmoji(joypixels.shortnameToImage(message));
         }
 
@@ -1703,20 +1704,19 @@ document
     });
 
   function setCursorPositionInContentEditable(element, position) {
-
     const textNodeMapping = [];
     let totalLength = 0;
 
     function mapTextNodes(node) {
-      if (node.nodeType === 3) { 
+      if (node.nodeType === 3) {
         const length = node.nodeValue.length;
         textNodeMapping.push({
           node: node,
           start: totalLength,
-          end: totalLength + length
+          end: totalLength + length,
         });
         totalLength += length;
-      } else if (node.nodeType === 1) { 
+      } else if (node.nodeType === 1) {
         for (let i = 0; i < node.childNodes.length; i++) {
           mapTextNodes(node.childNodes[i]);
         }
@@ -1743,7 +1743,6 @@ document
         targetNode = lastMapping.node;
         targetOffset = lastMapping.node.length;
       } else {
-
         targetNode = document.createTextNode("");
         element.appendChild(targetNode);
         targetOffset = 0;
@@ -1814,8 +1813,8 @@ document
   }
 
   function isValidUrl(text) {
-
-    const urlPattern = /^(https?:\/\/)?(www\.)?([a-zA-Z0-9]([a-zA-Z0-9-]*[a-zA-Z0-9])?\.)+[a-zA-Z]{2,}(\/\S*)?$/i;
+    const urlPattern =
+      /^(https?:\/\/)?(www\.)?([a-zA-Z0-9]([a-zA-Z0-9-]*[a-zA-Z0-9])?\.)+[a-zA-Z]{2,}(\/\S*)?$/i;
     return urlPattern.test(text);
   }
 
@@ -1827,7 +1826,7 @@ document
     return `<a href="${href}" target="_blank" rel="noopener noreferrer">${url}</a>`;
   }
 
-  window.addEventListener('DOMContentLoaded', function() {
+  window.addEventListener("DOMContentLoaded", function () {
     processLinksInInput();
   });
   let savedSelection = null;
@@ -2116,6 +2115,7 @@ document
 
   function positionLinkDialog() {
     const bookmarkletGui = document.getElementById("bookmarklet-gui");
+    const linkDialog = document.getElementById("link-dialog");
     const bookmarkletRect = bookmarkletGui.getBoundingClientRect();
 
     const left =
@@ -2125,18 +2125,25 @@ document
       bookmarkletRect.top +
       (bookmarkletRect.height - linkDialog.offsetHeight) / 2;
 
-    linkDialog.style.left = `${Math.max(bookmarkletRect.left + 10, left)}px`;
-    linkDialog.style.top = `${Math.max(bookmarkletRect.top + 50, top)}px`;
+    linkDialog.style.position = "fixed";
+    linkDialog.style.left = `${left}px`;
+    linkDialog.style.top = `${top}px`;
 
-    const maxLeft = bookmarkletRect.right - linkDialog.offsetWidth - 10;
-    const maxTop = bookmarkletRect.bottom - linkDialog.offsetHeight - 10;
+    const maxLeft = bookmarkletRect.right - linkDialog.offsetWidth;
+    const maxTop = bookmarkletRect.bottom - linkDialog.offsetHeight;
+    const minLeft = bookmarkletRect.left;
+    const minTop = bookmarkletRect.top;
 
     if (parseFloat(linkDialog.style.left) > maxLeft) {
       linkDialog.style.left = `${maxLeft}px`;
+    } else if (parseFloat(linkDialog.style.left) < minLeft) {
+      linkDialog.style.left = `${minLeft}px`;
     }
 
     if (parseFloat(linkDialog.style.top) > maxTop) {
       linkDialog.style.top = `${maxTop}px`;
+    } else if (parseFloat(linkDialog.style.top) < minTop) {
+      linkDialog.style.top = `${minTop}px`;
     }
   }
 
