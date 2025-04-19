@@ -465,7 +465,6 @@
         `${label} - First message: ${new Date(messages[0]?.Date)}, Last message: ${new Date(messages[messages.length - 1]?.Date)}`,
       );
     }
-
     messagesDiv.addEventListener("scroll", async () => {
       if (
         messagesDiv.scrollTop <= 100 &&
@@ -493,16 +492,18 @@
               oldestDisplayedIndex,
             );
 
-            olderMessages.sort((a, b) => new Date(b.Date) - new Date(a.Date));
-
-            for (const message of olderMessages) {
-              await appendSingleMessage(message, true);
+            for (let i = olderMessages.length - 1; i >= 0; i--) {
+              await appendSingleMessage(olderMessages[i], true);
             }
 
             requestAnimationFrame(() => {
               const newScrollHeight = messagesDiv.scrollHeight;
               const heightDifference = newScrollHeight - oldScrollHeight;
               messagesDiv.scrollTop = oldScrollTop + heightDifference;
+
+              console.log(
+                `Scroll adjusted: old=${oldScrollTop}, diff=${heightDifference}, new=${messagesDiv.scrollTop}`,
+              );
             });
           }
         }
