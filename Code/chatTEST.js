@@ -1247,7 +1247,6 @@
     };
   }
 
-  /* Function to send a message */
   async function sendMessage() {
     const messagesRef = ref(database, `Chats/${currentChat}`);
     let message = document.getElementById("message-input").innerHTML.trim();
@@ -1256,7 +1255,12 @@
 
     if (message) {
       messageInput.value = "";
-      if (document.getElementById("message-input").textContent.toLowerCase().startsWith("/ai ")) {
+      if (
+        document
+          .getElementById("message-input")
+          .textContent.toLowerCase()
+          .startsWith("/ai ")
+      ) {
         let d = Date.now();
         const question = message.substring(4).trim();
 
@@ -1332,7 +1336,12 @@ ${chatHistory}`;
           Message: aiReply,
           Date: d,
         });
-      } else if (document.getElementById("message-input").textContent.toLowerCase().startsWith("/eod")) {
+      } else if (
+        document
+          .getElementById("message-input")
+          .textContent.toLowerCase()
+          .startsWith("/eod")
+      ) {
         const parts = message.split(" ");
         let yesChance = 45;
         let noChance = 45;
@@ -1383,7 +1392,12 @@ ${chatHistory}`;
           Message: `${result}`,
           Date: Date.now(),
         });
-      } else if (document.getElementById("message-input").textContent.toLowerCase().startsWith("/coinflip")) {
+      } else if (
+        document
+          .getElementById("message-input")
+          .textContent.toLowerCase()
+          .startsWith("/coinflip")
+      ) {
         const parts = message.split(" ");
         let headsChance = 50;
         let tailsChance = 50;
@@ -1421,7 +1435,12 @@ ${chatHistory}`;
           Message: `🎲 Coin flip result: ${result}`,
           Date: Date.now(),
         });
-      } else if (document.getElementById("message-input").textContent.toLowerCase().startsWith("/roll ")) {
+      } else if (
+        document
+          .getElementById("message-input")
+          .textContent.toLowerCase()
+          .startsWith("/roll ")
+      ) {
         const sides = parseInt(message.split(" ")[1]);
 
         const userMessageRef = push(messagesRef);
@@ -1448,7 +1467,12 @@ ${chatHistory}`;
           Message: `🎲 Rolling a ${sides}-sided die: ${result}`,
           Date: Date.now(),
         });
-      } else if (document.getElementById("message-input").textContent.toLowerCase().startsWith("/snake")) {
+      } else if (
+        document
+          .getElementById("message-input")
+          .textContent.toLowerCase()
+          .startsWith("/snake")
+      ) {
         const temp_email =
           typeof email !== "undefined"
             ? email.replace(/\./g, "*")
@@ -1609,7 +1633,6 @@ ${chatHistory}`;
     }
   });
 
-  /* Attach send message functionality to the button */
   const sendButton = document.getElementById("send-button");
   sendButton.addEventListener("click", sendMessage);
 
@@ -1621,59 +1644,170 @@ ${chatHistory}`;
     e.target.innerHTML = e.target.value.substring(0, 1000);
   });
 
-  /* Add Enter key functionality */
   messageInput.addEventListener("keypress", (e) => {
     if (e.key === "Enter") {
       sendMessage();
     }
   });
 
-  function wrapSelection(tag, style = "") {
-  const selection = window.getSelection();
-  if (!selection.rangeCount) return;
-  const range = selection.getRangeAt(0);
-  const span = document.createElement(tag === "span" ? "span" : tag);
-  if (style) span.style.cssText = style;
-  range.surroundContents(span);
-}
+  const colors = [
+    "#000000",
+    "#434343",
+    "#666666",
+    "#999999",
+    "#b7b7b7",
+    "#cccccc",
+    "#d9d9d9",
+    "#efefef",
+    "#f3f3f3",
+    "#ffffff",
+    "#ff0000",
+    "#ff9900",
+    "#ffff00",
+    "#00ff00",
+    "#00ffff",
+    "#0000ff",
+    "#9900ff",
+    "#ff00ff",
+    "#e60000",
+    "#e67300",
+    "#e6e600",
+    "#00e600",
+    "#00e6e6",
+    "#0066cc",
+    "#6600cc",
+    "#cc00cc",
+  ];
 
-document.getElementById("bold-btn").onclick = () => wrapSelection("b");
-document.getElementById("italic-btn").onclick = () => wrapSelection("i");
-document.getElementById("underline-btn").onclick = () => wrapSelection("u");
-document.getElementById("strike-btn").onclick = () => wrapSelection("s");
-
-document.getElementById("color-picker").oninput = (e) => {
-  wrapSelection("span", `color: ${e.target.value}`);
-};
-
-document.getElementById("highlight-picker").oninput = (e) => {
-  wrapSelection("span", `background-color: ${e.target.value}`);
-};
-
-document.getElementById("font-size-selector").onchange = (e) => {
-  wrapSelection("span", `font-size: ${e.target.value}`);
-};
-
-
-document.getElementById("message-input").addEventListener("keydown", (e) => {
-  if (e.ctrlKey && e.key === "b") {
-    e.preventDefault();
-    wrapSelection("b");
+  function createColorGrid(gridId, execCommandType) {
+    const grid = document.getElementById(gridId);
+    colors.forEach((color) => {
+      const box = document.createElement("div");
+      box.style.backgroundColor = color;
+      box.onclick = () => {
+        focusMessageInput();
+        document.execCommand(execCommandType, false, color);
+        updateColorSelection(grid, color);
+        grid.style.display = "none";
+      };
+      grid.appendChild(box);
+    });
   }
-  if (e.ctrlKey && e.key === "i") {
-    e.preventDefault();
-    wrapSelection("i");
-  }
-  if (e.ctrlKey && e.key === "u") {
-    e.preventDefault();
-    wrapSelection("u");
-  }
-  if (e.ctrlKey && e.key === "s") {
-    e.preventDefault();
-    wrapSelection("s");
-  }
-});
 
+  function updateColorSelection(grid, color) {
+    Array.from(grid.children).forEach((box) => {
+      box.classList.toggle(
+        "selected",
+        box.style.backgroundColor.toLowerCase() === color.toLowerCase(),
+      );
+    });
+  }
+
+  createColorGrid("text-color-grid", "foreColor");
+  createColorGrid("highlight-color-grid", "hiliteColor");
+
+  document.getElementById("text-color-picker").onclick = () => {
+    toggleColorGrid("text-color-grid");
+  };
+  document.getElementById("highlight-color-picker").onclick = () => {
+    toggleColorGrid("highlight-color-grid");
+  };
+
+  function toggleColorGrid(gridId) {
+    document
+      .querySelectorAll(".color-grid")
+      .forEach((g) => (g.style.display = "none"));
+    const grid = document.getElementById(gridId);
+    grid.style.display = grid.style.display === "block" ? "none" : "block";
+  }
+
+  function focusMessageInput() {
+    const input = document.getElementById("message-input");
+    if (document.activeElement !== input) input.focus();
+  }
+
+  document.getElementById("bold-btn").onclick = () => {
+    focusMessageInput();
+    document.execCommand("bold");
+  };
+  document.getElementById("italic-btn").onclick = () => {
+    focusMessageInput();
+    document.execCommand("italic");
+  };
+  document.getElementById("underline-btn").onclick = () => {
+    focusMessageInput();
+    document.execCommand("underline");
+  };
+  document.getElementById("strike-btn").onclick = () => {
+    focusMessageInput();
+    document.execCommand("strikeThrough");
+  };
+
+  document.getElementById("message-input").addEventListener("keydown", (e) => {
+    if (e.ctrlKey) {
+      switch (e.key.toLowerCase()) {
+        case "b":
+          e.preventDefault();
+          document.execCommand("bold");
+          break;
+        case "i":
+          e.preventDefault();
+          document.execCommand("italic");
+          break;
+        case "u":
+          e.preventDefault();
+          document.execCommand("underline");
+          break;
+        case "s":
+          e.preventDefault();
+          document.execCommand("strikeThrough");
+          break;
+      }
+    }
+    if (e.shiftKey && e.key === "Enter") {
+      e.preventDefault();
+      document.execCommand("insertLineBreak");
+      adjustInputHeight();
+    }
+  });
+
+  document
+    .getElementById("message-input")
+    .addEventListener("input", adjustInputHeight);
+
+  function adjustInputHeight() {
+    const input = document.getElementById("message-input");
+    input.style.height = "auto"; 
+    input.style.height = Math.min(input.scrollHeight, 200) + "px";
+  }
+
+  document
+    .getElementById("message-input")
+    .addEventListener("keyup", updateToolbar);
+  document
+    .getElementById("message-input")
+    .addEventListener("mouseup", updateToolbar);
+
+  function updateToolbar() {
+    const isBold = document.queryCommandState("bold");
+    const isItalic = document.queryCommandState("italic");
+    const isUnderline = document.queryCommandState("underline");
+    const isStrike = document.queryCommandState("strikeThrough");
+
+    toggleButton("bold-btn", isBold);
+    toggleButton("italic-btn", isItalic);
+    toggleButton("underline-btn", isUnderline);
+    toggleButton("strike-btn", isStrike);
+  }
+
+  function toggleButton(id, active) {
+    const button = document.getElementById(id);
+    if (active) {
+      button.style.backgroundColor = "#00b894"; 
+    } else {
+      button.style.backgroundColor = "";
+    }
+  }
 
   async function markAllMessagesAsRead() {
     try {
@@ -2308,7 +2442,6 @@ document.getElementById("message-input").addEventListener("keydown", (e) => {
     await loadMessages(channelName);
   }
 
-  /* Load existing messages */
   checkForUpdates();
   fetchChatList();
   setupUnreadCountUpdates();
