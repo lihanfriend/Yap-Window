@@ -1781,29 +1781,46 @@ ${chatHistory}`;
     const size = e.target.value;
     const selection = window.getSelection();
     if (!selection.rangeCount) return;
-  
+
     const range = selection.getRangeAt(0);
-  
-    if (size === "normal") {
-      document.execCommand("removeFormat");
-      return;
-    }
-  
+
     const selectedText = selection.toString();
-  
+
+    if (!selectedText) return;
+
     range.deleteContents();
-  
+
+    removeNestedFormatting(range);
+
     const span = document.createElement("span");
     span.style.fontSize = size;
     span.textContent = selectedText;
-  
+
     range.insertNode(span);
-  
+
     selection.removeAllRanges();
     const newRange = document.createRange();
     newRange.setStartAfter(span);
     selection.addRange(newRange);
-};
+  };
+
+  function removeNestedFormatting(range) {
+    const container = range.commonAncestorContainer;
+    let parent = container.nodeType === 3 ? container.parentNode : container;
+
+    while (parent && parent !== document.getElementById("message-input")) {
+      if (parent.tagName === "SPAN" || parent.tagName === "FONT") {
+        const grandparent = parent.parentNode;
+        while (parent.firstChild) {
+          grandparent.insertBefore(parent.firstChild, parent);
+        }
+        grandparent.removeChild(parent);
+        parent = grandparent;
+      } else {
+        parent = parent.parentNode;
+      }
+    }
+  }
 
   function wrapSelectedText(wrapperNode) {
     const selection = window.getSelection();
