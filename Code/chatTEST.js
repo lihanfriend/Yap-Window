@@ -57,97 +57,119 @@
     });
     updateFavicon();
   }
-async function scrollToFirstUnread(chatName) {
-  const messagesDiv = document.getElementById("messages");
 
-  await new Promise((resolve) => {
-    const checkMessages = () => {
-      if (messagesDiv.children.length > 0) {
-        resolve();
-      } else {
-        setTimeout(checkMessages, 50);
-      }
-    };
-    checkMessages();
-  });
+  async function scrollToFirstUnread(chatName) {
+    const messagesDiv = document.getElementById("messages");
 
-  const lastReadMessageId = readMessages[chatName];
-  if (!lastReadMessageId) {
-
-    if (messagesDiv.children.length > 0) {
-      smoothScrollTo(messagesDiv, messagesDiv.children[0].offsetTop - messagesDiv.clientHeight / 3);
-    }
-    return;
-  }
-
-  async function findFirstUnreadMessage() {
-
-    const allMessages = Array.from(messagesDiv.children);
-
-    let lastReadMessageIndex = -1;
-    for (let i = 0; i < allMessages.length; i++) {
-      const msgElement = allMessages[i];
-      const msgId = msgElement.dataset.messageId;
-      const lastMsgId = msgElement.dataset.lastMessageId;
-
-      if (msgId === lastReadMessageId || lastMsgId === lastReadMessageId) {
-        lastReadMessageIndex = i;
-        break;
-      }
-    }
-
-    if (lastReadMessageIndex !== -1 && lastReadMessageIndex < allMessages.length - 1) {
-      return allMessages[lastReadMessageIndex + 1];
-    }
-
-    if (messagesDiv.scrollTop <= 5) {
-
-      return allMessages[0]; 
-    }
-
-    await smoothScrollTo(messagesDiv, 0);
-
-    await new Promise(resolve => setTimeout(resolve, 500));
-
-    return findFirstUnreadMessage();
-  }
-
-  const firstUnreadMessage = await findFirstUnreadMessage();
-  if (firstUnreadMessage) {
-
-    smoothScrollTo(
-      messagesDiv,
-      firstUnreadMessage.offsetTop - messagesDiv.clientHeight / 3
-    );
-  }
-
-  function smoothScrollTo(element, targetPosition) {
-    return new Promise((resolve) => {
-      const startPosition = element.scrollTop;
-      const distance = targetPosition - startPosition;
-      const duration = 500;
-      let start = null;
-
-      function animation(currentTime) {
-        if (!start) start = currentTime;
-        const progress = (currentTime - start) / duration;
-
-        if (progress < 1) {
-          const ease = (t) => (t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t);
-          const currentPosition = startPosition + distance * ease(progress);
-          element.scrollTop = currentPosition;
-          window.requestAnimationFrame(animation);
-        } else {
-          element.scrollTop = targetPosition;
+    await new Promise((resolve) => {
+      const checkMessages = () => {
+        if (messagesDiv.children.length > 0) {
           resolve();
+        } else {
+          setTimeout(checkMessages, 50);
+        }
+      };
+      checkMessages();
+    });
+
+    const lastReadMessageId = readMessages[chatName];
+
+    if (!lastReadMessageId && messagesDiv.children.length > 0) {
+      const allMessages = Array.from(messagesDiv.children);
+      const lastMessage = allMessages[allMessages.length - 1];
+      if (lastMessage) {
+        const lastMessageId = lastMessage.dataset.lastMessageId;
+        if (lastMessageId) {
+          await markMessagesAsRead(chatName, lastMessageId);
         }
       }
+      return;
+    }
 
-      window.requestAnimationFrame(animation);
-    });
+    async function findFirstUnread() {
+      const unreadMessages = Array.from(
+        document.querySelectorAll(".message.unread"),
+      );
+
+      if (unreadMessages.length > 0) {
+        return unreadMessages[0];
+      }
+
+      if (messagesDiv.scrollTop <= 5) {
+        return null;
+      }
+
+      const currentPosition = messagesDiv.scrollTop;
+      await smoothScrollUp(messagesDiv, currentPosition);
+
+      await new Promise((resolve) => setTimeout(resolve, 200));
+
+      return findFirstUnread();
+    }
+
+    const firstUnread = await findFirstUnread();
+
+    if (firstUnread) {
+      await smoothScrollTo(
+        messagesDiv,
+        firstUnread.offsetTop - messagesDiv.clientHeight / 3,
+      );
+    } else {
+      const allMessages = Array.from(messagesDiv.children);
+      if (allMessages.length > 0) {
+        const lastMessage = allMessages[allMessages.length - 1];
+        const lastMessageId = lastMessage.dataset.lastMessageId;
+        if (lastMessageId) {
+          await markMessagesAsRead(chatName, lastMessageId);
+        }
+      }
+    }
+
+    async function smoothScrollUp(element, startPosition) {
+      const scrollStep = Math.min(startPosition, 500);
+      const targetPosition = Math.max(startPosition - scrollStep, 0);
+
+      await smoothScrollTo(element, targetPosition);
+
+      if (targetPosition > 0) {
+        await new Promise((resolve) => setTimeout(resolve, 100));
+        return smoothScrollUp(element, targetPosition);
+      }
+    }
+
+    function smoothScrollTo(element, targetPosition) {
+      return new Promise((resolve) => {
+        const startPosition = element.scrollTop;
+        const distance = targetPosition - startPosition;
+
+        if (Math.abs(distance) < 5) {
+          element.scrollTop = targetPosition;
+          resolve();
+          return;
+        }
+
+        const duration = 400;
+        let start = null;
+
+        function animation(currentTime) {
+          if (!start) start = currentTime;
+          const progress = (currentTime - start) / duration;
+
+          if (progress < 1) {
+            const ease = (t) => (t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t);
+            const currentPosition = startPosition + distance * ease(progress);
+            element.scrollTop = currentPosition;
+            window.requestAnimationFrame(animation);
+          } else {
+            element.scrollTop = targetPosition;
+            resolve();
+          }
+        }
+
+        window.requestAnimationFrame(animation);
+      });
+    }
   }
-}
-
   async function updateFavicon() {
     const currentUrl = window.location.href;
     const hasUnreadMessages = !readAll;
