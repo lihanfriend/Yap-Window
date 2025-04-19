@@ -57,7 +57,7 @@
     });
     updateFavicon();
   }
-async function scrollUntilUnreadAppears(chatName) {
+async function scrollToFirstUnread(chatName) {
   console.log("scrollUntilUnreadAppears called for chat:", chatName);
 
   const messagesDiv = document.getElementById("messages");
