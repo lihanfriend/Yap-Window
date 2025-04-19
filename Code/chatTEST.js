@@ -77,6 +77,13 @@
       return;
     }
 
+    const hasUnreadMessages = document.querySelector(".message.unread") !== null;
+
+  if (!hasUnreadMessages) {
+    console.log("No unread messages found, nothing to scroll to");
+    return;
+  }
+
     const lastReadMessageId = readMessages[chatName];
 
     if (!lastReadMessageId) {
