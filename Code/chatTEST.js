@@ -1820,7 +1820,7 @@ ${chatHistory}`;
   function adjustInputHeight() {
     const input = document.getElementById("message-input");
     input.style.height = "auto";
-    input.style.height = Math.min(input.scrollHeight, 200) + "px";
+    input.style.height = Math.min(input.style.height, 140) + "px";
   }
 
   function resetMessageInput() {
@@ -1831,7 +1831,7 @@ ${chatHistory}`;
   
     messageInput.style.height = "auto";
   
-    messageInput.style.height = Math.max(messageInput.scrollHeight, 28) + "px";
+    messageInput.style.height = Math.max(input.style.height, 28) + "px";
   
     hideAllColorGrids(); 
   }
