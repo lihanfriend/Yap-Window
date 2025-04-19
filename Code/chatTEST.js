@@ -57,46 +57,74 @@
     });
     updateFavicon();
   }
-async function scrollToFirstUnread(chatName) {
-  console.log("scrollUntilUnreadAppears called for chat:", chatName);
+  async function scrollToFirstUnread(chatName) {
+    const messagesDiv = document.getElementById("messages");
 
-  const messagesDiv = document.getElementById("messages");
+    await new Promise((resolve) => {
+      const checkMessages = () => {
+        if (messagesDiv.children.length > 0) {
+          resolve();
+        } else {
+          setTimeout(checkMessages, 50);
+        }
+      };
+      checkMessages();
+    });
 
-  function findFirstUnread() {
-    const allMessages = Array.from(messagesDiv.querySelectorAll(".message"));
-    console.log("Total messages currently:", allMessages.length);
-
-    for (let i = 0; i < allMessages.length; i++) {
-      const msg = allMessages[i];
-      if (msg.classList.contains("unread")) {
-        console.log("Found unread message at index", i, ":", msg);
-        return msg;
+    let findUnreadMessage = async () => {
+      let unreadMessages = Array.from(
+        document.querySelectorAll(".message.unread"),
+      );
+      if (unreadMessages.length === 0) {
+        return null;
       }
+      return unreadMessages[0];
+    };
+
+    const firstUnread = await findUnreadMessage();
+    if (!firstUnread) return;
+
+    const smoothScroll = () => {
+      const targetPosition =
+        firstUnread.offsetTop - messagesDiv.clientHeight / 3;
+      const startPosition = messagesDiv.scrollTop;
+      const distance = targetPosition - startPosition;
+      const duration = 500;
+      let start = null;
+
+      const animation = (currentTime) => {
+        if (!start) start = currentTime;
+        const progress = (currentTime - start) / duration;
+
+        if (progress < 1) {
+          const ease = (t) => (t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t);
+          const currentPosition = startPosition + distance * ease(progress);
+          messagesDiv.scrollTop = currentPosition;
+          window.requestAnimationFrame(animation);
+        } else {
+          messagesDiv.scrollTop = targetPosition;
+        }
+      };
+
+      window.requestAnimationFrame(animation);
+    };
+
+    try {
+      smoothScroll();
+    } catch (error) {
+      console.error("Error during smooth scroll:", error);
+      firstUnread.scrollIntoView({ block: "center", behavior: "smooth" });
     }
-    return null;
+
+    await new Promise((resolve) => setTimeout(resolve, 100));
+    const unreadMessages = document.querySelectorAll(".message.unread");
+    unreadMessages.forEach((msg) => {
+      if (!msg.classList.contains("unread")) {
+        msg.classList.add("unread");
+      }
+    });
   }
 
-  let tries = 0;
-  const maxTries = 30; 
-
-  while (tries < maxTries) {
-    const unread = findFirstUnread();
-    if (unread) {
-      console.log("Unread message found! Scrolling to it...");
-      unread.scrollIntoView({ block: "center", behavior: "auto" });
-      return;
-    }
-
-    console.log("No unread yet. Scrolling to top to load more...");
-    messagesDiv.scrollTop = 0; 
-
-    await new Promise((resolve) => setTimeout(resolve, 600));
-    tries++;
-  }
-
-  console.log("Gave up after max tries. No unread message found.");
-}
-  
   async function updateFavicon() {
     const currentUrl = window.location.href;
     const hasUnreadMessages = !readAll;
