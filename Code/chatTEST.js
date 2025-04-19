@@ -2067,6 +2067,8 @@ const colors = [
     const membersList = document.getElementById("members-list");
     const deleteButton = document.getElementById("delete-channel");
     const memberSearch = document.getElementById("member-search");
+    const title = document.getElementById("channel-screen-title");
+    title = `${isModifying ? "Customize Channel" : "Create Channel"}`;
 
     let originalMembers = "";
     let previousChannelType = "Public";
