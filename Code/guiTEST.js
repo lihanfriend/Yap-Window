@@ -721,13 +721,6 @@
 	      🖌️
 	      <div class="color-grid" id="highlight-color-grid"></div>
 	    </div>
-	    <select id="font-size-selector">
-	      <option value="small">Small</option>
-	      <option value="normal" selected>Normal</option>
-	      <option value="large">Large</option>
-	      <option value="x-large">Extra Large</option>
-	      <option value="xx-large">Huge</option>
-	    </select>
 	  </div>
 	  <div id="message-send-row">
 	    <div id="message-input" contenteditable="true" placeholder="Type a message..."></div>
