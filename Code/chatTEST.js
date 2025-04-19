@@ -84,7 +84,7 @@ if (!lastReadMessageId && messagesDiv.children.length > 0) {
       }
       return;
     }
-  if (messagesDiv.childern.length == 0) {
+  if (messagesDiv.children.length == 0) {
     return;
   }
 
