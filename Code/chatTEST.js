@@ -1248,6 +1248,7 @@
   }
 
   async function sendMessage() {
+    removeFakeHighlights();
     const messagesRef = ref(database, `Chats/${currentChat}`);
     let message = document.getElementById("message-input").innerHTML;
     if (!message) return;
@@ -1651,8 +1652,25 @@ ${chatHistory}`;
   function saveSelection() {
     const sel = window.getSelection();
     if (sel.rangeCount > 0) {
-      savedSelection = sel.getRangeAt(0);
+      savedSelection = sel.getRangeAt(0).cloneRange();
     }
+  }
+
+  function applyFakeHighlight() {
+    if (!savedSelection) return;
+    const highlightSpan = document.createElement("span");
+    highlightSpan.className = "selection-highlight";
+    savedSelection.surroundContents(highlightSpan);
+  }
+
+  function removeFakeHighlights() {
+    document.querySelectorAll(".selection-highlight").forEach((span) => {
+      const parent = span.parentNode;
+      while (span.firstChild) {
+        parent.insertBefore(span.firstChild, span);
+      }
+      parent.removeChild(span);
+    });
   }
 
   function restoreSelection() {
@@ -1662,6 +1680,15 @@ ${chatHistory}`;
       sel.addRange(savedSelection);
     }
   }
+
+  messageInput.addEventListener("blur", () => {
+    applyFakeHighlight();
+  });
+
+  messageInput.addEventListener("focus", () => {
+    removeFakeHighlights();
+    restoreSelection();
+  });
 
   const colors = [
     "#000000",
@@ -1715,7 +1742,7 @@ ${chatHistory}`;
       .querySelectorAll(".color-grid")
       .forEach((g) => (g.style.display = "none"));
   }
-  hideAllColorGrids()
+  hideAllColorGrids();
 
   document.getElementById("text-color-picker").onclick = (e) => {
     e.stopPropagation();
@@ -1751,27 +1778,42 @@ ${chatHistory}`;
   };
 
   document.getElementById("font-size-selector").onchange = (e) => {
-  const size = e.target.value;
+    const size = e.target.value;
 
-  saveSelection();
-  restoreSelection();
+    saveSelection();
+    restoreSelection();
 
-  if (size === "normal") {
-    document.execCommand("removeFormat");
-  } else {
+    const selection = window.getSelection();
+    if (!selection.rangeCount) return;
+
+    const range = selection.getRangeAt(0);
+
+    if (size === "normal") {
+      document.execCommand("removeFormat");
+      return;
+    }
+
     const span = document.createElement("span");
     span.style.fontSize = size;
-    wrapSelectedText(span);
+
+    try {
+      range.surroundContents(span);
+    } catch (err) {
+      document.execCommand(
+        "insertHTML",
+        false,
+        `<span style="font-size: ${size};">${selection.toString()}</span>`,
+      );
+    }
+  };
+
+  function wrapSelectedText(wrapperNode) {
+    const selection = window.getSelection();
+    if (!selection.rangeCount) return;
+
+    const range = selection.getRangeAt(0);
+    range.surroundContents(wrapperNode);
   }
-};
-
-function wrapSelectedText(wrapperNode) {
-  const selection = window.getSelection();
-  if (!selection.rangeCount) return;
-
-  const range = selection.getRangeAt(0);
-  range.surroundContents(wrapperNode);
-}
 
   document.getElementById("message-input").addEventListener("keydown", (e) => {
     if (e.ctrlKey) {
@@ -1835,6 +1877,26 @@ function wrapSelectedText(wrapperNode) {
     toggleButton("italic-btn", isItalic);
     toggleButton("underline-btn", isUnderline);
     toggleButton("strike-btn", isStrike);
+
+    updateFontSizeDropdown();
+  }
+
+  function updateFontSizeDropdown() {
+    const selection = window.getSelection();
+    if (!selection.rangeCount) return;
+
+    const node = selection.anchorNode.parentNode;
+    const size = window.getComputedStyle(node).fontSize;
+
+    let selectedSize = "normal";
+
+    if (size.includes("xx-large")) selectedSize = "xx-large";
+    else if (size.includes("x-large")) selectedSize = "x-large";
+    else if (size.includes("large")) selectedSize = "large";
+    else if (size.includes("small")) selectedSize = "small";
+    else selectedSize = "normal";
+
+    document.getElementById("font-size-selector").value = selectedSize;
   }
 
   function toggleButton(id, active) {
