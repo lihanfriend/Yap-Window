@@ -1258,7 +1258,8 @@
       if (
         document
           .getElementById("message-input")
-          .textContent.trim().toLowerCase()
+          .textContent.trim()
+          .toLowerCase()
           .startsWith("/ai ")
       ) {
         let d = Date.now();
@@ -1339,7 +1340,8 @@ ${chatHistory}`;
       } else if (
         document
           .getElementById("message-input")
-          .textContent.trim().toLowerCase()
+          .textContent.trim()
+          .toLowerCase()
           .startsWith("/eod")
       ) {
         const parts = message.split(" ");
@@ -1395,7 +1397,8 @@ ${chatHistory}`;
       } else if (
         document
           .getElementById("message-input")
-          .textContent.trim().toLowerCase()
+          .textContent.trim()
+          .toLowerCase()
           .startsWith("/coinflip")
       ) {
         const parts = message.split(" ");
@@ -1438,7 +1441,8 @@ ${chatHistory}`;
       } else if (
         document
           .getElementById("message-input")
-          .textContent.trim().toLowerCase()
+          .textContent.trim()
+          .toLowerCase()
           .startsWith("/roll ")
       ) {
         const sides = parseInt(message.split(" ")[1]);
@@ -1470,16 +1474,20 @@ ${chatHistory}`;
       } else if (
         document
           .getElementById("message-input")
-          .textContent.trim().toLowerCase()
+          .textContent.trim()
+          .toLowerCase()
           .startsWith("/snake")
       ) {
         const temp_email =
           typeof email !== "undefined"
             ? email.replace(/\./g, "*")
             : "anonymous";
-        if document
-          .getElementById("message-input")
-          .textContent.trim().toLowerCase() === "/snake leaderboard") {
+        if (
+          document
+            .getElementById("message-input")
+            .textContent.trim()
+            .toLowerCase() === "/snake leaderboard"
+        ) {
           const userMessageRef = push(messagesRef);
           await update(userMessageRef, {
             User: email,
@@ -1763,7 +1771,7 @@ ${chatHistory}`;
 
   function adjustInputHeight() {
     const input = document.getElementById("message-input");
-    input.style.height = "auto"; 
+    input.style.height = "auto";
     input.style.height = Math.min(input.scrollHeight, 200) + "px";
   }
 
@@ -1789,7 +1797,7 @@ ${chatHistory}`;
   function toggleButton(id, active) {
     const button = document.getElementById(id);
     if (active) {
-      button.style.backgroundColor = "#00b894"; 
+      button.style.backgroundColor = "#00b894";
     } else {
       button.style.backgroundColor = "";
     }
