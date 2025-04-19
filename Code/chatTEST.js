@@ -59,8 +59,7 @@
   }
 async function scrollToFirstUnread(chatName) {
   const messagesDiv = document.getElementById("messages");
-  
-  // Wait for messages to initially load
+
   await new Promise((resolve) => {
     const checkMessages = () => {
       if (messagesDiv.children.length > 0) {
@@ -71,101 +70,81 @@ async function scrollToFirstUnread(chatName) {
     };
     checkMessages();
   });
-  
-  // Since messages are ordered chronologically and all messages after the first unread
-  // are also unread (except current user's messages), we can check the latest message first
-  const latestMessages = Array.from(messagesDiv.children).reverse();
-  
-  // If the latest non-user message is read, there are no unread messages
-  for (const message of latestMessages) {
-    if (!message.classList.contains("sent")) { // Not a message from the current user
-      if (!message.classList.contains("unread")) {
-        // The latest non-user message is read, so there are no unread messages
-        console.log("No unread messages found (latest message is read)");
-        return;
-      }
-      break; // Found an unread message, so we need to look for the first unread
+
+  const lastReadMessageId = readMessages[chatName];
+  if (!lastReadMessageId) {
+
+    if (messagesDiv.children.length > 0) {
+      smoothScrollTo(messagesDiv, messagesDiv.children[0].offsetTop - messagesDiv.clientHeight / 3);
     }
-  }
-  
-  // Find first unread message or continue scrolling to load more messages
-  async function findFirstUnread() {
-    let unreadMessages = Array.from(document.querySelectorAll(".message.unread"));
-    
-    if (unreadMessages.length === 0) {
-      // No unread messages found in the current view
-      // Check if we're at the top of the scroll area
-      if (messagesDiv.scrollTop <= 5) {
-        // We've already scrolled to the top and loaded all available messages
-        console.log("No unread messages found after loading all messages");
-        return null;
-      }
-      
-      // Scroll up to trigger loading more messages
-      const oldScrollHeight = messagesDiv.scrollHeight;
-      
-      // Scroll to top to trigger loading more messages
-      messagesDiv.scrollTop = 0;
-      
-      // Wait for new messages to load
-      await new Promise(resolve => setTimeout(resolve, 300));
-      
-      // Check if new content was loaded
-      if (messagesDiv.scrollHeight === oldScrollHeight) {
-        // No new content was loaded, we've reached the end
-        console.log("No more messages to load");
-        return null;
-      }
-      
-      // Recursively check for unread messages in the newly loaded content
-      return findFirstUnread();
-    }
-    
-    // Sort by DOM position to get the first unread message chronologically
-    unreadMessages.sort((a, b) => {
-      return a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_FOLLOWING ? -1 : 1;
-    });
-    
-    // Return the first unread message found
-    return unreadMessages[0];
-  }
-  
-  const firstUnread = await findFirstUnread();
-  if (!firstUnread) {
-    console.log("No unread messages found");
     return;
   }
-  
-  // Smooth scrolling animation
-  const smoothScroll = () => {
-    const targetPosition = firstUnread.offsetTop - messagesDiv.clientHeight / 3;
-    const startPosition = messagesDiv.scrollTop;
-    const distance = targetPosition - startPosition;
-    const duration = 500;
-    let start = null;
-    
-    const animation = (currentTime) => {
-      if (!start) start = currentTime;
-      const progress = (currentTime - start) / duration;
-      
-      if (progress < 1) {
-        const ease = (t) => (t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t);
-        const currentPosition = startPosition + distance * ease(progress);
-        messagesDiv.scrollTop = currentPosition;
-        window.requestAnimationFrame(animation);
-      } else {
-        messagesDiv.scrollTop = targetPosition;
+
+  async function findFirstUnreadMessage() {
+
+    const allMessages = Array.from(messagesDiv.children);
+
+    let lastReadMessageIndex = -1;
+    for (let i = 0; i < allMessages.length; i++) {
+      const msgElement = allMessages[i];
+      const msgId = msgElement.dataset.messageId;
+      const lastMsgId = msgElement.dataset.lastMessageId;
+
+      if (msgId === lastReadMessageId || lastMsgId === lastReadMessageId) {
+        lastReadMessageIndex = i;
+        break;
       }
-    };
-    
-    window.requestAnimationFrame(animation);
-  };
-  
-  try {
-    smoothScroll();
-  } catch (error) {
-    console.error("Error during smooth scroll:", error);
-    firstUnread.scrollIntoView({ block: "center", behavior: "smooth" });
+    }
+
+    if (lastReadMessageIndex !== -1 && lastReadMessageIndex < allMessages.length - 1) {
+      return allMessages[lastReadMessageIndex + 1];
+    }
+
+    if (messagesDiv.scrollTop <= 5) {
+
+      return allMessages[0]; 
+    }
+
+    await smoothScrollTo(messagesDiv, 0);
+
+    await new Promise(resolve => setTimeout(resolve, 500));
+
+    return findFirstUnreadMessage();
+  }
+
+  const firstUnreadMessage = await findFirstUnreadMessage();
+  if (firstUnreadMessage) {
+
+    smoothScrollTo(
+      messagesDiv,
+      firstUnreadMessage.offsetTop - messagesDiv.clientHeight / 3
+    );
+  }
+
+  function smoothScrollTo(element, targetPosition) {
+    return new Promise((resolve) => {
+      const startPosition = element.scrollTop;
+      const distance = targetPosition - startPosition;
+      const duration = 500;
+      let start = null;
+
+      function animation(currentTime) {
+        if (!start) start = currentTime;
+        const progress = (currentTime - start) / duration;
+
+        if (progress < 1) {
+          const ease = (t) => (t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t);
+          const currentPosition = startPosition + distance * ease(progress);
+          element.scrollTop = currentPosition;
+          window.requestAnimationFrame(animation);
+        } else {
+          element.scrollTop = targetPosition;
+          resolve();
+        }
+      }
+
+      window.requestAnimationFrame(animation);
+    });
   }
 }
 
