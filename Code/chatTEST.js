@@ -2114,38 +2114,18 @@ ${chatHistory}`;
   let linkRange = null;
 
   function positionLinkDialog() {
-    const bookmarkletGui = document.getElementById("bookmarklet-gui");
-    const linkDialog = document.getElementById("link-dialog");
-    const bookmarkletRect = bookmarkletGui.getBoundingClientRect();
+  const messageInput = document.getElementById("message-input");
+  const linkDialog = document.getElementById("link-dialog");
+  const inputRect = messageInput.getBoundingClientRect();
 
-    const left =
-      bookmarkletRect.left +
-      (bookmarkletRect.width - linkDialog.offsetWidth) / 2;
-    const top =
-      bookmarkletRect.top +
-      (bookmarkletRect.height - linkDialog.offsetHeight) / 2;
+  const left = inputRect.left + (inputRect.width - linkDialog.offsetWidth) / 2;
 
-    linkDialog.style.position = "fixed";
-    linkDialog.style.left = `${left}px`;
-    linkDialog.style.top = `${top}px`;
+  const top = inputRect.top - linkDialog.offsetHeight - 20; 
 
-    const maxLeft = bookmarkletRect.right - linkDialog.offsetWidth;
-    const maxTop = bookmarkletRect.bottom - linkDialog.offsetHeight;
-    const minLeft = bookmarkletRect.left;
-    const minTop = bookmarkletRect.top;
-
-    if (parseFloat(linkDialog.style.left) > maxLeft) {
-      linkDialog.style.left = `${maxLeft}px`;
-    } else if (parseFloat(linkDialog.style.left) < minLeft) {
-      linkDialog.style.left = `${minLeft}px`;
-    }
-
-    if (parseFloat(linkDialog.style.top) > maxTop) {
-      linkDialog.style.top = `${maxTop}px`;
-    } else if (parseFloat(linkDialog.style.top) < minTop) {
-      linkDialog.style.top = `${minTop}px`;
-    }
-  }
+  linkDialog.style.position = "fixed";
+  linkDialog.style.left = `${left}px`;
+  linkDialog.style.top = `${top}px`;
+}
 
   linkBtn.addEventListener("click", function () {
     const selection = window.getSelection();
