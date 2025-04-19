@@ -1285,7 +1285,6 @@
     message = div.innerHTML;
 
     if (message) {
-      document.getElementById("message-input").innerHTML = "";
       resetMessageInput();
       hideAllColorGrids();
       if (
@@ -1671,9 +1670,10 @@ ${chatHistory}`;
     }
   });
 
-  document
+document
     .getElementById("message-input")
     .addEventListener("input", function (e) {
+
       if (
         e.inputType === "insertFromPaste" ||
         (e.inputType === "insertText" && (e.data === " " || e.data === "\n"))
@@ -1681,16 +1681,17 @@ ${chatHistory}`;
         const selection = window.getSelection();
         const selectionRange =
           selection.rangeCount > 0 ? selection.getRangeAt(0) : null;
-
         if (selectionRange) {
           const cursorNode = selectionRange.startContainer;
           const cursorOffset = selectionRange.startOffset;
 
           processLinksInInput();
+
           let message = document
             .getElementById("message-input")
             .innerHTML.substring(0, 2500);
-          message = convertHtmlToEmoji(joypixels.shortnameToImage(message));
+
+            message = convertHtmlToEmoji(joypixels.shortnameToImage(message));
 
           try {
             setTimeout(() => {
@@ -1707,7 +1708,6 @@ ${chatHistory}`;
     const messageInput = document.getElementById("message-input");
     const selection = window.getSelection();
     const range = document.createRange();
-
     if (document.contains(originalNode)) {
       try {
         if (originalNode.nodeType === 3) {
@@ -1722,7 +1722,6 @@ ${chatHistory}`;
           }
           range.collapse(true);
         }
-
         selection.removeAllRanges();
         selection.addRange(range);
         messageInput.focus();
@@ -1736,16 +1735,14 @@ ${chatHistory}`;
 
   function processLinksInInput() {
     const messageInput = document.getElementById("message-input");
-
     const div = document.createElement("div");
     div.innerHTML = messageInput.innerHTML;
-
     let changed = false;
 
     const walker = document.createTreeWalker(div, NodeFilter.SHOW_TEXT);
     const nodesToProcess = [];
-
     let node;
+
     while ((node = walker.nextNode())) {
       if (node.parentNode.tagName !== "A") {
         nodesToProcess.push(node);
@@ -1755,30 +1752,28 @@ ${chatHistory}`;
     for (const textNode of nodesToProcess) {
       const text = textNode.nodeValue;
 
-      if (text.endsWith(" ") || text.endsWith("\n")) {
-        const words = text.split(/(\s+)/);
-        let hasLinks = false;
+      const words = text.split(/(\s+)/);
+      let hasLinks = false;
 
-        for (let i = 0; i < words.length; i += 2) {
-          const word = words[i];
-          if (word && isValidUrl(word)) {
-            hasLinks = true;
-            words[i] = createLinkMarkup(word);
-          }
+      for (let i = 0; i < words.length; i += 2) {
+        const word = words[i];
+        if (word && isValidUrl(word)) {
+          hasLinks = true;
+          words[i] = createLinkMarkup(word);
+        }
+      }
+
+      if (hasLinks) {
+        const fragment = document.createDocumentFragment();
+        const tempDiv = document.createElement("div");
+        tempDiv.innerHTML = words.join("");
+
+        while (tempDiv.firstChild) {
+          fragment.appendChild(tempDiv.firstChild);
         }
 
-        if (hasLinks) {
-          const fragment = document.createDocumentFragment();
-          const tempDiv = document.createElement("div");
-          tempDiv.innerHTML = words.join("");
-
-          while (tempDiv.firstChild) {
-            fragment.appendChild(tempDiv.firstChild);
-          }
-
-          textNode.parentNode.replaceChild(fragment, textNode);
-          changed = true;
-        }
+        textNode.parentNode.replaceChild(fragment, textNode);
+        changed = true;
       }
     }
 
@@ -1793,21 +1788,18 @@ ${chatHistory}`;
   }
 
   function isValidUrl(text) {
-    const urlPattern =
-      /^(https?:\/\/)?((www\.)?([a-zA-Z0-9]([a-zA-Z0-9-]*[a-zA-Z0-9])?\.)+[a-zA-Z]{2,})(\S*)?$/i;
+
+    const urlPattern = /^(https?:\/\/)?(www\.)?([a-zA-Z0-9]([a-zA-Z0-9-]*[a-zA-Z0-9])?\.)+[a-zA-Z]{2,}(\/\S*)?$/i;
     return urlPattern.test(text);
   }
 
   function createLinkMarkup(url) {
     let href = url;
-
     if (!url.startsWith("http://") && !url.startsWith("https://")) {
       href = "https://" + url;
     }
-
     return `<a href="${href}" target="_blank" rel="noopener noreferrer">${url}</a>`;
   }
-
   let savedSelection = null;
 
   function saveSelection() {
