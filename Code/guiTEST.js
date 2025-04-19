@@ -596,6 +596,7 @@
   border: 1px solid ${isDark ? "#555555" : "#e0e0e0"};
   border-radius: 8px;
   padding: 16px;
+  z-index: 3000000;
 }
 
 .link-input-group {
