@@ -1253,7 +1253,7 @@
     let message = document
       .getElementById("message-input")
       .innerHTML.substring(0, 2500);
-    if (!message) return;
+    if (!document.getElementById("message-input").textContent.substring(0, 2500)) return;
     message = joypixels.shortnameToImage(message);
     const div = document.createElement("div");
     div.innerHTML = message;
@@ -2041,11 +2041,17 @@ ${chatHistory}`;
     .getElementById("message-input")
     .addEventListener("input", adjustInputHeight);
 
-  function adjustInputHeight() {
-    const input = document.getElementById("message-input");
-    input.style.height = "auto";
-    input.style.maxHeight = "108px";
-  }
+function adjustInputHeight() {
+  const input = document.getElementById("message-input");
+
+  const originalHeight = input.style.height;
+
+  input.style.height = "auto";
+
+  const newHeight = Math.min(input.scrollHeight, 108);
+  input.style.height = `${newHeight}px`;
+  input.style.maxHeight = "108px";
+}
 
 function resetMessageInput() {
   const messageInput = document.getElementById("message-input");
