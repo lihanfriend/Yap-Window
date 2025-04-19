@@ -1777,60 +1777,6 @@ ${chatHistory}`;
     document.execCommand("strikeThrough");
   };
 
-  document.getElementById("font-size-selector").onchange = (e) => {
-  const size = e.target.value;
-  const selection = window.getSelection();
-  if (!selection.rangeCount) return;
-
-  const range = selection.getRangeAt(0);
-
-  if (selection.isCollapsed) {
-
-    document.execCommand('fontSize', false, "7"); 
-
-    const fonts = document.getElementById("message-input").querySelectorAll("font[size='7']");
-    fonts.forEach(font => {
-      font.removeAttribute("size");
-      font.style.fontSize = size;
-    });
-
-  } else {
-
-    const selectedText = selection.toString();
-    if (!selectedText) return;
-
-    range.deleteContents();
-
-    const span = document.createElement("span");
-    span.style.fontSize = size;
-    span.textContent = selectedText;
-    range.insertNode(span);
-
-    selection.removeAllRanges();
-    const newRange = document.createRange();
-    newRange.setStartAfter(span);
-    selection.addRange(newRange);
-  }
-};
-
-  function removeNestedFormatting(range) {
-    const container = range.commonAncestorContainer;
-    let parent = container.nodeType === 3 ? container.parentNode : container;
-
-    while (parent && parent !== document.getElementById("message-input")) {
-      if (parent.tagName === "SPAN" || parent.tagName === "FONT") {
-        const grandparent = parent.parentNode;
-        while (parent.firstChild) {
-          grandparent.insertBefore(parent.firstChild, parent);
-        }
-        grandparent.removeChild(parent);
-        parent = grandparent;
-      } else {
-        parent = parent.parentNode;
-      }
-    }
-  }
-
   function wrapSelectedText(wrapperNode) {
     const selection = window.getSelection();
     if (!selection.rangeCount) return;
@@ -1901,27 +1847,8 @@ ${chatHistory}`;
     toggleButton("italic-btn", isItalic);
     toggleButton("underline-btn", isUnderline);
     toggleButton("strike-btn", isStrike);
-
-    updateFontSizeDropdown();
   }
 
-  function updateFontSizeDropdown() {
-    const selection = window.getSelection();
-    if (!selection.rangeCount) return;
-
-    const node = selection.anchorNode.parentNode;
-    const size = window.getComputedStyle(node).fontSize;
-
-    let selectedSize = "normal";
-
-    if (size.includes("xx-large")) selectedSize = "xx-large";
-    else if (size.includes("x-large")) selectedSize = "x-large";
-    else if (size.includes("large")) selectedSize = "large";
-    else if (size.includes("small")) selectedSize = "small";
-    else selectedSize = "normal";
-
-    document.getElementById("font-size-selector").value = selectedSize;
-  }
 
   function toggleButton(id, active) {
     const button = document.getElementById(id);
