@@ -460,6 +460,11 @@
     let initialLoad = true;
     let oldestLoadedTimestamp = null;
     const MESSAGES_PER_LOAD = 100;
+    function logMessageOrder(messages, label) {
+      console.log(
+        `${label} - First message: ${new Date(messages[0]?.Date)}, Last message: ${new Date(messages[messages.length - 1]?.Date)}`,
+      );
+    }
 
     messagesDiv.addEventListener("scroll", async () => {
       if (
@@ -469,17 +474,28 @@
       ) {
         isLoadingMore = true;
 
-        if (oldestLoadedTimestamp) {
-          const oldScrollHeight = messagesDiv.scrollHeight;
-          const oldScrollTop = messagesDiv.scrollTop;
+        const oldestDisplayedMessage = Array.from(messagesDiv.children)
+          .filter((el) => el.dataset.messageId)
+          .shift();
 
-          const olderMessages = loadedMessages
-            .filter((msg) => new Date(msg.Date) < oldestLoadedTimestamp)
-            .sort((a, b) => new Date(a.Date) - new Date(b.Date))
-            .slice(0, MESSAGES_PER_LOAD);
+        if (oldestDisplayedMessage) {
+          const oldestDisplayedId = oldestDisplayedMessage.dataset.messageId;
+          const oldestDisplayedIndex = loadedMessages.findIndex(
+            (msg) => msg.id === oldestDisplayedId,
+          );
 
-          if (olderMessages.length > 0) {
-            oldestLoadedTimestamp = new Date(olderMessages[0].Date);
+          if (oldestDisplayedIndex > 0) {
+            const oldScrollHeight = messagesDiv.scrollHeight;
+            const oldScrollTop = messagesDiv.scrollTop;
+
+            const olderMessages = loadedMessages.slice(
+              Math.max(0, oldestDisplayedIndex - MESSAGES_PER_LOAD),
+              oldestDisplayedIndex,
+            );
+
+            olderMessages.sort((a, b) => new Date(a.Date) - new Date(b.Date));
+
+            logMessageOrder(olderMessages, "Loading older messages");
 
             await appendMessages(olderMessages, true);
 
@@ -544,6 +560,10 @@
         (a, b) => new Date(a.Date) - new Date(b.Date),
       );
 
+      logMessageOrder(
+        messagesToProcess,
+        prepend ? "Prepending messages" : "Appending messages",
+      );
       if (!prepend && messagesDiv.children.length > 0) {
         lastMessageDiv = messagesDiv.lastChild;
         lastUser = lastMessageDiv.dataset.user;
@@ -669,23 +689,21 @@
           .sort((a, b) => new Date(a.Date) - new Date(b.Date));
 
         loadedMessages = sortedMessages;
+        logMessageOrder(loadedMessages, "All loaded messages");
 
         if (initialLoad) {
           messagesDiv.innerHTML = "";
           appendedMessages.clear();
 
           const recentMessages = sortedMessages.slice(-MESSAGES_PER_LOAD);
+          logMessageOrder(recentMessages, "Initial recent messages");
 
-          if (recentMessages.length > 0) {
-            oldestLoadedTimestamp = new Date(recentMessages[0].Date);
+          await appendMessages(recentMessages);
+          initialLoad = false;
 
-            await appendMessages(recentMessages);
-            initialLoad = false;
-
-            setTimeout(async () => {
-              await scrollToFirstUnread(chatName);
-            }, 100);
-          }
+          setTimeout(async () => {
+            await scrollToFirstUnread(chatName);
+          }, 100);
         } else {
           const wasNearBottom =
             messagesDiv.scrollHeight -
