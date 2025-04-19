@@ -1254,7 +1254,7 @@
     message = convertHtmlToEmoji(joypixels.shortnameToImage(message));
 
     if (message) {
-      messageInput.value = "";
+      document.getElementById("message-input").innerHTML = "";
       if (
         document
           .getElementById("message-input")
@@ -1572,7 +1572,7 @@ ${chatHistory}`;
         });
       }
 
-      messageInput.value = "";
+      document.getElementById("message-input").innerHTML = "";
 
       const snapshot = await get(messagesRef);
       const messages = snapshot.val() || {};
