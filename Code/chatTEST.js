@@ -2114,18 +2114,18 @@ ${chatHistory}`;
   let linkRange = null;
 
   function positionLinkDialog() {
-  const messageInput = document.getElementById("message-input");
-  const linkDialog = document.getElementById("link-dialog");
-  const inputRect = messageInput.getBoundingClientRect();
+    const linkDialog = document.getElementById("link-dialog");
 
-  const left = inputRect.left + (inputRect.width - linkDialog.offsetWidth) / 2;
+    const viewportWidth = window.innerWidth;
+    const viewportHeight = window.innerHeight;
 
-  const top = inputRect.top - linkDialog.offsetHeight - 20; 
+    const left = (viewportWidth - linkDialog.offsetWidth) / 2;
+    const top = (viewportHeight - linkDialog.offsetHeight) / 2;
 
-  linkDialog.style.position = "fixed";
-  linkDialog.style.left = `${left}px`;
-  linkDialog.style.top = `${top}px`;
-}
+    linkDialog.style.position = "fixed";
+    linkDialog.style.left = `${left}px`;
+    linkDialog.style.top = `${top}px`;
+  }
 
   linkBtn.addEventListener("click", function () {
     const selection = window.getSelection();
