@@ -577,67 +577,111 @@
     border-radius: 4px;
 }
 #link-dialog {
-  position: absolute;
+  position: fixed;
   width: 280px;
   z-index: 1001;
+  border-radius: 8px;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.25);
+  animation: fade-in 0.2s ease-out;
+}
+
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 .link-dialog-content {
-  background-color: ${isDark ? "#444" : "#fff"};
-  color: ${isDark ? "#ddd" : "#333"};
-  border: 1px solid ${isDark ? "#555" : "#ccc"};
-  box-shadow: 0 4px 8px rgba(0,0,0,0.3);
-  border-radius: 4px;
-  padding: 12px;
+  background-color: ${isDark ? "#383838" : "#ffffff"};
+  color: ${isDark ? "#e0e0e0" : "#333333"};
+  border: 1px solid ${isDark ? "#555555" : "#e0e0e0"};
+  border-radius: 8px;
+  padding: 16px;
 }
 
 .link-input-group {
-  margin-bottom: 10px;
+  margin-bottom: 12px;
 }
 
 .link-input-group label {
   display: block;
-  margin-bottom: 4px;
+  margin-bottom: 6px;
   font-size: 13px;
+  font-weight: 500;
+  color: ${isDark ? "#cccccc" : "#555555"};
 }
 
 .link-input-group input {
   width: 100%;
-  padding: 8px;
-  border: 1px solid ${isDark ? "#555" : "#ccc"};
-  border-radius: 4px;
-  background-color: ${isDark ? "#333" : "#fff"};
-  color: ${isDark ? "#ddd" : "#333"};
+  padding: 10px;
+  border: 1px solid ${isDark ? "#555555" : "#dddddd"};
+  border-radius: 6px;
+  background-color: ${isDark ? "#2a2a2a" : "#f7f7f7"};
+  color: ${isDark ? "#e0e0e0" : "#333333"};
   box-sizing: border-box;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  font-size: 13px;
+}
+
+.link-input-group input:focus {
+  outline: none;
+  border-color: ${isDark ? "#6b8afd" : "#4285f4"};
+  box-shadow: 0 0 0 2px ${isDark ? "rgba(107, 138, 253, 0.25)" : "rgba(66, 133, 244, 0.25)"};
 }
 
 .link-button-group {
   display: flex;
   justify-content: space-between;
-  margin-top: 12px;
+  margin-top: 16px;
 }
 
 .link-button-group button {
-  padding: 6px 10px;
+  padding: 8px 14px;
   border: none;
-  border-radius: 4px;
+  border-radius: 6px;
   cursor: pointer;
-  background-color: ${isDark ? "#555" : "#eee"};
-  color: ${isDark ? "#ddd" : "#333"};
+  font-size: 13px;
+  font-weight: 500;
+  transition: background-color 0.15s ease, transform 0.15s ease;
 }
 
 .link-button-group button:hover {
-  background-color: ${isDark ? "#666" : "#ddd"};
+  transform: translateY(-1px);
+}
+
+.link-button-group button:active {
+  transform: translateY(0);
 }
 
 #apply-link {
-  background-color: ${isDark ? "#4a5d7e" : "#4285f4"} !important;
-  color: white !important;
+  background-color: ${isDark ? "#4a5d7e" : "#4285f4"};
+  color: white;
+  flex-grow: 1;
+  margin-right: 8px;
+}
+
+#apply-link:hover {
+  background-color: ${isDark ? "#5a6d8e" : "#3b78e7"};
 }
 
 #remove-link {
-  background-color: ${isDark ? "#7e4a4a" : "#f44242"} !important;
-  color: white !important;
+  background-color: ${isDark ? "#7e4a4a" : "#f44242"};
+  color: white;
+  width: 80px;
+}
+
+#remove-link:hover {
+  background-color: ${isDark ? "#8e5a5a" : "#e63535"};
+}
+
+#cancel-link {
+  background-color: ${isDark ? "#333333" : "#e0e0e0"};
+  color: ${isDark ? "#e0e0e0" : "#333333"};
+  width: 80px;
+  margin-left: 8px;
+}
+
+#cancel-link:hover {
+  background-color: ${isDark ? "#444444" : "#d0d0d0"};
 }
 
 a {
