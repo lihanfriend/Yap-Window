@@ -603,7 +603,7 @@
           lastMessageDiv = messageDiv;
         } else {
           const messageContent = document.createElement("p");
-          messageContent.textContent = message.Message;
+          messageContent.innerHTML = message.Message;
           messageContent.style.marginTop = "5px";
           lastMessageDiv.appendChild(messageContent);
           lastMessageDiv.dataset.lastMessageId = message.id;
