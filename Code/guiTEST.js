@@ -576,6 +576,61 @@
     border: 1px solid ${isDark ? "#555" : "#ccc"};
     border-radius: 4px;
 }
+#link-dialog {
+  position: absolute;
+  width: 300px;
+  padding: 12px;
+  background-color: ${isDark ? "#444" : "#fff"};
+  color: ${isDark ? "#ddd" : "#333"};
+  border: 1px solid ${isDark ? "#555" : "#ccc"};
+  box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+  border-radius: 4px;
+  z-index: 1001;
+}
+
+#link-dialog input {
+  width: 100%;
+  padding: 8px;
+  margin: 5px 0;
+  border: 1px solid ${isDark ? "#555" : "#ccc"};
+  border-radius: 4px;
+  background-color: ${isDark ? "#333" : "#fff"};
+  color: ${isDark ? "#ddd" : "#333"};
+}
+
+#link-dialog button {
+  padding: 6px 10px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  background-color: ${isDark ? "#555" : "#eee"};
+  color: ${isDark ? "#ddd" : "#333"};
+  margin-right: 5px;
+}
+
+#link-dialog button:hover {
+  background-color: ${isDark ? "#666" : "#ddd"};
+}
+
+#apply-link {
+  background-color: ${isDark ? "#4a5d7e" : "#4285f4"} !important;
+  color: white !important;
+}
+
+#remove-link {
+  background-color: ${isDark ? "#7e4a4a" : "#f44242"} !important;
+  color: white !important;
+}
+
+a {
+  color: ${isDark ? "#8ab4f8" : "#1a73e8"};
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+a:hover {
+  text-decoration: underline;
+}
   `;
   }
 
@@ -757,6 +812,21 @@
     <button id="submit-channel">Save</button>
     <button id="delete-channel" style="display: none">Delete</button>
    <button id="back-channel">Back</button>
+</div>
+<div id="link-dialog" style="display: none; position: absolute; padding: 10px; background-color: #fff; border: 1px solid #ccc; box-shadow: 0 4px 8px rgba(0,0,0,0.2); border-radius: 4px; z-index: 1000">
+  <div>
+    <label for="link-text">Text to display:</label>
+    <input type="text" id="link-text" placeholder="Link text">
+  </div>
+  <div style="margin-top: 8px;">
+    <label for="link-url">URL:</label>
+    <input type="text" id="link-url" placeholder="https://">
+  </div>
+  <div style="margin-top: 10px; display: flex; justify-content: space-between;">
+    <button id="apply-link">Apply</button>
+    <button id="remove-link">Remove</button>
+    <button id="cancel-link">Cancel</button>
+  </div>
 </div>
       `;
   document.body.appendChild(gui);
