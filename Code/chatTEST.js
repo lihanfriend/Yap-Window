@@ -1249,7 +1249,7 @@
 
   async function sendMessage() {
     const messagesRef = ref(database, `Chats/${currentChat}`);
-    let message = document.getElementById("message-input").innerHTML.trim();
+    let message = document.getElementById("message-input").innerHTML;
     if (!message) return;
     message = convertHtmlToEmoji(joypixels.shortnameToImage(message));
 
@@ -1258,7 +1258,7 @@
       if (
         document
           .getElementById("message-input")
-          .textContent.toLowerCase()
+          .textContent.trim().toLowerCase()
           .startsWith("/ai ")
       ) {
         let d = Date.now();
@@ -1339,7 +1339,7 @@ ${chatHistory}`;
       } else if (
         document
           .getElementById("message-input")
-          .textContent.toLowerCase()
+          .textContent.trim().toLowerCase()
           .startsWith("/eod")
       ) {
         const parts = message.split(" ");
@@ -1395,7 +1395,7 @@ ${chatHistory}`;
       } else if (
         document
           .getElementById("message-input")
-          .textContent.toLowerCase()
+          .textContent.trim().toLowerCase()
           .startsWith("/coinflip")
       ) {
         const parts = message.split(" ");
@@ -1438,7 +1438,7 @@ ${chatHistory}`;
       } else if (
         document
           .getElementById("message-input")
-          .textContent.toLowerCase()
+          .textContent.trim().toLowerCase()
           .startsWith("/roll ")
       ) {
         const sides = parseInt(message.split(" ")[1]);
@@ -1470,14 +1470,16 @@ ${chatHistory}`;
       } else if (
         document
           .getElementById("message-input")
-          .textContent.toLowerCase()
+          .textContent.trim().toLowerCase()
           .startsWith("/snake")
       ) {
         const temp_email =
           typeof email !== "undefined"
             ? email.replace(/\./g, "*")
             : "anonymous";
-        if (message.toLowerCase().trim() === "/snake leaderboard") {
+        if document
+          .getElementById("message-input")
+          .textContent.trim().toLowerCase() === "/snake leaderboard") {
           const userMessageRef = push(messagesRef);
           await update(userMessageRef, {
             User: email,
@@ -1521,23 +1523,7 @@ ${chatHistory}`;
                 let playerText = `${i + 1}. ${topPlayers[i].email.replace(/\*/g, ".")}: ${topPlayers[i].score}`;
                 await pushMessage(playerText);
               }
-
-              if (currentUserRank > 10) {
-                await pushMessage("...");
-                await pushMessage(
-                  `${currentUserRank}. ${email}: ${currentUserScore}`,
-                );
-              }
             }
-            await pushMessage("");
-            await pushMessage("🏆 WEEKLY PRIZE 🏆");
-            await pushMessage(
-              "The player in the #1 slot on 4/7/25 at 8:00 pm will:",
-            );
-            await pushMessage(
-              "- Get to customize their message color for a month",
-            );
-            await pushMessage("- Add 1 feature of their choice to the chat");
           } catch (error) {
             console.error("Error retrieving leaderboard:", error);
             const errorMessageRef = push(messagesRef);
