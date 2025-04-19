@@ -474,11 +474,11 @@
       ) {
         isLoadingMore = true;
 
-        const oldestDisplayedMessage = Array.from(messagesDiv.children)
-          .filter((el) => el.dataset.messageId)
-          .shift();
-
-        if (oldestDisplayedMessage) {
+        const oldestDisplayedMessage = messagesDiv.firstChild;
+        if (
+          oldestDisplayedMessage &&
+          oldestDisplayedMessage.dataset.messageId
+        ) {
           const oldestDisplayedId = oldestDisplayedMessage.dataset.messageId;
           const oldestDisplayedIndex = loadedMessages.findIndex(
             (msg) => msg.id === oldestDisplayedId,
@@ -493,11 +493,11 @@
               oldestDisplayedIndex,
             );
 
-            olderMessages.sort((a, b) => new Date(a.Date) - new Date(b.Date));
+            olderMessages.sort((a, b) => new Date(b.Date) - new Date(a.Date));
 
-            logMessageOrder(olderMessages, "Loading older messages");
-
-            await appendMessages(olderMessages, true);
+            for (const message of olderMessages) {
+              await appendSingleMessage(message, true);
+            }
 
             requestAnimationFrame(() => {
               const newScrollHeight = messagesDiv.scrollHeight;
@@ -509,7 +509,6 @@
         isLoadingMore = false;
       }
     });
-
     function formatDate(dateString) {
       const messageDate = new Date(dateString);
       const now = new Date();
@@ -544,6 +543,114 @@
           minute: "2-digit",
         })}`;
       }
+    }
+
+    async function appendSingleMessage(message, prepend = false) {
+      if (appendedMessages.has(message.id) || currentChat !== chatName) return;
+
+      const messageDate = new Date(message.Date);
+      const username = message.User;
+      const lastReadMessage = readMessages[chatName] || "";
+
+      let adjacentMessageDiv = null;
+      const timeThreshold = 5 * 60 * 1000;
+
+      if (prepend) {
+        const firstMessage = messagesDiv.firstChild;
+        if (
+          firstMessage &&
+          firstMessage.dataset.user === username &&
+          Math.abs(new Date(firstMessage.dataset.date) - messageDate) <
+            timeThreshold
+        ) {
+          adjacentMessageDiv = firstMessage;
+        }
+      } else {
+        const lastMessage = messagesDiv.lastChild;
+        if (
+          lastMessage &&
+          lastMessage.dataset.user === username &&
+          Math.abs(new Date(lastMessage.dataset.date) - messageDate) <
+            timeThreshold
+        ) {
+          adjacentMessageDiv = lastMessage;
+        }
+      }
+
+      if (adjacentMessageDiv) {
+        const messageContent = document.createElement("p");
+        messageContent.innerHTML = message.Message;
+        messageContent.style.marginTop = "5px";
+
+        adjacentMessageDiv.dataset.lastMessageId = message.id;
+
+        if (
+          message.User !== email &&
+          (!lastReadMessage || message.id > lastReadMessage)
+        ) {
+          adjacentMessageDiv.classList.add("unread");
+        }
+
+        adjacentMessageDiv.appendChild(messageContent);
+      } else {
+        const messageDiv = document.createElement("div");
+        messageDiv.classList.add("message");
+
+        if (
+          message.User.includes("elianag30@lakesideschoo.org") &&
+          !email.includes("elianag30@lakesideschool.org")
+        ) {
+          messageDiv.classList.add("Eliana");
+          if (!lastReadMessage || message.id > lastReadMessage) {
+            messageDiv.classList.add("unread");
+          }
+        } else if (Object.values(BOT_USERS).includes(message.User)) {
+          messageDiv.classList.add("bot");
+          if (!lastReadMessage || message.id > lastReadMessage) {
+            messageDiv.classList.add("unread");
+          }
+        } else if (message.User === email) {
+          messageDiv.classList.add("sent");
+        } else {
+          messageDiv.classList.add("received");
+          if (!lastReadMessage || message.id > lastReadMessage) {
+            messageDiv.classList.add("unread");
+          }
+        }
+
+        messageDiv.style.marginTop = "10px";
+        messageDiv.dataset.messageId = message.id;
+        messageDiv.dataset.user = username;
+        messageDiv.dataset.date = messageDate;
+        messageDiv.dataset.lastMessageId = message.id;
+
+        const headerInfo = document.createElement("p");
+        headerInfo.className = "send-info";
+        headerInfo.textContent = `${username} ${formatDate(message.Date)}`;
+        messageDiv.appendChild(headerInfo);
+
+        getUsernameFromEmail(username).then((displayName) => {
+          if (displayName && displayName !== username) {
+            headerInfo.textContent = `${displayName} (${username}) ${formatDate(message.Date)}`;
+          }
+        });
+
+        const messageContent = document.createElement("p");
+        messageContent.innerHTML = message.Message;
+        messageContent.style.marginTop = "5px";
+        messageDiv.appendChild(messageContent);
+
+        if (prepend) {
+          messagesDiv.insertBefore(messageDiv, messagesDiv.firstChild);
+        } else {
+          messagesDiv.appendChild(messageDiv);
+        }
+
+        adjacentMessageDiv = messageDiv;
+      }
+
+      appendedMessages.add(message.id);
+      return adjacentMessageDiv;
     }
 
     async function appendMessages(newMessages, prepend = false) {
@@ -689,28 +796,23 @@
           .sort((a, b) => new Date(a.Date) - new Date(b.Date));
 
         loadedMessages = sortedMessages;
-        logMessageOrder(loadedMessages, "All loaded messages");
 
         if (initialLoad) {
           messagesDiv.innerHTML = "";
           appendedMessages.clear();
 
           const recentMessages = sortedMessages.slice(-MESSAGES_PER_LOAD);
-          logMessageOrder(recentMessages, "Initial recent messages");
 
-          await appendMessages(recentMessages);
+          for (const message of recentMessages) {
+            await appendSingleMessage(message, false);
+          }
+
           initialLoad = false;
 
           setTimeout(async () => {
             await scrollToFirstUnread(chatName);
           }, 100);
         } else {
-          const wasNearBottom =
-            messagesDiv.scrollHeight -
-              messagesDiv.scrollTop -
-              messagesDiv.clientHeight <=
-            20;
-
           const lastDisplayedMessage = Array.from(messagesDiv.children)
             .filter((el) => el.dataset.messageId)
             .pop();
@@ -723,13 +825,19 @@
 
             if (lastMessageIndex !== -1) {
               const newMessages = sortedMessages.slice(lastMessageIndex + 1);
-              if (newMessages.length > 0) {
-                await appendMessages(newMessages);
-                if (wasNearBottom) {
-                  requestAnimationFrame(() => {
-                    messagesDiv.scrollTop = messagesDiv.scrollHeight;
-                  });
-                }
+              for (const message of newMessages) {
+                await appendSingleMessage(message, false);
+              }
+
+              const wasNearBottom =
+                messagesDiv.scrollHeight -
+                  messagesDiv.scrollTop -
+                  messagesDiv.clientHeight <=
+                20;
+              if (wasNearBottom) {
+                requestAnimationFrame(() => {
+                  messagesDiv.scrollTop = messagesDiv.scrollHeight;
+                });
               }
             }
           }
