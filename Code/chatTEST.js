@@ -1636,7 +1636,7 @@ ${chatHistory}`;
   const messageInput = document.getElementById("message-input");
   messageInput.addEventListener("input", (e) => {
     e.target.innerHTML = convertHtmlToEmoji(
-      joypixels.shortnameToImage(e.target.value),
+      joypixels.shortnameToImage(e.target.innerHTML),
     );
     e.target.innerHTML = e.target.value.substring(0, 1000);
   });
@@ -1820,7 +1820,7 @@ ${chatHistory}`;
   function adjustInputHeight() {
     const input = document.getElementById("message-input");
     input.style.height = "auto";
-    input.style.height = Math.min(input.style.height, 140) + "px";
+    input.style.maxHeight = "108px";
   }
 
   function resetMessageInput() {
@@ -1828,10 +1828,8 @@ ${chatHistory}`;
   
     messageInput.innerHTML = "";
     messageInput.textContent = "";
-  
-    messageInput.style.height = "auto";
-  
-    messageInput.style.height = Math.max(messageInput.style.height, 28) + "px";
+    
+    messageInput.style.height = "auto"
   
     hideAllColorGrids(); 
   }
