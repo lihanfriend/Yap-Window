@@ -1250,34 +1250,35 @@
   async function sendMessage() {
     removeFakeHighlights();
     const messagesRef = ref(database, `Chats/${currentChat}`);
-    let message = document.getElementById("message-input").innerHTML.substring(0, 1000);
+    let message = document
+      .getElementById("message-input")
+      .innerHTML.substring(0, 1000);
     if (!message) return;
     message = convertHtmlToEmoji(joypixels.shortnameToImage(message));
-    const div = document.createElement('div');
+    const div = document.createElement("div");
     div.innerHTML = message;
 
     function processNode(node) {
-      if (node.nodeType === 3) { 
-  
-        if (node.parentNode.tagName !== 'A') {
+      if (node.nodeType === 3) {
+        if (node.parentNode.tagName !== "A") {
           const fragment = document.createDocumentFragment();
-          const tempDiv = document.createElement('div');
+          const tempDiv = document.createElement("div");
           tempDiv.innerHTML = autoDetectLinks(node.textContent);
-  
+
           while (tempDiv.firstChild) {
             fragment.appendChild(tempDiv.firstChild);
           }
-  
+
           node.parentNode.replaceChild(fragment, node);
         }
-      } else if (node.nodeType === 1) { 
-        Array.from(node.childNodes).forEach(child => {
+      } else if (node.nodeType === 1) {
+        Array.from(node.childNodes).forEach((child) => {
           processNode(child);
         });
       }
     }
-  
-    Array.from(div.childNodes).forEach(node => {
+
+    Array.from(div.childNodes).forEach((node) => {
       processNode(node);
     });
 
@@ -1285,7 +1286,7 @@
 
     if (message) {
       document.getElementById("message-input").innerHTML = "";
-      resetMessageInput()
+      resetMessageInput();
       hideAllColorGrids();
       if (
         document
@@ -1713,26 +1714,88 @@ ${chatHistory}`;
     restoreSelection();
   });
 
-const colors = [
+  const colors = [
+    "#ffffff",
+    "#f5f5f5",
+    "#eeeeee",
+    "#cccccc",
+    "#999999",
+    "#666666",
+    "#333333",
+    "#000000",
 
-  "#ffffff", "#f5f5f5", "#eeeeee", "#cccccc", "#999999", "#666666", "#333333", "#000000",
+    "#ffebee",
+    "#ffcdd2",
+    "#ef9a9a",
+    "#e57373",
+    "#ef5350",
+    "#f44336",
+    "#d32f2f",
+    "#b71c1c",
 
-  "#ffebee", "#ffcdd2", "#ef9a9a", "#e57373", "#ef5350", "#f44336", "#d32f2f", "#b71c1c",
+    "#fff3e0",
+    "#ffe0b2",
+    "#ffcc80",
+    "#ffb74d",
+    "#ffa726",
+    "#ff9800",
+    "#fb8c00",
+    "#ef6c00",
 
-  "#fff3e0", "#ffe0b2", "#ffcc80", "#ffb74d", "#ffa726", "#ff9800", "#fb8c00", "#ef6c00",
+    "#fffde7",
+    "#fff9c4",
+    "#fff59d",
+    "#fff176",
+    "#ffee58",
+    "#ffeb3b",
+    "#fdd835",
+    "#fbc02d",
 
-  "#fffde7", "#fff9c4", "#fff59d", "#fff176", "#ffee58", "#ffeb3b", "#fdd835", "#fbc02d",
+    "#e8f5e9",
+    "#c8e6c9",
+    "#a5d6a7",
+    "#81c784",
+    "#66bb6a",
+    "#4caf50",
+    "#43a047",
+    "#388e3c",
 
-  "#e8f5e9", "#c8e6c9", "#a5d6a7", "#81c784", "#66bb6a", "#4caf50", "#43a047", "#388e3c",
+    "#e0f7fa",
+    "#b2ebf2",
+    "#80deea",
+    "#4dd0e1",
+    "#26c6da",
+    "#00bcd4",
+    "#00acc1",
+    "#0097a7",
 
-  "#e0f7fa", "#b2ebf2", "#80deea", "#4dd0e1", "#26c6da", "#00bcd4", "#00acc1", "#0097a7",
+    "#e3f2fd",
+    "#bbdefb",
+    "#90caf9",
+    "#64b5f6",
+    "#42a5f5",
+    "#2196f3",
+    "#1e88e5",
+    "#1976d2",
 
-  "#e3f2fd", "#bbdefb", "#90caf9", "#64b5f6", "#42a5f5", "#2196f3", "#1e88e5", "#1976d2",
+    "#f3e5f5",
+    "#e1bee7",
+    "#ce93d8",
+    "#ba68c8",
+    "#ab47bc",
+    "#9c27b0",
+    "#8e24aa",
+    "#7b1fa2",
 
-  "#f3e5f5", "#e1bee7", "#ce93d8", "#ba68c8", "#ab47bc", "#9c27b0", "#8e24aa", "#7b1fa2",
-
-  "#fce4ec", "#f8bbd0", "#f48fb1", "#f06292", "#ec407a", "#e91e63", "#d81b60", "#c2185b"
-];
+    "#fce4ec",
+    "#f8bbd0",
+    "#f48fb1",
+    "#f06292",
+    "#ec407a",
+    "#e91e63",
+    "#d81b60",
+    "#c2185b",
+  ];
 
   function createColorGrid(gridId, execCommandType) {
     const grid = document.getElementById(gridId);
@@ -1840,13 +1903,13 @@ const colors = [
 
   function resetMessageInput() {
     const messageInput = document.getElementById("message-input");
-  
+
     messageInput.innerHTML = "";
     messageInput.textContent = "";
-    
-    messageInput.style.height = "auto"
-  
-    hideAllColorGrids(); 
+
+    messageInput.style.height = "auto";
+
+    hideAllColorGrids();
   }
 
   document
@@ -1875,7 +1938,6 @@ const colors = [
     toggleButton("strike-btn", isStrike);
   }
 
-
   function toggleButton(id, active) {
     const button = document.getElementById(id);
     if (active) {
@@ -1884,221 +1946,146 @@ const colors = [
       button.style.backgroundColor = "";
     }
   }
+  const linkBtn = document.getElementById("link-btn");
+  const linkDialog = document.getElementById("link-dialog");
+  const linkText = document.getElementById("link-text");
+  const linkUrl = document.getElementById("link-url");
+  const applyLink = document.getElementById("apply-link");
+  const removeLink = document.getElementById("remove-link");
+  const cancelLink = document.getElementById("cancel-link");
+  let linkRange = null;
 
-  I'll help you implement the link functionality for your chat interface. You need to make the "link-btn" functional and also detect links in messages automatically. Here's how to do it:
-First, let's add the HTML for your link dialog:
-html<div id="link-dialog" style="display: none; position: absolute; padding: 10px; background-color: #fff; border: 1px solid #ccc; box-shadow: 0 4px 8px rgba(0,0,0,0.2); border-radius: 4px; z-index: 1000">
-  <div>
-    <label for="link-text">Text to display:</label>
-    <input type="text" id="link-text" placeholder="Link text">
-  </div>
-  <div style="margin-top: 8px;">
-    <label for="link-url">URL:</label>
-    <input type="text" id="link-url" placeholder="https://">
-  </div>
-  <div style="margin-top: 10px; display: flex; justify-content: space-between;">
-    <button id="apply-link">Apply</button>
-    <button id="remove-link">Remove</button>
-    <button id="cancel-link">Cancel</button>
-  </div>
-</div>
-Now let's add the CSS to your existing styles:
-css#link-dialog {
-  position: absolute;
-  width: 300px;
-  padding: 12px;
-  background-color: ${isDark ? "#444" : "#fff"};
-  color: ${isDark ? "#ddd" : "#333"};
-  border: 1px solid ${isDark ? "#555" : "#ccc"};
-  box-shadow: 0 4px 8px rgba(0,0,0,0.3);
-  border-radius: 4px;
-  z-index: 1001;
-}
+  function positionLinkDialog() {
+    const selection = window.getSelection();
+    if (selection.rangeCount > 0) {
+      const range = selection.getRangeAt(0);
+      const rect = range.getBoundingClientRect();
 
-#link-dialog input {
-  width: 100%;
-  padding: 8px;
-  margin: 5px 0;
-  border: 1px solid ${isDark ? "#555" : "#ccc"};
-  border-radius: 4px;
-  background-color: ${isDark ? "#333" : "#fff"};
-  color: ${isDark ? "#ddd" : "#333"};
-}
+      linkDialog.style.left = `${rect.left}px`;
+      linkDialog.style.top = `${rect.top - linkDialog.offsetHeight - 10}px`;
 
-#link-dialog button {
-  padding: 6px 10px;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  background-color: ${isDark ? "#555" : "#eee"};
-  color: ${isDark ? "#ddd" : "#333"};
-  margin-right: 5px;
-}
+      if (parseFloat(linkDialog.style.top) < 0) {
+        linkDialog.style.top = `${rect.bottom + 10}px`;
+      }
 
-#link-dialog button:hover {
-  background-color: ${isDark ? "#666" : "#ddd"};
-}
-
-#apply-link {
-  background-color: ${isDark ? "#4a5d7e" : "#4285f4"} !important;
-  color: white !important;
-}
-
-#remove-link {
-  background-color: ${isDark ? "#7e4a4a" : "#f44242"} !important;
-  color: white !important;
-}
-
-a {
-  color: ${isDark ? "#8ab4f8" : "#1a73e8"};
-  text-decoration: underline;
-  cursor: pointer;
-}
-
-a:hover {
-  text-decoration: underline;
-}
-And finally, here's the JavaScript to implement the link functionality:
-javascript
-const linkBtn = document.getElementById("link-btn");
-const linkDialog = document.getElementById("link-dialog");
-const linkText = document.getElementById("link-text");
-const linkUrl = document.getElementById("link-url");
-const applyLink = document.getElementById("apply-link");
-const removeLink = document.getElementById("remove-link");
-const cancelLink = document.getElementById("cancel-link");
-let linkRange = null;
-
-function positionLinkDialog() {
-  const selection = window.getSelection();
-  if (selection.rangeCount > 0) {
-    const range = selection.getRangeAt(0);
-    const rect = range.getBoundingClientRect();
-
-    linkDialog.style.left = `${rect.left}px`;
-    linkDialog.style.top = `${rect.top - linkDialog.offsetHeight - 10}px`;
-
-    if (parseFloat(linkDialog.style.top) < 0) {
-      linkDialog.style.top = `${rect.bottom + 10}px`;
-    }
-
-    if (rect.left + linkDialog.offsetWidth > window.innerWidth) {
-      linkDialog.style.left = `${window.innerWidth - linkDialog.offsetWidth - 10}px`;
+      if (rect.left + linkDialog.offsetWidth > window.innerWidth) {
+        linkDialog.style.left = `${window.innerWidth - linkDialog.offsetWidth - 10}px`;
+      }
     }
   }
-}
 
-linkBtn.addEventListener("click", function() {
-  const selection = window.getSelection();
-  if (selection.rangeCount > 0) {
-    linkRange = selection.getRangeAt(0).cloneRange();
+  linkBtn.addEventListener("click", function () {
+    const selection = window.getSelection();
+    if (selection.rangeCount > 0) {
+      linkRange = selection.getRangeAt(0).cloneRange();
 
-    let parentLink = null;
-    let currentNode = selection.anchorNode;
+      let parentLink = null;
+      let currentNode = selection.anchorNode;
 
-    while (currentNode && !parentLink) {
-      if (currentNode.tagName === 'A') {
-        parentLink = currentNode;
+      while (currentNode && !parentLink) {
+        if (currentNode.tagName === "A") {
+          parentLink = currentNode;
+        }
+        currentNode = currentNode.parentNode;
       }
-      currentNode = currentNode.parentNode;
-    }
 
-    if (parentLink) {
-      linkText.value = parentLink.textContent;
-      linkUrl.value = parentLink.href;
-      linkRange = document.createRange();
-      linkRange.selectNode(parentLink);
-    } else {
+      if (parentLink) {
+        linkText.value = parentLink.textContent;
+        linkUrl.value = parentLink.href;
+        linkRange = document.createRange();
+        linkRange.selectNode(parentLink);
+      } else {
+        linkText.value = selection.toString();
+        linkUrl.value = "";
 
-      linkText.value = selection.toString();
-      linkUrl.value = '';
-
-      if (/^(https?:\/\/|www\.)[^\s]+$/i.test(linkText.value)) {
-        linkUrl.value = linkText.value;
-        if (linkUrl.value.startsWith('www.')) {
-          linkUrl.value = 'https://' + linkUrl.value;
+        if (/^(https?:\/\/|www\.)[^\s]+$/i.test(linkText.value)) {
+          linkUrl.value = linkText.value;
+          if (linkUrl.value.startsWith("www.")) {
+            linkUrl.value = "https://" + linkUrl.value;
+          }
         }
       }
+
+      linkDialog.style.display = "block";
+      positionLinkDialog();
     }
-
-    linkDialog.style.display = 'block';
-    positionLinkDialog();
-  }
-});
-
-applyLink.addEventListener("click", function() {
-  if (linkRange && linkUrl.value) {
-    const selection = window.getSelection();
-    selection.removeAllRanges();
-    selection.addRange(linkRange);
-
-    const url = linkUrl.value.trim();
-    let formattedUrl = url;
-
-    if (!url.match(/^[a-zA-Z]+:\/\
-      formattedUrl = 'https://' + url;
-    }
-
-    const link = document.createElement('a');
-    link.href = formattedUrl;
-    link.textContent = linkText.value.trim() || url;
-    link.target = "_blank"; 
-    link.rel = "noopener noreferrer"; 
-
-    linkRange.deleteContents();
-    linkRange.insertNode(link);
-
-    linkDialog.style.display = 'none';
-
-    linkRange = null;
-    messageInput.focus();
-  }
-});
-
-removeLink.addEventListener("click", function() {
-  if (linkRange) {
-    const selection = window.getSelection();
-    selection.removeAllRanges();
-    selection.addRange(linkRange);
-
-    const text = selection.toString();
-    document.execCommand('unlink', false, null);
-
-    linkDialog.style.display = 'none';
-
-    linkRange = null;
-    messageInput.focus();
-  }
-});
-
-cancelLink.addEventListener("click", function() {
-  linkDialog.style.display = 'none';
-  linkRange = null;
-  messageInput.focus();
-});
-
-document.addEventListener("click", function(e) {
-  if (e.target !== linkDialog && 
-      !linkDialog.contains(e.target) && 
-      e.target !== linkBtn) {
-    linkDialog.style.display = 'none';
-  }
-});
-
-document.getElementById("message-input").addEventListener("input", function() {
-
-});
-
-function autoDetectLinks(text) {
-  const urlRegex = /(https?:\/\/[^\s]+)|(www\.[^\s]+)/gi;
-  return text.replace(urlRegex, function(url) {
-    let href = url;
-    if (url.startsWith('www.')) {
-      href = 'https://' + url;
-    }
-    return `<a href="${href}" target="_blank" rel="noopener noreferrer">${url}</a>`;
   });
-}
+
+  applyLink.addEventListener("click", function () {
+    if (linkRange && linkUrl.value) {
+      const selection = window.getSelection();
+      selection.removeAllRanges();
+      selection.addRange(linkRange);
+
+      const url = linkUrl.value.trim();
+      let formattedUrl = url;
+
+      if (!url.match(/^[a-zA-Z]+:\/\//) && !url.startsWith("mailto:")) {
+        formattedUrl = "https://" + url;
+      }
+
+      const link = document.createElement("a");
+      link.href = formattedUrl;
+      link.textContent = linkText.value.trim() || url;
+      link.target = "_blank";
+      link.rel = "noopener noreferrer";
+
+      linkRange.deleteContents();
+      linkRange.insertNode(link);
+
+      linkDialog.style.display = "none";
+
+      linkRange = null;
+      messageInput.focus();
+    }
+  });
+
+  removeLink.addEventListener("click", function () {
+    if (linkRange) {
+      const selection = window.getSelection();
+      selection.removeAllRanges();
+      selection.addRange(linkRange);
+
+      const text = selection.toString();
+      document.execCommand("unlink", false, null);
+
+      linkDialog.style.display = "none";
+
+      linkRange = null;
+      messageInput.focus();
+    }
+  });
+
+  cancelLink.addEventListener("click", function () {
+    linkDialog.style.display = "none";
+    linkRange = null;
+    messageInput.focus();
+  });
+
+  document.addEventListener("click", function (e) {
+    if (
+      e.target !== linkDialog &&
+      !linkDialog.contains(e.target) &&
+      e.target !== linkBtn
+    ) {
+      linkDialog.style.display = "none";
+    }
+  });
+
+  document
+    .getElementById("message-input")
+    .addEventListener("input", function () {});
+
+  function autoDetectLinks(text) {
+    const urlRegex = /(https?:\/\/[^\s]+)|(www\.[^\s]+)/gi;
+    return text.replace(urlRegex, function (url) {
+      let href = url;
+      if (url.startsWith("www.")) {
+        href = "https://" + url;
+      }
+      return `<a href="${href}" target="_blank" rel="noopener noreferrer">${url}</a>`;
+    });
+  }
 
   async function markAllMessagesAsRead() {
     try {
