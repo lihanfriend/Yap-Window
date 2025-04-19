@@ -1256,7 +1256,7 @@
 
     if (message) {
       document.getElementById("message-input").innerHTML = "";
-      messageInput.style.height = "28px";
+      resetMessageInput()
       hideAllColorGrids();
       if (
         document
@@ -1821,6 +1821,19 @@ ${chatHistory}`;
     const input = document.getElementById("message-input");
     input.style.height = "auto";
     input.style.height = Math.min(input.scrollHeight, 200) + "px";
+  }
+
+  function resetMessageInput() {
+    const messageInput = document.getElementById("message-input");
+  
+    messageInput.innerHTML = "";
+    messageInput.textContent = "";
+  
+    messageInput.style.height = "auto";
+  
+    messageInput.style.height = Math.max(messageInput.scrollHeight, 28) + "px";
+  
+    hideAllColorGrids(); 
   }
 
   document
