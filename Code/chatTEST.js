@@ -62,33 +62,11 @@ async function scrollToFirstUnread(chatName) {
 
   const messagesDiv = document.getElementById("messages");
 
-  await new Promise((resolve) => {
-    let lastCount = -1;
-    let stableCount = 0;
-
-    const checkStable = () => {
-      const currentCount = messagesDiv.children.length;
-      if (currentCount === lastCount) {
-        stableCount += 1;
-      } else {
-        stableCount = 0;
-      }
-      lastCount = currentCount;
-
-      if (stableCount >= 2) {
-        console.log("Messages stable at:", currentCount);
-        resolve();
-      } else {
-        console.log("Waiting for messages to stabilize... Current:", currentCount);
-        setTimeout(checkStable, 100);
-      }
-    };
-
-    checkStable();
-  });
+  await new Promise((resolve) => setTimeout(resolve, 500));
+  console.log("Waited 500ms, now checking messages...");
 
   const allMessages = Array.from(messagesDiv.querySelectorAll(".message"));
-  console.log("Total messages after stabilization:", allMessages.length);
+  console.log("Total messages after wait:", allMessages.length);
 
   let firstUnread = null;
   for (let i = 0; i < allMessages.length; i++) {
