@@ -1250,7 +1250,7 @@
   async function sendMessage() {
     removeFakeHighlights();
     const messagesRef = ref(database, `Chats/${currentChat}`);
-    let message = document.getElementById("message-input").innerHTML;
+    let message = document.getElementById("message-input").innerHTML.substring(0, 1000);
     if (!message) return;
     message = convertHtmlToEmoji(joypixels.shortnameToImage(message));
 
@@ -1634,12 +1634,6 @@ ${chatHistory}`;
   sendButton.addEventListener("click", sendMessage);
 
   const messageInput = document.getElementById("message-input");
-  messageInput.addEventListener("input", (e) => {
-    e.target.innerHTML = convertHtmlToEmoji(
-      joypixels.shortnameToImage(e.target.innerHTML),
-    );
-    e.target.innerHTML = e.target.value.substring(0, 1000);
-  });
 
   messageInput.addEventListener("keypress", (e) => {
     if (e.key === "Enter") {
@@ -1690,34 +1684,26 @@ ${chatHistory}`;
     restoreSelection();
   });
 
-  const colors = [
-    "#000000",
-    "#434343",
-    "#666666",
-    "#999999",
-    "#b7b7b7",
-    "#cccccc",
-    "#d9d9d9",
-    "#efefef",
-    "#f3f3f3",
-    "#ffffff",
-    "#ff0000",
-    "#ff9900",
-    "#ffff00",
-    "#00ff00",
-    "#00ffff",
-    "#0000ff",
-    "#9900ff",
-    "#ff00ff",
-    "#e60000",
-    "#e67300",
-    "#e6e600",
-    "#00e600",
-    "#00e6e6",
-    "#0066cc",
-    "#6600cc",
-    "#cc00cc",
-  ];
+const colors = [
+
+  "#ffffff", "#f5f5f5", "#eeeeee", "#cccccc", "#999999", "#666666", "#333333", "#000000",
+
+  "#ffebee", "#ffcdd2", "#ef9a9a", "#e57373", "#ef5350", "#f44336", "#d32f2f", "#b71c1c",
+
+  "#fff3e0", "#ffe0b2", "#ffcc80", "#ffb74d", "#ffa726", "#ff9800", "#fb8c00", "#ef6c00",
+
+  "#fffde7", "#fff9c4", "#fff59d", "#fff176", "#ffee58", "#ffeb3b", "#fdd835", "#fbc02d",
+
+  "#e8f5e9", "#c8e6c9", "#a5d6a7", "#81c784", "#66bb6a", "#4caf50", "#43a047", "#388e3c",
+
+  "#e0f7fa", "#b2ebf2", "#80deea", "#4dd0e1", "#26c6da", "#00bcd4", "#00acc1", "#0097a7",
+
+  "#e3f2fd", "#bbdefb", "#90caf9", "#64b5f6", "#42a5f5", "#2196f3", "#1e88e5", "#1976d2",
+
+  "#f3e5f5", "#e1bee7", "#ce93d8", "#ba68c8", "#ab47bc", "#9c27b0", "#8e24aa", "#7b1fa2",
+
+  "#fce4ec", "#f8bbd0", "#f48fb1", "#f06292", "#ec407a", "#e91e63", "#d81b60", "#c2185b"
+];
 
   function createColorGrid(gridId, execCommandType) {
     const grid = document.getElementById(gridId);
