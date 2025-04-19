@@ -391,6 +391,17 @@
   border-left: 3px solid ${isDark ? "#ff6b6b" : "#4caf50"};
   box-shadow: 0 1px 3px ${isDark ? "rgba(0,0,0,0.3)" : "rgba(0,0,0,0.1)"};
 }
+.message.bot {
+  text-align: left;
+  background-color: ${isDark ? "#2a323c" : "#f0f7ff"};
+  color: ${isDark ? "#e2e8f0" : "#1a365d"};
+}
+
+.message.bot.unread {
+  background-color: ${isDark ? "#2d3748" : "#ebf8ff"};
+  border-left: 3px solid ${isDark ? "#90cdf4" : "#4299e1"};
+  box-shadow: 0 1px 3px ${isDark ? "rgba(0,0,0,0.3)" : "rgba(0,0,0,0.1)"};
+}
 .message.Eliana {
 	text-align: left;
 	background-color: ${isDark ? "#a83a32" : "#fc7d74"};
