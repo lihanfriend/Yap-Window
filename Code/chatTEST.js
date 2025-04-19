@@ -1644,6 +1644,23 @@ ${chatHistory}`;
     }
   });
 
+  let savedSelection = null;
+
+  function saveSelection() {
+    const sel = window.getSelection();
+    if (sel.rangeCount > 0) {
+      savedSelection = sel.getRangeAt(0);
+    }
+  }
+
+  function restoreSelection() {
+    if (savedSelection) {
+      const sel = window.getSelection();
+      sel.removeAllRanges();
+      sel.addRange(savedSelection);
+    }
+  }
+
   const colors = [
     "#000000",
     "#434343",
@@ -1678,63 +1695,70 @@ ${chatHistory}`;
     colors.forEach((color) => {
       const box = document.createElement("div");
       box.style.backgroundColor = color;
-      box.onclick = () => {
-        focusMessageInput();
+      box.onclick = (e) => {
+        e.stopPropagation();
+        restoreSelection();
         document.execCommand(execCommandType, false, color);
-        updateColorSelection(grid, color);
-        grid.style.display = "none";
+        hideAllColorGrids();
       };
       grid.appendChild(box);
-    });
-  }
-
-  function updateColorSelection(grid, color) {
-    Array.from(grid.children).forEach((box) => {
-      box.classList.toggle(
-        "selected",
-        box.style.backgroundColor.toLowerCase() === color.toLowerCase(),
-      );
     });
   }
 
   createColorGrid("text-color-grid", "foreColor");
   createColorGrid("highlight-color-grid", "hiliteColor");
 
-  document.getElementById("text-color-picker").onclick = () => {
+  function hideAllColorGrids() {
+    document
+      .querySelectorAll(".color-grid")
+      .forEach((g) => (g.style.display = "none"));
+  }
+
+  document.getElementById("text-color-picker").onclick = (e) => {
+    e.stopPropagation();
     toggleColorGrid("text-color-grid");
   };
-  document.getElementById("highlight-color-picker").onclick = () => {
+  document.getElementById("highlight-color-picker").onclick = (e) => {
+    e.stopPropagation();
     toggleColorGrid("highlight-color-grid");
   };
 
   function toggleColorGrid(gridId) {
-    document
-      .querySelectorAll(".color-grid")
-      .forEach((g) => (g.style.display = "none"));
     const grid = document.getElementById(gridId);
-    grid.style.display = grid.style.display === "block" ? "none" : "block";
+    const isVisible = grid.style.display === "grid";
+    hideAllColorGrids();
+    grid.style.display = isVisible ? "none" : "grid";
   }
 
-  function focusMessageInput() {
-    const input = document.getElementById("message-input");
-    if (document.activeElement !== input) input.focus();
-  }
+  document.addEventListener("click", () => {
+    hideAllColorGrids();
+  });
 
   document.getElementById("bold-btn").onclick = () => {
-    focusMessageInput();
     document.execCommand("bold");
   };
   document.getElementById("italic-btn").onclick = () => {
-    focusMessageInput();
     document.execCommand("italic");
   };
   document.getElementById("underline-btn").onclick = () => {
-    focusMessageInput();
     document.execCommand("underline");
   };
   document.getElementById("strike-btn").onclick = () => {
-    focusMessageInput();
     document.execCommand("strikeThrough");
+  };
+
+  document.getElementById("font-size-selector").onchange = (e) => {
+    saveSelection();
+    restoreSelection();
+    const size = e.target.value;
+    document.execCommand("fontSize", false, "7");
+    const fontElements = document
+      .getElementById("message-input")
+      .getElementsByTagName("font");
+    for (let i = 0; i < fontElements.length; i++) {
+      fontElements[i].removeAttribute("size");
+      fontElements[i].style.fontSize = size;
+    }
   };
 
   document.getElementById("message-input").addEventListener("keydown", (e) => {
@@ -1774,6 +1798,13 @@ ${chatHistory}`;
     input.style.height = "auto";
     input.style.height = Math.min(input.scrollHeight, 200) + "px";
   }
+
+  document
+    .getElementById("message-input")
+    .addEventListener("mouseup", saveSelection);
+  document
+    .getElementById("message-input")
+    .addEventListener("keyup", saveSelection);
 
   document
     .getElementById("message-input")
