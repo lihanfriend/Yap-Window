@@ -507,6 +507,9 @@
   left: 5px;
 }
 
+.selection-highlight {
+  background: lightgray;
+}
 
 #send-button:hover {
 	background-color: ${isDark ? "#3a3a3a" : "#004d40"};
