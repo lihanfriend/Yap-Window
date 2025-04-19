@@ -1656,6 +1656,7 @@ ${chatHistory}`;
 
   messageInput.addEventListener("keypress", (e) => {
     if (e.key === "Enter") {
+      e.preventDefault();
       sendMessage();
     }
   });
