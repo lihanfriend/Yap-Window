@@ -1254,7 +1254,7 @@
       .getElementById("message-input")
       .innerHTML.substring(0, 2500);
     if (!message) return;
-    message = convertHtmlToEmoji(joypixels.shortnameToImage(message));
+    message = joypixels.shortnameToImage(message);
     const div = document.createElement("div");
     div.innerHTML = message;
 
@@ -1623,14 +1623,6 @@ ${chatHistory}`;
     resetMessageInput();
     hideAllColorGrids();
   }
-  function convertHtmlToEmoji(inputString) {
-    return inputString.replace(
-      /<img[^>]*alt="([^"]*)"[^>]*>/g,
-      (match, altText) => {
-        return altText || match;
-      },
-    );
-  }
 
   function formatDate(timestamp) {
     const messageDate = new Date(timestamp);
@@ -1690,12 +1682,8 @@ ${chatHistory}`;
           .getElementById("message-input")
           .innerHTML.substring(0, 2500);
 
-        if (
-          typeof convertHtmlToEmoji === "function" &&
-          typeof joypixels !== "undefined"
-        ) {
-          message = convertHtmlToEmoji(joypixels.shortnameToImage(message));
-        }
+          message = joypixels.shortnameToImage(message);
+    
 
         setTimeout(() => {
           setCursorPositionInContentEditable(messageInput, caretPosition);
@@ -2059,16 +2047,14 @@ ${chatHistory}`;
     input.style.maxHeight = "108px";
   }
 
-  function resetMessageInput() {
-    const messageInput = document.getElementById("message-input");
+function resetMessageInput() {
+  const messageInput = document.getElementById("message-input");
+  messageInput.innerHTML = "";
+  messageInput.textContent = "";
 
-    messageInput.innerHTML = "";
-    messageInput.textContent = "";
-
-    messageInput.style.height = "auto";
-
-    hideAllColorGrids();
-  }
+  messageInput.style.height = ""; 
+  hideAllColorGrids();
+}
 
   document
     .getElementById("message-input")
@@ -2113,19 +2099,19 @@ ${chatHistory}`;
   const cancelLink = document.getElementById("cancel-link");
   let linkRange = null;
 
-  function positionLinkDialog() {
-    const linkDialog = document.getElementById("link-dialog");
+function positionLinkDialog() {
+  const linkDialog = document.getElementById("link-dialog");
+  const guiContainer = document.getElementById("bookmarklet-gui");
 
-    const viewportWidth = window.innerWidth;
-    const viewportHeight = window.innerHeight;
+  const guiRect = guiContainer.getBoundingClientRect();
 
-    const left = (viewportWidth - linkDialog.offsetWidth) / 2;
-    const top = (viewportHeight - linkDialog.offsetHeight) / 2;
+  const left = (guiRect.width - linkDialog.offsetWidth) / 2;
+  const top = (guiRect.height - linkDialog.offsetHeight) / 2;
 
-    linkDialog.style.position = "fixed";
-    linkDialog.style.left = `${left}px`;
-    linkDialog.style.top = `${top}px`;
-  }
+  linkDialog.style.position = "absolute";
+  linkDialog.style.left = `${left}px`;
+  linkDialog.style.top = `${top}px`;
+}
 
   linkBtn.addEventListener("click", function () {
     const selection = window.getSelection();
