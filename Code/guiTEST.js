@@ -658,6 +658,7 @@
   color: white;
   flex-grow: 1;
   margin-right: 8px;
+  height: 25px;
 }
 
 #apply-link:hover {
@@ -668,6 +669,7 @@
   background-color: ${isDark ? "#7e4a4a" : "#f44242"};
   color: white;
   width: 80px;
+  height: 25px;
 }
 
 #remove-link:hover {
@@ -679,6 +681,7 @@
   color: ${isDark ? "#e0e0e0" : "#333333"};
   width: 80px;
   margin-left: 8px;
+  height: 25px;
 }
 
 #cancel-link:hover {
