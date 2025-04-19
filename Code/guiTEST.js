@@ -578,37 +578,55 @@
 }
 #link-dialog {
   position: absolute;
-  width: 300px;
-  padding: 12px;
+  width: 280px;
+  z-index: 1001;
+}
+
+.link-dialog-content {
   background-color: ${isDark ? "#444" : "#fff"};
   color: ${isDark ? "#ddd" : "#333"};
   border: 1px solid ${isDark ? "#555" : "#ccc"};
   box-shadow: 0 4px 8px rgba(0,0,0,0.3);
   border-radius: 4px;
-  z-index: 1001;
+  padding: 12px;
 }
 
-#link-dialog input {
+.link-input-group {
+  margin-bottom: 10px;
+}
+
+.link-input-group label {
+  display: block;
+  margin-bottom: 4px;
+  font-size: 13px;
+}
+
+.link-input-group input {
   width: 100%;
   padding: 8px;
-  margin: 5px 0;
   border: 1px solid ${isDark ? "#555" : "#ccc"};
   border-radius: 4px;
   background-color: ${isDark ? "#333" : "#fff"};
   color: ${isDark ? "#ddd" : "#333"};
+  box-sizing: border-box;
 }
 
-#link-dialog button {
+.link-button-group {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 12px;
+}
+
+.link-button-group button {
   padding: 6px 10px;
   border: none;
   border-radius: 4px;
   cursor: pointer;
   background-color: ${isDark ? "#555" : "#eee"};
   color: ${isDark ? "#ddd" : "#333"};
-  margin-right: 5px;
 }
 
-#link-dialog button:hover {
+.link-button-group button:hover {
   background-color: ${isDark ? "#666" : "#ddd"};
 }
 
