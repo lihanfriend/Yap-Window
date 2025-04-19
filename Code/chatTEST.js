@@ -411,7 +411,7 @@
   async function getUsernameFromEmail(userEmail) {
     if (!userEmail) return "";
     if (
-      ["[AI]", "[EOD]", "[RNG]", "[ADMIN]", "[Snake Game]"].indcludes(userEmail)
+      ["[AI]", "[EOD]", "[RNG]", "[ADMIN]", "[Snake Game]"].includes(userEmail)
     )
       return userEmail;
     const formattedEmail = userEmail.replace(/\./g, "*");
