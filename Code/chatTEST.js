@@ -57,27 +57,38 @@
     });
     updateFavicon();
   }
-
 async function scrollToFirstUnread(chatName) {
   console.log("scrollToFirstUnread called for chat:", chatName);
 
   const messagesDiv = document.getElementById("messages");
 
   await new Promise((resolve) => {
-    const checkMessages = () => {
-      if (messagesDiv.children.length > 0) {
-        console.log("Messages loaded:", messagesDiv.children.length);
+    let lastCount = -1;
+    let stableCount = 0;
+
+    const checkStable = () => {
+      const currentCount = messagesDiv.children.length;
+      if (currentCount === lastCount) {
+        stableCount += 1;
+      } else {
+        stableCount = 0;
+      }
+      lastCount = currentCount;
+
+      if (stableCount >= 2) {
+        console.log("Messages stable at:", currentCount);
         resolve();
       } else {
-        console.log("Waiting for messages to load...");
-        setTimeout(checkMessages, 50);
+        console.log("Waiting for messages to stabilize... Current:", currentCount);
+        setTimeout(checkStable, 100);
       }
     };
-    checkMessages();
+
+    checkStable();
   });
 
   const allMessages = Array.from(messagesDiv.querySelectorAll(".message"));
-  console.log("Total messages found:", allMessages.length);
+  console.log("Total messages after stabilization:", allMessages.length);
 
   let firstUnread = null;
   for (let i = 0; i < allMessages.length; i++) {
@@ -96,6 +107,7 @@ async function scrollToFirstUnread(chatName) {
     console.log("No unread messages found. Not scrolling.");
   }
 }
+  
   async function updateFavicon() {
     const currentUrl = window.location.href;
     const hasUnreadMessages = !readAll;
