@@ -59,7 +59,6 @@
   }
 
 async function scrollToFirstUnread(chatName) {
-  const messagesDiv = document.getElementById("messages");
 
   await new Promise((resolve) => {
     const checkMessages = () => {
