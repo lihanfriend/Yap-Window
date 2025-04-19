@@ -1252,7 +1252,7 @@
     const messagesRef = ref(database, `Chats/${currentChat}`);
     let message = document
       .getElementById("message-input")
-      .innerHTML.substring(0, 1000);
+      .innerHTML.substring(0, 2500);
     if (!message) return;
     message = convertHtmlToEmoji(joypixels.shortnameToImage(message));
     const div = document.createElement("div");
@@ -1671,6 +1671,104 @@ ${chatHistory}`;
     }
   });
 
+  document.getElementById("message-input").addEventListener("input", function(e) {
+
+  if (e.inputType === "insertFromPaste" || e.inputType === "insertText") {
+
+    const selection = window.getSelection();
+    const savedRange = selection.rangeCount > 0 ? selection.getRangeAt(0).cloneRange() : null;
+    const cursorPosition = savedRange ? savedRange.startOffset : 0;
+
+    processLinksInInput();
+    let message = document
+      .getElementById("message-input")
+      .innerHTML.substring(0, 2500);
+    message = convertHtmlToEmoji(joypixels.shortnameToImage(message));
+
+    if (savedRange) {
+      try {
+
+        selection.removeAllRanges();
+        selection.addRange(savedRange);
+      } catch (err) {
+
+        messageInput.focus();
+      }
+    }
+  }
+});
+
+  function processLinksInInput() {
+  const messageInput = document.getElementById("message-input");
+
+  const div = document.createElement('div');
+  div.innerHTML = messageInput.innerHTML;
+
+  let changed = false;
+
+  const walker = document.createTreeWalker(div, NodeFilter.SHOW_TEXT);
+  const nodesToProcess = [];
+
+  let node;
+  while (node = walker.nextNode()) {
+
+    if (node.parentNode.tagName !== 'A') {
+      nodesToProcess.push(node);
+    }
+  }
+
+  for (const textNode of nodesToProcess) {
+    const text = textNode.nodeValue;
+    const matches = [...text.matchAll(urlRegex)];
+
+    if (matches.length > 0) {
+
+      const fragment = document.createDocumentFragment();
+      let lastIndex = 0;
+
+      for (const match of matches) {
+
+        if (match.index > lastIndex) {
+          fragment.appendChild(document.createTextNode(text.substring(lastIndex, match.index)));
+        }
+
+        const url = match[0];
+        const link = document.createElement('a');
+        let href = url;
+
+        if (!url.startsWith('http://') && !url.startsWith('https://')) {
+          href = 'https://' + url;
+        }
+
+        link.href = href;
+        link.textContent = url;
+        link.target = "_blank";
+        link.rel = "noopener noreferrer";
+        fragment.appendChild(link);
+
+        lastIndex = match.index + url.length;
+      }
+
+      if (lastIndex < text.length) {
+        fragment.appendChild(document.createTextNode(text.substring(lastIndex)));
+      }
+
+      textNode.parentNode.replaceChild(fragment, textNode);
+      changed = true;
+    }
+  }
+
+  if (changed) {
+
+    const oldValue = messageInput.innerHTML;
+    const newValue = div.innerHTML;
+
+    if (oldValue !== newValue) {
+      messageInput.innerHTML = newValue;
+    }
+  }
+}
+  
   let savedSelection = null;
 
   function saveSelection() {
@@ -1955,25 +2053,29 @@ ${chatHistory}`;
   const cancelLink = document.getElementById("cancel-link");
   let linkRange = null;
 
-  function positionLinkDialog() {
-    const selection = window.getSelection();
-    if (selection.rangeCount > 0) {
-      const range = selection.getRangeAt(0);
-      const rect = range.getBoundingClientRect();
+function positionLinkDialog() {
+  const bookmarkletGui = document.getElementById("bookmarklet-gui");
+  const bookmarkletRect = bookmarkletGui.getBoundingClientRect();
 
-      linkDialog.style.left = `${rect.left}px`;
-      linkDialog.style.top = `${rect.top - linkDialog.offsetHeight - 10}px`;
+  const left = bookmarkletRect.left + (bookmarkletRect.width - linkDialog.offsetWidth) / 2;
+  const top = bookmarkletRect.top + (bookmarkletRect.height - linkDialog.offsetHeight) / 2;
 
-      if (parseFloat(linkDialog.style.top) < 0) {
-        linkDialog.style.top = `${rect.bottom + 10}px`;
-      }
+  linkDialog.style.left = `${Math.max(bookmarkletRect.left + 10, left)}px`;
+  linkDialog.style.top = `${Math.max(bookmarkletRect.top + 50, top)}px`;
 
-      if (rect.left + linkDialog.offsetWidth > window.innerWidth) {
-        linkDialog.style.left = `${window.innerWidth - linkDialog.offsetWidth - 10}px`;
-      }
-    }
+  const maxLeft = bookmarkletRect.right - linkDialog.offsetWidth - 10;
+  const maxTop = bookmarkletRect.bottom - linkDialog.offsetHeight - 10;
+
+  if (parseFloat(linkDialog.style.left) > maxLeft) {
+    linkDialog.style.left = `${maxLeft}px`;
   }
 
+  if (parseFloat(linkDialog.style.top) > maxTop) {
+    linkDialog.style.top = `${maxTop}px`;
+  }
+}
+
+  
   linkBtn.addEventListener("click", function () {
     const selection = window.getSelection();
     if (selection.rangeCount > 0) {
@@ -2077,7 +2179,7 @@ ${chatHistory}`;
     .addEventListener("input", function () {});
 
   function autoDetectLinks(text) {
-    const urlRegex = /(https?:\/\/[^\s]+)|(www\.[^\s]+)/gi;
+    const urlRegex = /(https?:\/\/[^\s]+)|((www\.)?([a-zA-Z0-9]([a-zA-Z0-9-]*[a-zA-Z0-9])?\.)+[a-zA-Z]{2,}\b(\/[^\s]*)?)/gi;
     return text.replace(urlRegex, function (url) {
       let href = url;
       if (url.startsWith("www.")) {
