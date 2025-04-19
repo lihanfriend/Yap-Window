@@ -2044,13 +2044,7 @@ ${chatHistory}`;
 
 function adjustInputHeight() {
   const input = document.getElementById("message-input");
-
-  const originalHeight = input.style.height;
-
   input.style.height = "auto";
-
-  const newHeight = Math.min(input.scrollHeight, 108);
-  input.style.height = `${newHeight}px`;
   input.style.maxHeight = "108px";
 }
 
