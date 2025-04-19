@@ -722,6 +722,7 @@
 	      🖌️
 	      <div class="color-grid" id="highlight-color-grid"></div>
 	    </div>
+     	    <button id="link-btn">🔗</button>
 	  </div>
 	  <div id="message-send-row">
 	    <div id="message-input" contenteditable="true" placeholder="Type a message..."></div>
