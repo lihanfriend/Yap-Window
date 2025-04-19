@@ -406,13 +406,12 @@
 	font-size: 8px;
 	color: ${isDark ? "#888" : "#666"};
 }
-
 #message-send {
   display: flex;
   flex-direction: column;
   width: 100%;
   padding: 5px;
-border-top: 1px solid #ccc;
+  border-top: 1px solid #ccc;
 }
 
 #formatting-bar {
@@ -425,9 +424,9 @@ border-top: 1px solid #ccc;
 }
 
 #formatting-bar button {
-  width: 26px;
-  height: 26px;
-  font-size: 13px;
+  width: 24px;
+  height: 24px;
+  font-size: 12px;
   border: 1px solid ${isDark ? "#555" : "#ccc"};
   background: ${isDark ? "#444" : "#eee"};
   color: ${isDark ? "#fff" : "#333"};
@@ -436,22 +435,28 @@ border-top: 1px solid #ccc;
   padding: 0;
 }
 
+#formatting-bar select {
+  height: 24px;
+  font-size: 12px;
+}
+
 #message-send-row {
   display: flex;
-  gap: 5px;
   align-items: center;
+  gap: 8px;
 }
 
 #message-input {
   flex-grow: 1;
   min-height: 28px;
-  max-height: 100px;
+  max-height: 200px;
   border: 1px solid ${isDark ? "#555" : "#ccc"};
   border-radius: 5px;
   padding: 5px;
   overflow-y: auto;
   background: ${isDark ? "#333" : "#fff"};
   color: ${isDark ? "#ddd" : "#333"};
+  resize: none;
 }
 
 #send-button {
@@ -471,14 +476,16 @@ border-top: 1px solid #ccc;
 }
 
 .color-grid {
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: 5px;
+  display: none;
   position: absolute;
-  bottom: 40px;
-  background: white;
-  border: 1px solid #ccc;
-  padding: 5px;
+  bottom: 30px;
+  background: ${isDark ? "#333" : "#fff"};
+  border: 1px solid ${isDark ? "#555" : "#ccc"};
+  border-radius: 4px;
+  padding: 6px;
+  display: grid;
+  grid-template-columns: repeat(6, 20px);
+  gap: 4px;
   z-index: 1000;
 }
 
@@ -699,10 +706,10 @@ border-top: 1px solid #ccc;
       </div>
 	<div id="message-send">
 	  <div id="formatting-bar">
-	    <button id="bold-btn">B</button>
-	    <button id="italic-btn">I</button>
-	    <button id="underline-btn">U</button>
-	    <button id="strike-btn">S</button>
+	    <button id="bold-btn"><b>B</b></button>
+	    <button id="italic-btn"><i>I</i></button>
+	    <button id="underline-btn"><u>U</u></button>
+	    <button id="strike-btn"><s>S</s></button>
 	    <div class="color-picker-container" id="text-color-picker">
 	      🖍️
 	      <div class="color-grid" id="text-color-grid"></div>
@@ -711,6 +718,13 @@ border-top: 1px solid #ccc;
 	      🖌️
 	      <div class="color-grid" id="highlight-color-grid"></div>
 	    </div>
+	    <select id="font-size-selector">
+	      <option value="small">Small</option>
+	      <option value="normal" selected>Normal</option>
+	      <option value="large">Large</option>
+	      <option value="x-large">Extra Large</option>
+	      <option value="xx-large">Huge</option>
+	    </select>
 	  </div>
 	  <div id="message-send-row">
 	    <div id="message-input" contenteditable="true" placeholder="Type a message..."></div>
