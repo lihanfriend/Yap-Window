@@ -1253,6 +1253,35 @@
     let message = document.getElementById("message-input").innerHTML.substring(0, 1000);
     if (!message) return;
     message = convertHtmlToEmoji(joypixels.shortnameToImage(message));
+    const div = document.createElement('div');
+    div.innerHTML = message;
+
+    function processNode(node) {
+      if (node.nodeType === 3) { 
+  
+        if (node.parentNode.tagName !== 'A') {
+          const fragment = document.createDocumentFragment();
+          const tempDiv = document.createElement('div');
+          tempDiv.innerHTML = autoDetectLinks(node.textContent);
+  
+          while (tempDiv.firstChild) {
+            fragment.appendChild(tempDiv.firstChild);
+          }
+  
+          node.parentNode.replaceChild(fragment, node);
+        }
+      } else if (node.nodeType === 1) { 
+        Array.from(node.childNodes).forEach(child => {
+          processNode(child);
+        });
+      }
+    }
+  
+    Array.from(div.childNodes).forEach(node => {
+      processNode(node);
+    });
+
+    message = div.innerHTML;
 
     if (message) {
       document.getElementById("message-input").innerHTML = "";
@@ -1855,6 +1884,221 @@ const colors = [
       button.style.backgroundColor = "";
     }
   }
+
+  I'll help you implement the link functionality for your chat interface. You need to make the "link-btn" functional and also detect links in messages automatically. Here's how to do it:
+First, let's add the HTML for your link dialog:
+html<div id="link-dialog" style="display: none; position: absolute; padding: 10px; background-color: #fff; border: 1px solid #ccc; box-shadow: 0 4px 8px rgba(0,0,0,0.2); border-radius: 4px; z-index: 1000">
+  <div>
+    <label for="link-text">Text to display:</label>
+    <input type="text" id="link-text" placeholder="Link text">
+  </div>
+  <div style="margin-top: 8px;">
+    <label for="link-url">URL:</label>
+    <input type="text" id="link-url" placeholder="https://">
+  </div>
+  <div style="margin-top: 10px; display: flex; justify-content: space-between;">
+    <button id="apply-link">Apply</button>
+    <button id="remove-link">Remove</button>
+    <button id="cancel-link">Cancel</button>
+  </div>
+</div>
+Now let's add the CSS to your existing styles:
+css#link-dialog {
+  position: absolute;
+  width: 300px;
+  padding: 12px;
+  background-color: ${isDark ? "#444" : "#fff"};
+  color: ${isDark ? "#ddd" : "#333"};
+  border: 1px solid ${isDark ? "#555" : "#ccc"};
+  box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+  border-radius: 4px;
+  z-index: 1001;
+}
+
+#link-dialog input {
+  width: 100%;
+  padding: 8px;
+  margin: 5px 0;
+  border: 1px solid ${isDark ? "#555" : "#ccc"};
+  border-radius: 4px;
+  background-color: ${isDark ? "#333" : "#fff"};
+  color: ${isDark ? "#ddd" : "#333"};
+}
+
+#link-dialog button {
+  padding: 6px 10px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  background-color: ${isDark ? "#555" : "#eee"};
+  color: ${isDark ? "#ddd" : "#333"};
+  margin-right: 5px;
+}
+
+#link-dialog button:hover {
+  background-color: ${isDark ? "#666" : "#ddd"};
+}
+
+#apply-link {
+  background-color: ${isDark ? "#4a5d7e" : "#4285f4"} !important;
+  color: white !important;
+}
+
+#remove-link {
+  background-color: ${isDark ? "#7e4a4a" : "#f44242"} !important;
+  color: white !important;
+}
+
+a {
+  color: ${isDark ? "#8ab4f8" : "#1a73e8"};
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+And finally, here's the JavaScript to implement the link functionality:
+javascript
+const linkBtn = document.getElementById("link-btn");
+const linkDialog = document.getElementById("link-dialog");
+const linkText = document.getElementById("link-text");
+const linkUrl = document.getElementById("link-url");
+const applyLink = document.getElementById("apply-link");
+const removeLink = document.getElementById("remove-link");
+const cancelLink = document.getElementById("cancel-link");
+let linkRange = null;
+
+function positionLinkDialog() {
+  const selection = window.getSelection();
+  if (selection.rangeCount > 0) {
+    const range = selection.getRangeAt(0);
+    const rect = range.getBoundingClientRect();
+
+    linkDialog.style.left = `${rect.left}px`;
+    linkDialog.style.top = `${rect.top - linkDialog.offsetHeight - 10}px`;
+
+    if (parseFloat(linkDialog.style.top) < 0) {
+      linkDialog.style.top = `${rect.bottom + 10}px`;
+    }
+
+    if (rect.left + linkDialog.offsetWidth > window.innerWidth) {
+      linkDialog.style.left = `${window.innerWidth - linkDialog.offsetWidth - 10}px`;
+    }
+  }
+}
+
+linkBtn.addEventListener("click", function() {
+  const selection = window.getSelection();
+  if (selection.rangeCount > 0) {
+    linkRange = selection.getRangeAt(0).cloneRange();
+
+    let parentLink = null;
+    let currentNode = selection.anchorNode;
+
+    while (currentNode && !parentLink) {
+      if (currentNode.tagName === 'A') {
+        parentLink = currentNode;
+      }
+      currentNode = currentNode.parentNode;
+    }
+
+    if (parentLink) {
+      linkText.value = parentLink.textContent;
+      linkUrl.value = parentLink.href;
+      linkRange = document.createRange();
+      linkRange.selectNode(parentLink);
+    } else {
+
+      linkText.value = selection.toString();
+      linkUrl.value = '';
+
+      if (/^(https?:\/\/|www\.)[^\s]+$/i.test(linkText.value)) {
+        linkUrl.value = linkText.value;
+        if (linkUrl.value.startsWith('www.')) {
+          linkUrl.value = 'https://' + linkUrl.value;
+        }
+      }
+    }
+
+    linkDialog.style.display = 'block';
+    positionLinkDialog();
+  }
+});
+
+applyLink.addEventListener("click", function() {
+  if (linkRange && linkUrl.value) {
+    const selection = window.getSelection();
+    selection.removeAllRanges();
+    selection.addRange(linkRange);
+
+    const url = linkUrl.value.trim();
+    let formattedUrl = url;
+
+    if (!url.match(/^[a-zA-Z]+:\/\
+      formattedUrl = 'https://' + url;
+    }
+
+    const link = document.createElement('a');
+    link.href = formattedUrl;
+    link.textContent = linkText.value.trim() || url;
+    link.target = "_blank"; 
+    link.rel = "noopener noreferrer"; 
+
+    linkRange.deleteContents();
+    linkRange.insertNode(link);
+
+    linkDialog.style.display = 'none';
+
+    linkRange = null;
+    messageInput.focus();
+  }
+});
+
+removeLink.addEventListener("click", function() {
+  if (linkRange) {
+    const selection = window.getSelection();
+    selection.removeAllRanges();
+    selection.addRange(linkRange);
+
+    const text = selection.toString();
+    document.execCommand('unlink', false, null);
+
+    linkDialog.style.display = 'none';
+
+    linkRange = null;
+    messageInput.focus();
+  }
+});
+
+cancelLink.addEventListener("click", function() {
+  linkDialog.style.display = 'none';
+  linkRange = null;
+  messageInput.focus();
+});
+
+document.addEventListener("click", function(e) {
+  if (e.target !== linkDialog && 
+      !linkDialog.contains(e.target) && 
+      e.target !== linkBtn) {
+    linkDialog.style.display = 'none';
+  }
+});
+
+document.getElementById("message-input").addEventListener("input", function() {
+
+});
+
+function autoDetectLinks(text) {
+  const urlRegex = /(https?:\/\/[^\s]+)|(www\.[^\s]+)/gi;
+  return text.replace(urlRegex, function(url) {
+    let href = url;
+    if (url.startsWith('www.')) {
+      href = 'https://' + url;
+    }
+    return `<a href="${href}" target="_blank" rel="noopener noreferrer">${url}</a>`;
+  });
+}
 
   async function markAllMessagesAsRead() {
     try {
