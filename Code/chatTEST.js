@@ -501,7 +501,6 @@
 
     updateReadAllStatus();
   }
-  F;
 
   async function getUsernameFromEmail(userEmail) {
     if (!userEmail) return "";
