@@ -2495,27 +2495,37 @@ ${chatHistory}`;
       img.style.width = "100%";
       img.style.height = "100%";
       img.style.objectFit = "cover";
-      item.onclick = (e) => {
-        const link = document.createElement("a");
-        link.href = fileBlobOrUrl;
-        link.target = "_blank";
-        link.rel = "noopener noreferrer";
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-      };
+item.onclick = (e) => {
+  if (e.target.classList.contains("remove-attachment")) return;
+
+  const win = window.open();
+  win.opener = null; 
+  win.document.write(`
+    <html>
+      <head><title>${fileName || "Attachment"}</title></head>
+      <body style="margin:0">
+        <iframe src="${fileBlobOrUrl}" style="border:none;width:100vw;height:100vh;"></iframe>
+      </body>
+    </html>
+  `);
+};
       item.appendChild(img);
     } else {
       item.innerHTML = "📎";
-      item.onclick = (e) => {
-        const link = document.createElement("a");
-        link.href = fileBlobOrUrl;
-        link.target = "_blank";
-        link.rel = "noopener noreferrer";
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-      };
+item.onclick = (e) => {
+  if (e.target.classList.contains("remove-attachment")) return;
+
+  const win = window.open();
+  win.opener = null; // security best practice
+  win.document.write(`
+    <html>
+      <head><title>${fileName || "Attachment"}</title></head>
+      <body style="margin:0">
+        <iframe src="${fileBlobOrUrl}" style="border:none;width:100vw;height:100vh;"></iframe>
+      </body>
+    </html>
+  `);
+};
     }
 
     item.appendChild(removeBtn);
