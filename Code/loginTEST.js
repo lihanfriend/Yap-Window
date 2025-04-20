@@ -608,6 +608,7 @@
         /* Customize Account Button */
         document.getElementById("submit-customize").onclick =
           async function () {
+            console.log(email)
             const username = document
               .getElementById("create-username")
               .value.trim();
