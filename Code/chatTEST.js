@@ -2049,18 +2049,18 @@ ${chatHistory}`;
   mentionSuggestions.className = "mention-suggestions";
   document.body.appendChild(mentionSuggestions);
   mentionSuggestions.style.display = "none";
+
   let activeMention = null;
   let currentMatches = [];
   let mentionIndex = 0;
   let lastInsertedMention = null;
   let isTabbing = false;
+  let isNavigating = false;
 
   messageInput.addEventListener("input", async function (e) {
-      if (isTabbing) {
-    isTabbing = false;
-    return;
-  }
-
+    if (isTabbing || isNavigating) {
+      return;
+    }
 
     const text = messageInput.innerText;
     const cursorPos = getCaretCharacterOffsetWithin(messageInput);
@@ -2085,23 +2085,16 @@ ${chatHistory}`;
       });
 
       if (matches.length) {
-        if (!isTabbing) {
-          mentionIndex = 0;
-        }
-
+        mentionIndex = 0;
         updateMentionDropdown(matches.slice(0, 5));
-
         positionMentionBox();
-
         activeMention = mentionMatch[0];
         currentMatches = matches.slice(0, 5);
       } else {
         hideSuggestions();
       }
     } else {
-      if (!isTabbing) {
-        hideSuggestions();
-      }
+      hideSuggestions();
     }
   });
 
@@ -2142,9 +2135,31 @@ ${chatHistory}`;
   }
 
   messageInput.addEventListener("keydown", async function (e) {
+    if (
+      (e.key === "ArrowUp" || e.key === "ArrowDown") &&
+      mentionSuggestions.style.display === "block"
+    ) {
+      e.preventDefault();
+      isNavigating = true;
+
+      if (e.key === "ArrowUp") {
+        mentionIndex =
+          (mentionIndex - 1 + currentMatches.length) % currentMatches.length;
+      } else {
+        mentionIndex = (mentionIndex + 1) % currentMatches.length;
+      }
+
+      updateMentionDropdown(currentMatches);
+
+      setTimeout(() => {
+        isNavigating = false;
+      }, 10);
+
+      return;
+    }
+
     if (e.key === "Tab" && mentionSuggestions.style.display === "block") {
       e.preventDefault();
-
       console.log("Tab pressed, cycling mention at index:", mentionIndex);
       isTabbing = true;
 
@@ -2161,11 +2176,15 @@ ${chatHistory}`;
           mentionIndex = (mentionIndex + 1) % currentMatches.length;
 
           updateMentionDropdown(currentMatches);
-
           positionMentionBox();
+
+          setTimeout(() => {
+            isTabbing = false;
+          }, 0);
         }
       } catch (error) {
         console.error("Error during tab cycling:", error);
+        isTabbing = false;
       }
 
       return;
@@ -2201,6 +2220,23 @@ ${chatHistory}`;
       }
 
       hideSuggestions();
+      return;
+    }
+
+    if (e.key === "Enter" && mentionSuggestions.style.display === "block") {
+      e.preventDefault();
+
+      if (currentMatches.length > 0) {
+        const match = currentMatches[mentionIndex];
+
+        if (lastInsertedMention && lastInsertedMention.parentNode) {
+          lastInsertedMention.remove();
+        }
+
+        insertMention(match.email, match.username);
+        hideSuggestions();
+      }
+
       return;
     }
   });
@@ -2263,7 +2299,7 @@ ${chatHistory}`;
   }
 
   function hideSuggestions() {
-    if (isTabbing) return;
+    if (isTabbing || isNavigating) return;
 
     mentionSuggestions.style.display = "none";
     activeMention = null;
