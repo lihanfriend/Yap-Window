@@ -1497,11 +1497,11 @@
     const messagesRef = ref(database, `Chats/${currentChat}`);
     let message = document
       .getElementById("message-input")
-      .innerHTML.substring(0, 2500);
+      .innerHTML.substring(0, 5000);
 
     let textContent = document
       .getElementById("message-input")
-      .textContent.substring(0, 2500);
+      .textContent.substring(0, 5000);
 
     if (!textContent.trim() && attachments.length === 0) {
       isSending = false;
@@ -1509,11 +1509,15 @@
       return;
     }
 
+    let pureMessage = document
+      .getElementById("message-input")
+      .textContent.substring(0, 2500);
+
     attachments.forEach((att) => {
       if (att.type === "image") {
-        messageHtml += `<br><img src="${att.file}" style="max-width:150px;max-height:150px;border-radius:5px;margin:5px 0;">`;
+        message += `<br><img src="${att.file}" style="max-width:150px;max-height:150px;border-radius:5px;margin:5px 0;">`;
       } else if (att.type === "file") {
-        messageHtml += `<br><a href="${att.file}" target="_blank" style="text-decoration:underline;color:${isDark ? "#66b2ff" : "#007bff"};">📎 ${att.name}</a>`;
+        message += `<br><a href="${att.file}" target="_blank" style="text-decoration:underline;color:${isDark ? "#66b2ff" : "#007bff"};">📎 ${att.name}</a>`;
       }
     });
 
@@ -1547,14 +1551,13 @@
 
     message = div.innerHTML;
 
+    resetMessageInput();
+    hideAllColorGrids();
+    clearAttachments();
+    messagesDiv.scrollTop = messagesDiv.scrollHeight;
+
     if (message) {
-      if (
-        document
-          .getElementById("message-input")
-          .textContent.trim()
-          .toLowerCase()
-          .startsWith("/ai ")
-      ) {
+      if (pureMessage.trim().toLowerCase().startsWith("/ai ")) {
         let d = Date.now();
         const question = message.substring(4).trim();
 
@@ -1630,13 +1633,7 @@ ${chatHistory}`;
           Message: aiReply,
           Date: d,
         });
-      } else if (
-        document
-          .getElementById("message-input")
-          .textContent.trim()
-          .toLowerCase()
-          .startsWith("/eod")
-      ) {
+      } else if (pureMessage.trim().toLowerCase().startsWith("/eod")) {
         const parts = message.split(" ");
         let yesChance = 45;
         let noChance = 45;
@@ -1687,13 +1684,7 @@ ${chatHistory}`;
           Message: `${result}`,
           Date: Date.now(),
         });
-      } else if (
-        document
-          .getElementById("message-input")
-          .textContent.trim()
-          .toLowerCase()
-          .startsWith("/coinflip")
-      ) {
+      } else if (pureMessage.trim().toLowerCase().startsWith("/coinflip")) {
         const parts = message.split(" ");
         let headsChance = 50;
         let tailsChance = 50;
@@ -1731,13 +1722,7 @@ ${chatHistory}`;
           Message: `🎲 Coin flip result: ${result}`,
           Date: Date.now(),
         });
-      } else if (
-        document
-          .getElementById("message-input")
-          .textContent.trim()
-          .toLowerCase()
-          .startsWith("/roll ")
-      ) {
+      } else if (pureMessage.trim().toLowerCase().startsWith("/roll ")) {
         const sides = parseInt(message.split(" ")[1]);
 
         const userMessageRef = push(messagesRef);
@@ -1764,23 +1749,12 @@ ${chatHistory}`;
           Message: `🎲 Rolling a ${sides}-sided die: ${result}`,
           Date: Date.now(),
         });
-      } else if (
-        document
-          .getElementById("message-input")
-          .textContent.trim()
-          .toLowerCase()
-          .startsWith("/snake")
-      ) {
+      } else if (pureMessage.trim().toLowerCase().startsWith("/snake")) {
         const temp_email =
           typeof email !== "undefined"
             ? email.replace(/\./g, "*")
             : "anonymous";
-        if (
-          document
-            .getElementById("message-input")
-            .textContent.trim()
-            .toLowerCase() === "/snake leaderboard"
-        ) {
+        if (pureMessage.trim().toLowerCase() === "/snake leaderboard") {
           const userMessageRef = push(messagesRef);
           await update(userMessageRef, {
             User: email,
@@ -1883,10 +1857,6 @@ ${chatHistory}`;
       }
     }
     document.getElementById("bookmarklet-gui").scrollTop = 0;
-    resetMessageInput();
-    hideAllColorGrids();
-    clearAttachments();
-    messagesDiv.scrollTop = messagesDiv.scrollHeight;
     isSending = false;
     sendButton.disabled = false;
   }
