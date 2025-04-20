@@ -2053,6 +2053,7 @@ let activeMention = null;
 let currentMatches = [];
 let mentionIndex = 0;
 let lastInsertedMention = null;
+let cyclingMention = false;
 
 messageInput.addEventListener("input", async function (e) {
   const selection = window.getSelection();
@@ -2070,7 +2071,8 @@ messageInput.addEventListener("input", async function (e) {
     const query = mentionMatch[1].toLowerCase();
     positionMentionBox();
     if (!query) {
-      hideSuggestions();
+        if (!cyclingMention) hideSuggestions();
+  return;
       return;
     }
 
@@ -2106,10 +2108,12 @@ messageInput.addEventListener("input", async function (e) {
       currentMatches = matches.slice(0, 5);
       mentionIndex = 0;
     } else {
-      hideSuggestions();
+  if (!cyclingMention) hideSuggestions();
+  return;
     }
   } else {
-    hideSuggestions();
+  if (!cyclingMention) hideSuggestions();
+  return;
   }
 });
 
@@ -2139,7 +2143,7 @@ messageInput.addEventListener("keydown", async function (e) {
     if (!currentMatches.length) return;
 
     const email = currentMatches[mentionIndex];
-
+    cyclingMention = true;
     if (lastInsertedMention && lastInsertedMention.parentNode) {
       const range = document.createRange();
       range.selectNode(lastInsertedMention);
@@ -2148,7 +2152,9 @@ messageInput.addEventListener("keydown", async function (e) {
 
     if (email) {
       lastInsertedMention = await insertMention(email);
-
+      setTimeout(() => {
+    cyclingMention = false;
+  }, 10);
       Array.from(mentionSuggestions.children).forEach((item, idx) => {
         if (idx === mentionIndex) {
           item.classList.add('selected');
