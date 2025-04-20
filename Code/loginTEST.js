@@ -438,6 +438,7 @@
                       }
                     }
                   } else {
+                    const storedForget = localStorage.getItem("neverPersist");
                     if (storedForget !== "true") {
                       loginScreen.classList.add("hidden");
                       stayloginScreen.classList.remove("hidden");
@@ -523,6 +524,7 @@
                       }
                     }
                   } else {
+                    const storedForget = localStorage.getItem("neverPersist");
                     if (storedForget !== "true") {
                       loginScreen.classList.add("hidden");
                       stayloginScreen.classList.remove("hidden");
