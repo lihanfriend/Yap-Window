@@ -627,15 +627,6 @@
                   return 0;
                 });
                 mostRecentVersionKey = versionKeys[versionKeys.length - 1];
-
-                await update(userRef, {
-                  Version: mostRecentVersionKey,
-                });
-
-                const storedForget = localStorage.getItem("neverPersist");
-
-                savedAccounScreen.classList.add("hidden");
-                openChatScreen();
               }
             }
             const updatedAccountData = {
