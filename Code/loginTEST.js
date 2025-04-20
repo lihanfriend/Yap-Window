@@ -4,7 +4,6 @@
     gui.style.opacity = "1";
     gui.style.display = "flex";
   } else {
-
     const firebaseConfig = {
       apiKey: "AIzaSyBze6NI0eB8S2RK5pr9E97dirYp5propCw",
       authDomain: "yap--window.firebaseapp.com",
@@ -18,7 +17,6 @@
 
     var database, auth, provider, email, mostRecentVersionKey;
     try {
-
       var { initializeApp } = await import(
         "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js"
       );
@@ -601,7 +599,12 @@
               database,
               `Accounts/${email.replace(/\./g, "*")}`,
             );
-
+            const userRef = ref(
+              database,
+              `Accounts/${email.replace(/\./g, "*")}`,
+            );
+            const userSnapshot = await get(userRef);
+            const userData = userSnapshot.val();
             const missingVersion = !userData.Version;
             if (missingVersion) {
               const updatesRef = ref(database, "Updates");
