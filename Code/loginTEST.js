@@ -89,7 +89,7 @@
               eval(wrappedChatCode);
             })
             .catch((error) => {
-              console.error("Error loading chat code:", error);
+              console.error("Error loading code:", error);
               alert("Failed to load chat code. Check the console for details.");
             });
         }
@@ -131,12 +131,10 @@
                 document.getElementById("saved-username").textContent =
                   "Username: " + username;
               } else {
-                console.error("No username found for this email.");
                 document.getElementById("saved-username").textContent =
                   "Username: Not Found";
               }
             } catch (error) {
-              console.error("Error fetching username:", error);
               document.getElementById("saved-username").textContent =
                 "Username: Error";
             }
