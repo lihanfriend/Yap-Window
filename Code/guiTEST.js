@@ -854,7 +854,7 @@ a:hover {
   border-radius: 5px;
   padding: 5px;
   display: none;
-  z-index: 1000;
+  z-index: 3000000;
   max-height: 150px;
   overflow-y: auto;
   font-size: 12px;
