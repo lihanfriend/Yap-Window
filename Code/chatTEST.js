@@ -2478,6 +2478,116 @@ ${chatHistory}`;
     });
   }
 
+  const MAX_FILE_SIZE = 5 * 1024 * 1024; 
+
+const fileUploadInput = document.getElementById("file-upload"); 
+const attachmentBtn = document.getElementById("attachment-btn"); 
+const messageInput = document.getElementById("message-input");
+
+attachmentBtn.addEventListener("click", () => {
+  fileUploadInput.click();
+});
+
+fileUploadInput.addEventListener("change", (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+  if (file.size > MAX_FILE_SIZE) {
+    alert("File too large! Max size is 5MB.");
+    return;
+  }
+  handleFile(file);
+});
+
+messageInput.addEventListener("paste", (e) => {
+  const items = e.clipboardData.items;
+  for (const item of items) {
+    if (item.type.startsWith("image/")) {
+      const file = item.getAsFile();
+      if (file && file.size <= MAX_FILE_SIZE) {
+        handleFile(file);
+      } else if (file && file.size > MAX_FILE_SIZE) {
+        alert("Pasted image too large! Max 5MB.");
+      }
+    }
+  }
+});
+
+async function handleFile(file) {
+  const reader = new FileReader();
+  reader.onload = function (event) {
+    const ext = file.name.split('.').pop().toLowerCase();
+    if (["png", "jpg", "jpeg", "gif", "webp"].includes(ext)) {
+
+      const imgHtml = `<img src="${event.target.result}" class="preview-image" onclick="window.open('${event.target.result}', '_blank')">`;
+      insertHtmlAtCursor(imgHtml);
+    } else {
+
+      const icon = pickIconForFile(ext);
+      const linkHtml = `<a href="${event.target.result}" target="_blank" class="preview-link">${icon} ${file.name}</a>`;
+      insertHtmlAtCursor(linkHtml);
+    }
+  };
+  reader.readAsDataURL(file);
+}
+
+function pickIconForFile(ext) {
+  switch (ext) {
+    case "pdf":
+      return "📄";
+    case "doc":
+    case "docx":
+      return "📝";
+    case "ppt":
+    case "pptx":
+      return "📊";
+    case "xls":
+    case "xlsx":
+      return "📈";
+    case "zip":
+    case "rar":
+    case "7z":
+      return "🗜️";
+    case "txt":
+      return "📃";
+    case "mp4":
+    case "mov":
+    case "avi":
+      return "🎥";
+    case "mp3":
+    case "wav":
+      return "🎵";
+    default:
+      return "📎"; 
+  }
+}
+
+function insertHtmlAtCursor(html) {
+  const selection = window.getSelection();
+  if (!selection.rangeCount) return false;
+
+  const range = selection.getRangeAt(0);
+  range.deleteContents();
+
+  const tempDiv = document.createElement("div");
+  tempDiv.innerHTML = html;
+  const frag = document.createDocumentFragment();
+  let node;
+  let lastNode;
+  while ((node = tempDiv.firstChild)) {
+    lastNode = frag.appendChild(node);
+  }
+
+  range.insertNode(frag);
+
+  if (lastNode) {
+    const newRange = document.createRange();
+    newRange.setStartAfter(lastNode);
+    newRange.collapse(true);
+    selection.removeAllRanges();
+    selection.addRange(newRange);
+  }
+}
+
   async function markAllMessagesAsRead() {
     try {
       document.querySelectorAll(".message.unread").forEach((msg) => {
