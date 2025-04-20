@@ -718,6 +718,37 @@ a {
 a:hover {
 	text-decoration: underline;
 }
+
+.preview-image {
+  max-width: 120px;
+  max-height: 120px;
+  display: inline-block;
+  margin: 4px;
+  border: 1px solid ${isDark ? "#555" : "#ccc"};
+  border-radius: 6px;
+  cursor: pointer;
+  transition: transform 0.2s, background-color 0.2s;
+}
+
+.preview-image:hover {
+  transform: scale(1.05);
+  background-color: ${isDark ? "#444" : "#f0f0f0"};
+}
+
+.preview-link {
+  color: ${isDark ? "#66b2ff" : "#007bff"};
+  text-decoration: underline;
+  font-size: 0.95em;
+  margin: 4px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+}
+
+.preview-link:hover {
+  text-decoration: none;
+}
   `;
   }
 
@@ -851,6 +882,7 @@ a:hover {
          <div id="messages">
          </div>
          <div id="message-send">
+	    <input type="file" id="file-upload" style="display: none;" accept="image/*,video/*,.pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.txt,.zip,.rar,.7z">
             <div id="formatting-bar">
                <button id="bold-btn"><b>B</b></button>
                <button id="italic-btn"><i>I</i></button>
@@ -865,6 +897,7 @@ a:hover {
                   <div class="color-grid" id="highlight-color-grid"></div>
                </div>
                <button id="link-btn">🔗</button>
+	       <button id="attachment-btn">📎</button>
             </div>
             <div id="message-send-row">
                <div id="message-input" contenteditable="true" placeholder="Type a message..."></div>
