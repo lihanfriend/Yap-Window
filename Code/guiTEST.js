@@ -6,7 +6,8 @@
   function toggleDarkMode() {
     isDark = !isDark;
     localStorage.setItem("bookmarklet-mode", isDark ? "dark" : "light");
-    document.getElementById("dark-mode").textContent = `${isDark ? "☀️" : "🌙"}`;
+    document.getElementById("dark-mode").textContent =
+      `${isDark ? "☀️" : "🌙"}`;
     updateColor();
   }
   document.addEventListener("keydown", (e) => {
@@ -17,7 +18,8 @@
   });
 
   function updateColor() {
-    style.innerHTML = `#bookmarklet-gui {
+    style.innerHTML = `
+#bookmarklet-gui {
 	position: fixed;
 	top: 10%;
 	left: 50%;
@@ -162,115 +164,112 @@
 	justify-items: center;
 }
 
-
 .chat {
-  width: 100%;
-  display: flex;
-  justify-content: flex-start;
-  align-items: flex-start;
-  padding: 0;
-  box-sizing: border-box;
-  background-color: ${isDark ? "#222" : "#fff"};
-  color: ${isDark ? "#ddd" : "#333"};
-  height: 100%;
+	width: 100%;
+	display: flex;
+	justify-content: flex-start;
+	align-items: flex-start;
+	padding: 0;
+	box-sizing: border-box;
+	background-color: ${isDark ? "#222" : "#fff"};
+	color: ${isDark ? "#ddd" : "#333"};
+	height: 100%;
 }
 
 .chat.hidden {
-  display: none !important;
+	display: none !important;
 }
 
 #chat-screen {
-  flex-direction: column;
-  margin-top: 40px;
-  padding-top: 0;
-  height: calc(100% - 40px);
+	flex-direction: column;
+	margin-top: 40px;
+	padding-top: 0;
+	height: calc(100% - 40px);
 }
 
 #lower-chat {
-  display: flex;
-  flex-direction: row;
-  height: calc(100% - 40px);
-  width: 100%;
-  margin: 0;
+	display: flex;
+	flex-direction: row;
+	height: calc(100% - 40px);
+	width: 100%;
+	margin: 0;
 }
 
-/* Settings Bar */
 #settings-bar {
-  width: 100%;
-  height: 40px;
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  border-bottom: 1px solid ${isDark ? "#444" : "#e0e0e0"};
-  background: ${isDark ? "#2a2a2a" : "#f8f9fa"};
-  padding: 0 16px;
-  gap: 12px;
-  position: sticky;
-  top: 0;
-  z-index: 10;
+	width: 100%;
+	height: 40px;
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	border-bottom: 1px solid ${isDark ? "#444" : "#e0e0e0"};
+	background: ${isDark ? "#2a2a2a" : "#f8f9fa"};
+	padding: 0 16px;
+	gap: 12px;
+	position: sticky;
+	top: 0;
+	z-index: 10;
 }
 
 .setting-button {
-  height: 32px;
-  font-size: 13px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: ${isDark ? "#404040" : "#e9ecef"};
-  color: ${isDark ? "#ffffff" : "#495057"};
-  border: none;
-  padding: 6px 16px;
-  border-radius: 4px;
-  font-weight: 500;
-  transition: all 0.2s ease;
+	height: 32px;
+	font-size: 13px;
+	cursor: pointer;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	background: ${isDark ? "#404040" : "#e9ecef"};
+	color: ${isDark ? "#ffffff" : "#495057"};
+	border: none;
+	padding: 6px 16px;
+	border-radius: 4px;
+	font-weight: 500;
+	transition: all 0.2s ease;
 }
 
 .setting-button:hover {
-  background: ${isDark ? "#505050" : "#dee2e6"};
+	background: ${isDark ? "#505050" : "#dee2e6"};
 }
 
-/* Left Sidebar (Server and DM) */
 #left-sidebar {
-  width: 20%;
-  min-width: 180px;
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-  border-right: 2px solid ${isDark ? "#555" : "#ccc"};
-  background: ${isDark ? "linear-gradient(to bottom, #444, #333)" : "linear-gradient(to bottom, #f7f7f7, #e0e0e0)"};
-  padding: 8px;
-  box-sizing: border-box;
-  flex-shrink: 0;
-  margin-bottom: 0;
+	width: 20%;
+	min-width: 180px;
+	display: flex;
+	flex-direction: column;
+	height: 100%;
+	border-right: 2px solid ${isDark ? "#555" : "#ccc"};
+	background: ${isDark ? "linear-gradient(to bottom, #444, #333)" : "linear-gradient(to bottom, #f7f7f7, #e0e0e0)"};
+	padding: 8px;
+	box-sizing: border-box;
+	flex-shrink: 0;
+	margin-bottom: 0;
 }
 
 #top-left-sidebar {
-  height: 60%;
-  min-height: 60%;
-  max-height: 60%;
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding-bottom: 10px;
-  overflow-y: auto;
-  overflow-x: hidden;
+	height: 60%;
+	min-height: 60%;
+	max-height: 60%;
+	width: 100%;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	padding-bottom: 10px;
+	overflow-y: auto;
+	overflow-x: hidden;
 }
 
 #bottom-left-sidebar {
-  height: 40%;
-  min-height: 40%;
-  width: 100%;
-  padding: 8px 0 0 0;
-  background-color: ${isDark ? "#333" : "#f1f1f1"};
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  border-top: 1px solid ${isDark ? "#555" : "#ddd"};
-  overflow-y: auto;
-  overflow-x: hidden;
-  margin-bottom: 0;
+	height: 40%;
+	min-height: 40%;
+	width: 100%;
+	padding: 8px 0 0 0;
+	background-color: ${isDark ? "#333" : "#f1f1f1"};
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	border-top: 1px solid ${isDark ? "#555" : "#ddd"};
+	overflow-y: auto;
+	overflow-x: hidden;
+	margin-bottom: 0;
 }
 
 #server-list {
@@ -281,42 +280,42 @@
 }
 
 #create-new-server {
-  padding: 8px 5px;
-  background-color: ${isDark ? "#a65653" : "#5865F2"};
-  color: white;
-  border: none;
-  border-radius: 4px;
-  width: 90%;
-  font-size: 13px;
-  font-weight: 500;
-  transition: background-color 0.3s ease;
-  margin-bottom: 8px;
+	padding: 8px 5px;
+	background-color: ${isDark ? "#a65653" : "#5865F2"};
+	color: white;
+	border: none;
+	border-radius: 4px;
+	width: 90%;
+	font-size: 13px;
+	font-weight: 500;
+	transition: background-color 0.3s ease;
+	margin-bottom: 8px;
 }
 
 #create-new-server:hover {
-  background-color: ${isDark ? "#c79d9b" : "#4752C4"};
+	background-color: ${isDark ? "#c79d9b" : "#4752C4"};
 }
 
 .server {
-  background-color: ${isDark ? "#555" : "#e0e0e0"};
-  width: 90%;
-  padding: 5px 4px;
-  margin-bottom: 1px;
-  font-size: 13px;
-  font-weight: 500;
-  text-align: center;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: background-color 0.2s ease;
+	background-color: ${isDark ? "#555" : "#e0e0e0"};
+	width: 90%;
+	padding: 5px 4px;
+	margin-bottom: 1px;
+	font-size: 13px;
+	font-weight: 500;
+	text-align: center;
+	border-radius: 4px;
+	cursor: pointer;
+	transition: background-color 0.2s ease;
 }
 
 .server:hover {
-  background-color: ${isDark ? "#666" : "#d0d0d0"};
+	background-color: ${isDark ? "#666" : "#d0d0d0"};
 }
 
 .server.selected {
-  background-color: ${isDark ? "#777" : "#ccc"};
-  box-shadow: 0 0 0 1px ${isDark ? "#888" : "#999"};
+	background-color: ${isDark ? "#777" : "#ccc"};
+	box-shadow: 0 0 0 1px ${isDark ? "#888" : "#999"};
 }
 
 .dm {
@@ -341,7 +340,6 @@
 	box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
 }
 
-/* Right Sidebar (Messages Area) */
 #right-sidebar {
 	width: 80%;
 	display: flex;
@@ -349,7 +347,7 @@
 	justify-content: space-between;
 	height: 100%;
 	padding-left: 10px;
- 	padding: 0 10px 0 10px;
+	padding: 0 10px 0 10px;
 	background-color: ${isDark ? "#333" : "#fff"};
 	color: ${isDark ? "#ddd" : "#333"};
 	min-width: 0;
@@ -386,327 +384,339 @@
 	background-color: ${isDark ? "#3a3a3a" : "#f1f8e9"};
 	color: ${isDark ? "#cccccc" : "#33691e"};
 }
+
 .message.received.unread {
-  background-color: ${isDark ? "#4a3a3a" : "#e8f5e9"};
-  border-left: 3px solid ${isDark ? "#ff6b6b" : "#4caf50"};
-  box-shadow: 0 1px 3px ${isDark ? "rgba(0,0,0,0.3)" : "rgba(0,0,0,0.1)"};
+	background-color: ${isDark ? "#4a3a3a" : "#e8f5e9"};
+	border-left: 3px solid ${isDark ? "#ff6b6b" : "#4caf50"};
+	box-shadow: 0 1px 3px ${isDark ? "rgba(0,0,0,0.3)" : "rgba(0,0,0,0.1)"};
 }
+
 .message.bot {
-  text-align: left;
-  background-color: ${isDark ? "#2a323c" : "#f0f7ff"};
-  color: ${isDark ? "#e2e8f0" : "#1a365d"};
+	text-align: left;
+	background-color: ${isDark ? "#2a323c" : "#f0f7ff"};
+	color: ${isDark ? "#e2e8f0" : "#1a365d"};
 }
 
 .message.bot.unread {
-  background-color: ${isDark ? "#2d3748" : "#ebf8ff"};
-  border-left: 3px solid ${isDark ? "#90cdf4" : "#4299e1"};
-  box-shadow: 0 1px 3px ${isDark ? "rgba(0,0,0,0.3)" : "rgba(0,0,0,0.1)"};
+	background-color: ${isDark ? "#2d3748" : "#ebf8ff"};
+	border-left: 3px solid ${isDark ? "#90cdf4" : "#4299e1"};
+	box-shadow: 0 1px 3px ${isDark ? "rgba(0,0,0,0.3)" : "rgba(0,0,0,0.1)"};
 }
+
 .message.Eliana {
 	text-align: left;
 	background-color: ${isDark ? "#a83a32" : "#fc7d74"};
 	color: ${isDark ? "#cccccc" : "#33691e"};
 }
-.message.Eliana.unread {
-  background-color: ${isDark ? "#732822" : "#c26059"};
-  border-left: 3px solid ${isDark ? "#ff6b6b" : "#4caf50"};
-  box-shadow: 0 1px 3px ${isDark ? "rgba(0,0,0,0.3)" : "rgba(0,0,0,0.1)"};
-}
 
+.message.Eliana.unread {
+	background-color: ${isDark ? "#732822" : "#c26059"};
+	border-left: 3px solid ${isDark ? "#ff6b6b" : "#4caf50"};
+	box-shadow: 0 1px 3px ${isDark ? "rgba(0,0,0,0.3)" : "rgba(0,0,0,0.1)"};
+}
 
 .send-info {
 	font-size: 8px;
 	color: ${isDark ? "#888" : "#666"};
 }
+
 #message-send {
-  display: flex;
-  flex-direction: column;
-  width: 100%;
-  padding: 5px;
-  border-top: 1px solid #ccc;
+	display: flex;
+	flex-direction: column;
+	width: 100%;
+	padding: 5px;
+	border-top: 1px solid #ccc;
 }
 
 #formatting-bar {
-  display: flex;
-  gap: 4px;
-  margin-bottom: 5px;
-  align-items: center;
-  justify-content: center;
-  flex-wrap: wrap;
+	display: flex;
+	gap: 4px;
+	margin-bottom: 5px;
+	align-items: center;
+	justify-content: center;
+	flex-wrap: wrap;
 }
 
 #formatting-bar button {
-  width: 24px;
-  height: 24px;
-  font-size: 12px;
-  border: 1px solid ${isDark ? "#555" : "#ccc"};
-  background: ${isDark ? "#444" : "#eee"};
-  color: ${isDark ? "#fff" : "#333"};
-  border-radius: 3px;
-  cursor: pointer;
-  padding: 0;
+	width: 24px;
+	height: 24px;
+	font-size: 12px;
+	border: 1px solid ${isDark ? "#555" : "#ccc"};
+	background: ${isDark ? "#444" : "#eee"};
+	color: ${isDark ? "#fff" : "#333"};
+	border-radius: 3px;
+	cursor: pointer;
+	padding: 0;
 }
 
 #formatting-bar select {
-  height: 28px;
-  font-size: 10px;
+	height: 28px;
+	font-size: 10px;
 }
 
 #message-send-row {
-  display: flex;
-  align-items: center;
-  gap: 8px;
+	display: flex;
+	align-items: center;
+	gap: 8px;
 }
 
 #message-input {
-  flex-grow: 1;
-  min-height: 28px;
-  max-height: 200px;
-  border: 1px solid ${isDark ? "#555" : "#ccc"};
-  border-radius: 5px;
-  padding: 5px;
-  overflow-y: auto;
-  background: ${isDark ? "#333" : "#fff"};
-  color: ${isDark ? "#ddd" : "#333"};
-  resize: none;
+	flex-grow: 1;
+	min-height: 28px;
+	max-height: 200px;
+	border: 1px solid ${isDark ? "#555" : "#ccc"};
+	border-radius: 5px;
+	padding: 5px;
+	overflow-y: auto;
+	background: ${isDark ? "#333" : "#fff"};
+	color: ${isDark ? "#ddd" : "#333"};
+	resize: none;
 }
 
 #send-button {
-  height: 40px;
-  padding: 0 16px;
-  border-radius: 5px;
-  border: none;
-  background: ${isDark ? "#4a4a4a" : "#00796b"};
-  color: white;
-  cursor: pointer;
+	height: 40px;
+	padding: 0 16px;
+	border-radius: 5px;
+	border: none;
+	background: ${isDark ? "#4a4a4a" : "#00796b"};
+	color: white;
+	cursor: pointer;
 }
 
-/* Color picker */
 .color-picker-container {
-  position: relative;
-  cursor: pointer;
+	position: relative;
+	cursor: pointer;
 }
 
 .color-grid {
-  display: none;
-  position: absolute;
-  bottom: 30px;
-  background: ${isDark ? "#333" : "#fff"};
-  border: 1px solid ${isDark ? "#555" : "#ccc"};
-  border-radius: 4px;
-  padding: 6px;
-  display: grid;
-  grid-template-columns: repeat(6, 20px);
-  gap: 4px;
-  z-index: 1000;
+	display: none;
+	position: absolute;
+	bottom: 30px;
+	background: ${isDark ? "#333" : "#fff"};
+	border: 1px solid ${isDark ? "#555" : "#ccc"};
+	border-radius: 4px;
+	padding: 6px;
+	display: grid;
+	grid-template-columns: repeat(6, 20px);
+	gap: 4px;
+	z-index: 1000;
 }
 
 .color-grid div {
-  width: 20px;
-  height: 20px;
-  border-radius: 3px;
-  cursor: pointer;
-  border: 1px solid #ccc;
-  position: relative;
+	width: 20px;
+	height: 20px;
+	border-radius: 3px;
+	cursor: pointer;
+	border: 1px solid #ccc;
+	position: relative;
 }
 
 .color-grid div.selected::after {
-  content: "✓";
-  color: white;
-  font-size: 14px;
-  position: absolute;
-  top: 2px;
-  left: 5px;
+	content: "✓";
+	color: white;
+	font-size: 14px;
+	position: absolute;
+	top: 2px;
+	left: 5px;
 }
 
 .selection-highlight {
-  background: lightgray;
+	background: lightgray;
 }
 
 #send-button:hover {
 	background-color: ${isDark ? "#3a3a3a" : "#004d40"};
 }
+
 .selected-members-container {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 4px;
-    margin: 8px 0;
-    min-height: 24px;
-    padding: 4px;
-    border: 1px solid ${isDark ? "#555" : "#ccc"};
-    border-radius: 4px;
-    overflow: hidden;
+	display: flex;
+	flex-wrap: wrap;
+	gap: 4px;
+	margin: 8px 0;
+	min-height: 24px;
+	padding: 4px;
+	border: 1px solid ${isDark ? "#555" : "#ccc"};
+	border-radius: 4px;
+	overflow: hidden;
 }
 
 .selected-member {
-    background: ${isDark ? "#444" : "#e0e0e0"};
-    padding: 2px 6px;
-    border-radius: 12px;
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    font-size: 0.85em;
-    white-space: nowrap;
+	background: ${isDark ? "#444" : "#e0e0e0"};
+	padding: 2px 6px;
+	border-radius: 12px;
+	display: flex;
+	align-items: center;
+	gap: 4px;
+	font-size: 0.85em;
+	white-space: nowrap;
 }
 
 .remove-member {
-    cursor: pointer;
-    color: ${isDark ? "#fff" : "#666"};
-    font-weight: bold;
-    font-size: 0.9em;
+	cursor: pointer;
+	color: ${isDark ? "#fff" : "#666"};
+	font-weight: bold;
+	font-size: 0.9em;
 }
 
 .members-dropdown {
-    position: relative;
+	position: relative;
 }
 
 .members-list {
-    border: 1px solid ${isDark ? "#555" : "#ccc"};
-    border-radius: 4px;
-    max-height: 200px;
-    overflow-y: auto;
-    position: absolute;
-    width: 100%;
-    background: ${isDark ? "#333" : "#fff"};
-    display: none;
+	border: 1px solid ${isDark ? "#555" : "#ccc"};
+	border-radius: 4px;
+	max-height: 200px;
+	overflow-y: auto;
+	position: absolute;
+	width: 100%;
+	background: ${isDark ? "#333" : "#fff"};
+	display: none;
 }
 
 .member-option {
-    padding: 8px;
-    cursor: pointer;
+	padding: 8px;
+	cursor: pointer;
 }
 
 .member-option:hover {
-    background: ${isDark ? "#444" : "#f0f0f0"};
+	background: ${isDark ? "#444" : "#f0f0f0"};
 }
 
 #member-search {
-    width: 100%;
-    padding: 8px;
-    margin: 8px 0;
-    border: 1px solid ${isDark ? "#555" : "#ccc"};
-    border-radius: 4px;
+	width: 100%;
+	padding: 8px;
+	margin: 8px 0;
+	border: 1px solid ${isDark ? "#555" : "#ccc"};
+	border-radius: 4px;
 }
+
 #link-dialog {
-  position: fixed;
-  width: 280px;
-  z-index: 1001;
-  border-radius: 8px;
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.25);
-  animation: fade-in 0.2s ease-out;
+	position: fixed;
+	width: 280px;
+	z-index: 1001;
+	border-radius: 8px;
+	box-shadow: 0 6px 16px rgba(0, 0, 0, 0.25);
+	animation: fade-in 0.2s ease-out;
 }
 
 @keyframes fade-in {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
+	from {
+		opacity: 0;
+		transform: translateY(10px);
+	}
+
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
 }
 
 .link-dialog-content {
-  background-color: ${isDark ? "#383838" : "#ffffff"};
-  color: ${isDark ? "#e0e0e0" : "#333333"};
-  border: 1px solid ${isDark ? "#555555" : "#e0e0e0"};
-  border-radius: 8px;
-  padding: 16px;
-  z-index: 3000000;
+	background-color: ${isDark ? "#383838" : "#ffffff"};
+	color: ${isDark ? "#e0e0e0" : "#333333"};
+	border: 1px solid ${isDark ? "#555555" : "#e0e0e0"};
+	border-radius: 8px;
+	padding: 16px;
+	z-index: 3000000;
 }
 
 .link-input-group {
-  margin-bottom: 12px;
+	margin-bottom: 12px;
 }
 
 .link-input-group label {
-  display: block;
-  margin-bottom: 6px;
-  font-size: 13px;
-  font-weight: 500;
-  color: ${isDark ? "#cccccc" : "#555555"};
+	display: block;
+	margin-bottom: 6px;
+	font-size: 13px;
+	font-weight: 500;
+	color: ${isDark ? "#cccccc" : "#555555"};
 }
 
 .link-input-group input {
-  width: 100%;
-  padding: 10px;
-  border: 1px solid ${isDark ? "#555555" : "#dddddd"};
-  border-radius: 6px;
-  background-color: ${isDark ? "#2a2a2a" : "#f7f7f7"};
-  color: ${isDark ? "#e0e0e0" : "#333333"};
-  box-sizing: border-box;
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
-  font-size: 13px;
+	width: 100%;
+	padding: 10px;
+	border: 1px solid ${isDark ? "#555555" : "#dddddd"};
+	border-radius: 6px;
+	background-color: ${isDark ? "#2a2a2a" : "#f7f7f7"};
+	color: ${isDark ? "#e0e0e0" : "#333333"};
+	box-sizing: border-box;
+	transition: border-color 0.2s ease, box-shadow 0.2s ease;
+	font-size: 13px;
 }
 
 .link-input-group input:focus {
-  outline: none;
-  border-color: ${isDark ? "#6b8afd" : "#4285f4"};
-  box-shadow: 0 0 0 2px ${isDark ? "rgba(107, 138, 253, 0.25)" : "rgba(66, 133, 244, 0.25)"};
+	outline: none;
+	border-color: ${isDark ? "#6b8afd" : "#4285f4"};
+	box-shadow: 0 0 0 2px ${isDark ? "rgba(107, 138, 253, 0.25)" : "rgba(66, 133, 244, 0.25)"};
 }
 
 .link-button-group {
-  display: flex;
-  justify-content: space-between;
-  margin-top: 16px;
+	display: flex;
+	justify-content: space-between;
+	margin-top: 16px;
 }
 
 .link-button-group button {
-  padding: 8px 14px;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 13px;
-  font-weight: 500;
-  transition: background-color 0.15s ease, transform 0.15s ease;
+	padding: 8px 14px;
+	border: none;
+	border-radius: 6px;
+	cursor: pointer;
+	font-size: 13px;
+	font-weight: 500;
+	transition: background-color 0.15s ease, transform 0.15s ease;
 }
 
 .link-button-group button:hover {
-  transform: translateY(-1px);
+	transform: translateY(-1px);
 }
 
 .link-button-group button:active {
-  transform: translateY(0);
+	transform: translateY(0);
 }
 
 #apply-link {
-  background-color: ${isDark ? "#4a5d7e" : "#4285f4"};
-  color: white;
-  flex-grow: 1;
-  margin-right: 8px;
-  height: 25px;
+	background-color: ${isDark ? "#4a5d7e" : "#4285f4"};
+	color: white;
+	flex-grow: 1;
+	margin-right: 8px;
+	height: 25px;
 }
 
 #apply-link:hover {
-  background-color: ${isDark ? "#5a6d8e" : "#3b78e7"};
+	background-color: ${isDark ? "#5a6d8e" : "#3b78e7"};
 }
 
 #remove-link {
-  background-color: ${isDark ? "#7e4a4a" : "#f44242"};
-  color: white;
-  width: 80px;
-  height: 25px;
+	background-color: ${isDark ? "#7e4a4a" : "#f44242"};
+	color: white;
+	width: 80px;
+	height: 25px;
 }
 
 #remove-link:hover {
-  background-color: ${isDark ? "#8e5a5a" : "#e63535"};
+	background-color: ${isDark ? "#8e5a5a" : "#e63535"};
 }
 
 #cancel-link {
-  background-color: ${isDark ? "#333333" : "#e0e0e0"};
-  color: ${isDark ? "#e0e0e0" : "#333333"};
-  width: 80px;
-  margin-left: 8px;
-  height: 25px;
+	background-color: ${isDark ? "#333333" : "#e0e0e0"};
+	color: ${isDark ? "#e0e0e0" : "#333333"};
+	width: 80px;
+	margin-left: 8px;
+	height: 25px;
 }
 
 #cancel-link:hover {
-  background-color: ${isDark ? "#444444" : "#d0d0d0"};
+	background-color: ${isDark ? "#444444" : "#d0d0d0"};
 }
 
 a {
-  color: ${isDark ? "#8ab4f8" : "#1a73e8"};
-  text-decoration: underline;
-  cursor: pointer;
+	color: ${isDark ? "#8ab4f8" : "#1a73e8"};
+	text-decoration: underline;
+	cursor: pointer;
 }
 
 a:hover {
-  text-decoration: underline;
+	text-decoration: underline;
 }
   `;
   }
@@ -774,11 +784,11 @@ a:hover {
    <hr style="margin: 20px 0">
 </div>
 <div id="verification-screen" class="screen hidden">
-    <h2>Email Verification</h2>
-    <p>Please check your email for a verification link.</p>
-    <p>Once you verify your email, you will automatically be taken to the next page</p>
-    <button id="resend-verification">Resend Verification Email</button>
-    <p id="verification-error" class="error-text"></p>
+   <h2>Email Verification</h2>
+   <p>Please check your email for a verification link.</p>
+   <p>Once you verify your email, you will automatically be taken to the next page</p>
+   <button id="resend-verification">Resend Verification Email</button>
+   <p id="verification-error" class="error-text"></p>
 </div>
 <div id="customize-account-screen" class="screen hidden">
    <h2>Final Steps</h2>
@@ -802,12 +812,12 @@ a:hover {
    <p>Press CTRL-ALT-D to switch between light and dark mode</p>
    <button id="login-button">Log In</button>
    <button id="create-account-button">Create Account</button>
-<p style="width:80%; text-align: center;">
-  By using Yap Window, you agree to the 
-  <a href="https://docs.google.com/document/d/1nsVWJ94ijnRRsyV_mCkdVdXvuOvg6c4bk9PBP-L2NaI" target="_blank">
-    Terms and Conditions
-  </a>.
-</p>
+   <p style="width:80%; text-align: center;">
+      By using Yap Window, you agree to the 
+      <a href="https://docs.google.com/document/d/1nsVWJ94ijnRRsyV_mCkdVdXvuOvg6c4bk9PBP-L2NaI" target="_blank">
+      Terms and Conditions
+      </a>.
+   </p>
 </div>
 <div id="saved-account" class="screen hidden">
    <h2>You have an account saved on this computer</h2>
@@ -817,98 +827,94 @@ a:hover {
    <button id="saved-signout-button">Sign Out</button>
 </div>
 <div id="chat-screen" class="chat hidden">
-  <div id="settings-bar">
-    <button id="customize-profile" class="setting-button">👤</button>
-    <button id="dark-mode" class="setting-button">${isDark ? "☀️" : "🌙"}</button>
-    <button id="read-all" class="setting-button">📖</button>
-    <button id="hide-left-sidebar" class="setting-button">☰</button>
-    <button id="modify-channel" class="setting-button" style="display: none">✏️</button>
-  </div>
-  <div id="lower-chat" class="chat">
-    <div id="left-sidebar">
-      <div id="top-left-sidebar">
-        <button id="create-new-server">Create New Channel</button>
-        <div id="server-list">
-          <div class="server" id="general-server">General</div>
-        </div>
+   <div id="settings-bar">
+      <button id="customize-profile" class="setting-button">👤</button>
+      <button id="dark-mode" class="setting-button">${isDark ? "☀️" : "🌙"}</button>
+      <button id="read-all" class="setting-button">📖</button>
+      <button id="hide-left-sidebar" class="setting-button">☰</button>
+      <button id="modify-channel" class="setting-button" style="display: none">✏️</button>
+   </div>
+   <div id="lower-chat" class="chat">
+      <div id="left-sidebar">
+         <div id="top-left-sidebar">
+            <button id="create-new-server">Create New Channel</button>
+            <div id="server-list">
+               <div class="server" id="general-server">General</div>
+            </div>
+         </div>
+         <div id="bottom-left-sidebar">
+            <div id="dm-list">
+            </div>
+         </div>
       </div>
-      <div id="bottom-left-sidebar">
-        <div id="dm-list">
-        </div>
+      <div id="right-sidebar">
+         <div id="messages">
+         </div>
+         <div id="message-send">
+            <div id="formatting-bar">
+               <button id="bold-btn"><b>B</b></button>
+               <button id="italic-btn"><i>I</i></button>
+               <button id="underline-btn"><u>U</u></button>
+               <button id="strike-btn"><s>S</s></button>
+               <div class="color-picker-container" id="text-color-picker">
+                  🖍️
+                  <div class="color-grid" id="text-color-grid"></div>
+               </div>
+               <div class="color-picker-container" id="highlight-color-picker">
+                  🖌️
+                  <div class="color-grid" id="highlight-color-grid"></div>
+               </div>
+               <button id="link-btn">🔗</button>
+            </div>
+            <div id="message-send-row">
+               <div id="message-input" contenteditable="true" placeholder="Type a message..."></div>
+               <button id="send-button">Send</button>
+            </div>
+         </div>
       </div>
-    </div>
-    <div id="right-sidebar">
-      <div id="messages">
-      </div>
-	<div id="message-send">
-	  <div id="formatting-bar">
-	    <button id="bold-btn"><b>B</b></button>
-	    <button id="italic-btn"><i>I</i></button>
-	    <button id="underline-btn"><u>U</u></button>
-	    <button id="strike-btn"><s>S</s></button>
-	    <div class="color-picker-container" id="text-color-picker">
-	      🖍️
-	      <div class="color-grid" id="text-color-grid"></div>
-	    </div>
-	    <div class="color-picker-container" id="highlight-color-picker">
-	      🖌️
-	      <div class="color-grid" id="highlight-color-grid"></div>
-	    </div>
-     	    <button id="link-btn">🔗</button>
-	  </div>
-	  <div id="message-send-row">
-	    <div id="message-input" contenteditable="true" placeholder="Type a message..."></div>
-	    <button id="send-button">Send</button>
-	  </div>
-	</div>
-    </div>
-  </div>
+   </div>
 </div>
 <div id="channel-screen" class="screen hidden">
-    <h2 id="channel-screen-title">Create/Customize Channel</h2>
-    <label for="channel-name">Channel Name</label>
-    <input id="channel-name" type="text" placeholder="Name your channel..." required>
-    
-    <label for="channel-type">Channel Type</label>
-    <select id="channel-type">
-        <option value="Public">Public</option>
-        <option value="Private">Private</option>
-    </select>
-    
-    <div id="members-container" style="display: none;">
-        <label>Select Members</label>
-        <div id="selected-members" class="selected-members-container"></div>
-        <div class="members-dropdown">
-            <input type="text" id="member-search" placeholder="Type Emails Here...">
-            <div id="members-list" class="members-list"></div>
-        </div>
-    </div>
-    
-    <label for="channel-description">Description/Rules (optional)</label>   
-    <textarea id="channel-description" rows="8" columns="50"></textarea>
-    <button id="submit-channel">Save</button>
-    <button id="delete-channel" style="display: none">Delete</button>
+   <h2 id="channel-screen-title">Create/Customize Channel</h2>
+   <label for="channel-name">Channel Name</label>
+   <input id="channel-name" type="text" placeholder="Name your channel..." required>
+   <label for="channel-type">Channel Type</label>
+   <select id="channel-type">
+      <option value="Public">Public</option>
+      <option value="Private">Private</option>
+   </select>
+   <div id="members-container" style="display: none;">
+      <label>Select Members</label>
+      <div id="selected-members" class="selected-members-container"></div>
+      <div class="members-dropdown">
+         <input type="text" id="member-search" placeholder="Type Emails Here...">
+         <div id="members-list" class="members-list"></div>
+      </div>
+   </div>
+   <label for="channel-description">Description/Rules (optional)</label>   
+   <textarea id="channel-description" rows="8" columns="50"></textarea>
+   <button id="submit-channel">Save</button>
+   <button id="delete-channel" style="display: none">Delete</button>
    <button id="back-channel">Back</button>
 </div>
 <div id="link-dialog" style="display: none; position: absolute; padding: 10px; background-color: #fff; border: 1px solid #ccc; box-shadow: 0 4px 8px rgba(0,0,0,0.2); border-radius: 4px; z-index: 1000">
-  <div>
-    <label for="link-text">Text to display:</label>
-    <input type="text" id="link-text" placeholder="Link text">
-  </div>
-  <div style="margin-top: 8px;">
-    <label for="link-url">URL:</label>
-    <input type="text" id="link-url" placeholder="https://">
-  </div>
-  <div style="margin-top: 10px; display: flex; justify-content: space-between;">
-    <button id="apply-link">Apply</button>
-    <button id="remove-link">Remove</button>
-    <button id="cancel-link">Cancel</button>
-  </div>
+   <div>
+      <label for="link-text">Text to display:</label>
+      <input type="text" id="link-text" placeholder="Link text">
+   </div>
+   <div style="margin-top: 8px;">
+      <label for="link-url">URL:</label>
+      <input type="text" id="link-url" placeholder="https://">
+   </div>
+   <div style="margin-top: 10px; display: flex; justify-content: space-between;">
+      <button id="apply-link">Apply</button>
+      <button id="remove-link">Remove</button>
+      <button id="cancel-link">Cancel</button>
+   </div>
 </div>
       `;
   document.body.appendChild(gui);
 
-  /* Make the GUI draggable */
   const header = gui.querySelector("#bookmarklet-gui-header");
   const enableDragging = () => {
     header.onmousedown = function (e) {
@@ -925,7 +931,6 @@ a:hover {
   };
   enableDragging();
 
-  /* Close button functionality */
   gui.querySelector("#bookmarklet-close").onclick = function () {
     gui.remove();
   };
@@ -938,7 +943,6 @@ a:hover {
     }, 300);
   };
 
-  /* Fullscreen functionality */
   gui.querySelector("#bookmarklet-fullscreen").onclick = function (e) {
     const isFullscreen = e.target.innerHTML === "⿻";
     if (!isFullscreen) {
