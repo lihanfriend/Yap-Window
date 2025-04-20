@@ -109,7 +109,7 @@
         let email = "";
 
         mainScreen.classList.add("hidden");
-        
+
         const unsubscribe = onAuthStateChanged(auth, async (user) => {
           unsubscribe();
           if (user) {
@@ -154,7 +154,6 @@
                     const userData = userSnapshot.val();
                     const missingUsername = !userData.Username;
                     const missingBio = !userData.Bio;
-                    const missingVersion = !userData.Version;
 
                     if (missingUsername || missingBio) {
                       customizeScreen.classList.remove("hidden");
@@ -166,7 +165,7 @@
                       skip = true;
                       return;
                     }
-
+                    const missingVersion = !userData.Version;
                     if (missingVersion) {
                       const updatesRef = ref(database, "Updates");
                       const updatesSnapshot = await get(updatesRef);
@@ -606,7 +605,7 @@
         /* Customize Account Button */
         document.getElementById("submit-customize").onclick =
           async function () {
-            console.log(email)
+            console.log(email);
             const username = document
               .getElementById("create-username")
               .value.trim();
@@ -616,6 +615,40 @@
               database,
               `Accounts/${email.replace(/\./g, "*")}`,
             );
+
+            const missingVersion = !userData.Version;
+            if (missingVersion) {
+              const updatesRef = ref(database, "Updates");
+              const updatesSnapshot = await get(updatesRef);
+              if (updatesSnapshot.exists()) {
+                const updates = updatesSnapshot.val();
+                const versionKeys = Object.keys(updates).sort((a, b) => {
+                  const aParts = a.split("*").map(Number);
+                  const bParts = b.split("*").map(Number);
+                  for (
+                    let i = 0;
+                    i < Math.max(aParts.length, bParts.length);
+                    i++
+                  ) {
+                    const aSegment = aParts[i] || 0;
+                    const bSegment = bParts[i] || 0;
+                    if (aSegment < bSegment) return -1;
+                    if (aSegment > bSegment) return 1;
+                  }
+                  return 0;
+                });
+                mostRecentVersionKey = versionKeys[versionKeys.length - 1];
+
+                await update(userRef, {
+                  Version: mostRecentVersionKey,
+                });
+
+                const storedForget = localStorage.getItem("neverPersist");
+
+                savedAccounScreen.classList.add("hidden");
+                openChatScreen();
+              }
+            }
             const updatedAccountData = {
               Username: username || "Anonymous",
               Bio: bio || "I'm a yapper",
