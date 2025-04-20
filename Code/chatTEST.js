@@ -1513,14 +1513,37 @@
       .getElementById("message-input")
       .textContent.substring(0, 2500);
 
-    attachments.forEach((att) => {
+    attachments.forEach((att, index) => {
+      if (!att.file) return;
+
       if (att.type === "image") {
         message += `<br><img src="${att.file}" style="max-width:150px;max-height:150px;border-radius:5px;margin:5px 0;">`;
       } else if (att.type === "file") {
-        message += `<br><a href="${att.file}" target="_blank" style="text-decoration:underline;color:${isDark ? "#66b2ff" : "#007bff"};">📎 ${att.name}</a>`;
+        const linkId = `attachment-link-${Date.now()}-${index}`;
+        const safeName = att.name?.replace(/"/g, "&quot;") || "file";
+        message += `<br><a href="${att.file}" id="${linkId}" style="text-decoration:underline;color:${isDark ? "#66b2ff" : "#007bff"};">📎 ${safeName}</a>`;
+
+        setTimeout(() => {
+          const el = document.getElementById(linkId);
+          if (!el) return;
+
+          el.addEventListener("click", (e) => {
+            e.preventDefault();
+
+            const win = window.open();
+            win.opener = null;
+            win.document.write(`
+          <html>
+            <head><title>${safeName}</title></head>
+            <body style="margin:0">
+              <iframe src="${att.file}" style="border:none;width:100vw;height:100vh;"></iframe>
+            </body>
+          </html>
+        `);
+          });
+        }, 0);
       }
     });
-
     message = joypixels.shortnameToImage(message);
     const div = document.createElement("div");
     div.innerHTML = message;
@@ -2496,25 +2519,35 @@ ${chatHistory}`;
       img.style.height = "100%";
       img.style.objectFit = "cover";
       item.onclick = (e) => {
-        const link = document.createElement("a");
-        link.href = fileBlobOrUrl;
-        link.target = "_blank";
-        link.rel = "noopener noreferrer";
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
+        if (e.target.classList.contains("remove-attachment")) return;
+
+        const win = window.open();
+        win.opener = null;
+        win.document.write(`
+    <html>
+      <head><title>${fileName || "Attachment"}</title></head>
+      <body style="margin:0">
+        <iframe src="${fileBlobOrUrl}" style="border:none;width:100vw;height:100vh;"></iframe>
+      </body>
+    </html>
+  `);
       };
       item.appendChild(img);
     } else {
       item.innerHTML = "📎";
       item.onclick = (e) => {
-        const link = document.createElement("a");
-        link.href = fileBlobOrUrl;
-        link.target = "_blank";
-        link.rel = "noopener noreferrer";
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
+        if (e.target.classList.contains("remove-attachment")) return;
+
+        const win = window.open();
+        win.opener = null;
+        win.document.write(`
+    <html>
+      <head><title>${fileName || "Attachment"}</title></head>
+      <body style="margin:0">
+        <iframe src="${fileBlobOrUrl}" style="border:none;width:100vw;height:100vh;"></iframe>
+      </body>
+    </html>
+  `);
       };
     }
 
