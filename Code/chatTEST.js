@@ -2058,8 +2058,7 @@ ${chatHistory}`;
   let isNavigating = false;
 
   messageInput.addEventListener("input", async function (e) {
-    if (isTabbing || isNavigating) {
-      isTabbing=false;
+    if (isNavigating) {
       isNavigating=false;
       return;
     }
@@ -2162,7 +2161,6 @@ ${chatHistory}`;
 
     if (e.key === "Tab" && mentionSuggestions.style.display === "block") {
       e.preventDefault();
-      isTabbing = true;
 
       try {
         if (currentMatches.length > 0) {
