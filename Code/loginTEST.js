@@ -106,13 +106,14 @@
         const stayloginScreen = document.getElementById("stay-login-screen");
         const savedAccountScreen = document.getElementById("saved-account");
         let skip = false;
+        let email = "";
 
         const unsubscribe = onAuthStateChanged(auth, async (user) => {
           mainScreen.classList.add("hidden");
           unsubscribe();
           if (user) {
             const storedForget = localStorage.getItem("neverPersist");
-            const email = user.email;
+            email = user.email;
             const sanitizedEmail = email.replace(/\./g, "*");
             const usernameRef = ref(
               database,
@@ -144,7 +145,6 @@
 
             document.getElementById("saved-login-button").onclick =
               async function () {
-                email = auth.currentUser.email
                 const userRef = ref(
                   database,
                   `Accounts/${email.replace(/\./g, "*")}`,
