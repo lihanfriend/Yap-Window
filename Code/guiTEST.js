@@ -1028,7 +1028,6 @@ a:hover {
 	       <button id="attachment-btn">📎</button>
             </div>
             <div id="message-send-row">
-	    	<div id="mention-suggestions" class="mention-suggestions"></div>
                <div id="message-input" contenteditable="true" placeholder="Type a message..."></div>
                <button id="send-button">Send</button>
             </div>
