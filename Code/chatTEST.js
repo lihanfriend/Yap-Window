@@ -2146,7 +2146,7 @@ messageInput.addEventListener("keydown", async function (e) {
 
     const email = currentMatches[mentionIndex];
     if (email) {
-      lastInsertedMention = await insertMention(email);
+      lastInsertedMention = await insertMention(email); 
     }
 
     mentionIndex++;
@@ -2163,7 +2163,7 @@ messageInput.addEventListener("keydown", async function (e) {
     if (email) {
       insertMention(email);
     }
-    hideSuggestions();
+    hideSuggestions(); 
   }
 
   if (e.key === "Escape") {
@@ -2171,7 +2171,7 @@ messageInput.addEventListener("keydown", async function (e) {
       lastInsertedMention.remove();
       lastInsertedMention = null;
     }
-    hideSuggestions();
+    hideSuggestions(); 
   }
 });
 
