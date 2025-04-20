@@ -4,7 +4,7 @@
     gui.style.opacity = "1";
     gui.style.display = "flex";
   } else {
-    /* Firebase Config */
+
     const firebaseConfig = {
       apiKey: "AIzaSyBze6NI0eB8S2RK5pr9E97dirYp5propCw",
       authDomain: "yap--window.firebaseapp.com",
@@ -18,7 +18,7 @@
 
     var database, auth, provider, email, mostRecentVersionKey;
     try {
-      /* Dynamically load Firebase modules */
+
       var { initializeApp } = await import(
         "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js"
       );
@@ -279,7 +279,7 @@
         }
 
         storedEmail = localStorage.getItem("userEmail");
-        /* Login and Create Account functions */
+
         document.getElementById("login-button").onclick = function () {
           mainScreen.classList.add("hidden");
           loginScreen.classList.remove("hidden");
@@ -290,7 +290,6 @@
           createScreen.classList.remove("hidden");
         };
 
-        /* Account creation using email and password */
         document.getElementById("submit-create-email").onclick =
           async function () {
             const emailInput = document.getElementById("create-email");
@@ -328,7 +327,6 @@
             }
           };
 
-        /* Account creation using Google */
         document.getElementById("google-create-button").onclick =
           async function () {
             try {
@@ -346,14 +344,12 @@
             }
           };
 
-        /* Back Create Button */
         document.getElementById("back-create-button").onclick =
           async function () {
             mainScreen.classList.remove("hidden");
             createScreen.classList.add("hidden");
           };
 
-        /* Log In Submit Button */
         document.getElementById("submit-login-email").onclick =
           async function () {
             const emailInput = document.getElementById("login-email");
@@ -456,7 +452,6 @@
             }
           };
 
-        /* Google Log In */
         document.getElementById("google-login-button").onclick =
           async function () {
             try {
@@ -537,14 +532,12 @@
             }
           };
 
-        /* Back Login Button */
         document.getElementById("back-login-button").onclick =
           async function () {
             mainScreen.classList.remove("hidden");
             loginScreen.classList.add("hidden");
           };
 
-        /* Account Creation */
         function create_account() {
           const accountsRef = ref(
             database,
@@ -585,12 +578,7 @@
               };
 
               set(accountsRef, accountData)
-                .then(() => {
-                  console.log(
-                    "Account created successfully with version:",
-                    mostRecentVersionKey,
-                  );
-                })
+                .then(() => {})
                 .catch((error) => {
                   console.error("Error creating account:", error);
                   alert("Failed to create account. Please try again.");
@@ -602,10 +590,8 @@
             });
         }
 
-        /* Customize Account Button */
         document.getElementById("submit-customize").onclick =
           async function () {
-            console.log(email);
             const username = document
               .getElementById("create-username")
               .value.trim();
