@@ -2056,7 +2056,11 @@ ${chatHistory}`;
   let isTabbing = false;
 
   messageInput.addEventListener("input", async function (e) {
-    if (isTabbing) return;
+      if (isTabbing) {
+    isTabbing = false;
+    return;
+  }
+
 
     const text = messageInput.innerText;
     const cursorPos = getCaretCharacterOffsetWithin(messageInput);
@@ -2163,10 +2167,6 @@ ${chatHistory}`;
       } catch (error) {
         console.error("Error during tab cycling:", error);
       }
-
-      setTimeout(() => {
-        isTabbing = false;
-      }, 50);
 
       return;
     }
