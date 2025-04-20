@@ -2497,7 +2497,6 @@ ${chatHistory}`;
   const attachmentBtn = document.getElementById("attachment-btn");
 
   let attachments = [];
-  let isSending = false;
 
   function updateAttachmentBar() {
     attachmentPreview.style.display = attachments.length > 0 ? "flex" : "none";
