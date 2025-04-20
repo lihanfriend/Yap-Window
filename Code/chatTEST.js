@@ -2536,36 +2536,22 @@ ${chatHistory}`;
     fileUploadInput.click();
   });
 
-  fileUploadInput.addEventListener("change", (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-    if (file.size > 5 * 1024 * 1024) {
-      alert("File too large! Max size 5MB.");
-      return;
-    }
+fileUploadInput.addEventListener("change", (e) => {
+  const files = e.target.files;
+  if (!files.length) return;
 
+  [...files].forEach((file) => {
     const reader = new FileReader();
     reader.onload = function (event) {
-      const ext = file.name.split(".").pop().toLowerCase();
-      if (["png", "jpg", "jpeg", "gif", "webp"].includes(ext)) {
-        addAttachment(event.target.result, "image", file.name);
-      } else {
-        addAttachment(event.target.result, "file", file.name);
-      }
+      const result = event.target.result;
+      const type = file.type.startsWith("image/") ? "image" : "file";
+      addAttachment(result, type, file.name);
     };
-    const ext = file.name.split(".").pop().toLowerCase();
-    if (["png", "jpg", "jpeg", "gif", "webp"].includes(ext)) {
-      const reader = new FileReader();
-      reader.onload = function (event) {
-        addAttachment(event.target.result, "image", file.name);
-      };
-      reader.readAsDataURL(file);
-    } else {
-      const objectUrl = URL.createObjectURL(file);
-      addAttachment(objectUrl, "file", file.name);
-    }
-    fileUploadInput.value = "";
+    reader.readAsDataURL(file);
   });
+
+  fileUploadInput.value = "";
+});
 
   async function markAllMessagesAsRead() {
     try {
