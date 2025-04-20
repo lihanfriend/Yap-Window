@@ -847,6 +847,36 @@ a:hover {
 	border-radius: 4px;
 	margin: 2px 0;
 }
+.mention-suggestions {
+  position: absolute;
+  background: var(--mention-bg, #fff);
+  border: 1px solid var(--mention-border, #ccc);
+  border-radius: 5px;
+  padding: 5px;
+  display: none;
+  z-index: 1000;
+  max-height: 150px;
+  overflow-y: auto;
+  font-size: 12px;
+}
+
+.mention-suggestions div {
+  padding: 4px 8px;
+  cursor: pointer;
+}
+
+.mention-suggestions div:hover {
+  background-color: var(--mention-hover, #eef);
+}
+
+.mention {
+  background-color: ${isDark ? "#555" : "#d0f0ff"};
+  color: ${isDark ? "#fff" : "#0077aa"};
+  padding: 2px 5px;
+  border-radius: 4px;
+  font-weight: bold;
+}
+
   `;
   }
 
@@ -998,6 +1028,7 @@ a:hover {
 	       <button id="attachment-btn">📎</button>
             </div>
             <div id="message-send-row">
+	    	<div id="mention-suggestions" class="mention-suggestions"></div>
                <div id="message-input" contenteditable="true" placeholder="Type a message..."></div>
                <button id="send-button">Send</button>
             </div>
