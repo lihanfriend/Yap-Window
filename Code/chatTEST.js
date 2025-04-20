@@ -2059,6 +2059,8 @@ ${chatHistory}`;
 
   messageInput.addEventListener("input", async function (e) {
     if (isTabbing || isNavigating) {
+      isTabbing=false;
+      isNavigating=false;
       return;
     }
 
@@ -2160,7 +2162,6 @@ ${chatHistory}`;
 
     if (e.key === "Tab" && mentionSuggestions.style.display === "block") {
       e.preventDefault();
-      console.log("Tab pressed, cycling mention at index:", mentionIndex);
       isTabbing = true;
 
       try {
@@ -2177,10 +2178,6 @@ ${chatHistory}`;
 
           updateMentionDropdown(currentMatches);
           positionMentionBox();
-
-          setTimeout(() => {
-            isTabbing = false;
-          }, 0);
         }
       } catch (error) {
         console.error("Error during tab cycling:", error);
@@ -2222,27 +2219,9 @@ ${chatHistory}`;
       hideSuggestions();
       return;
     }
-
-    if (e.key === "Enter" && mentionSuggestions.style.display === "block") {
-      e.preventDefault();
-
-      if (currentMatches.length > 0) {
-        const match = currentMatches[mentionIndex];
-
-        if (lastInsertedMention && lastInsertedMention.parentNode) {
-          lastInsertedMention.remove();
-        }
-
-        insertMention(match.email, match.username);
-        hideSuggestions();
-      }
-
-      return;
-    }
   });
 
   function insertMention(email, username) {
-    console.log(`Inserting mention for: ${email} (${username})`);
 
     const selection = window.getSelection();
     if (!selection.rangeCount) return null;
