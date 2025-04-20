@@ -878,8 +878,8 @@ a:hover {
 }
 
   .mention.highlight {
-    background-color: ${isDark ? "#777" : "#a0e0ff"};
-    color: ${isDark ? "#fff" : "#005577"};
+    background-color: ${isDark ? "#551111" : "#ffd6d6"};
+    color: ${isDark ? "#ff5555" : "#aa0000"};
     padding: 2px 5px;
     border-radius: 4px;
     font-weight: bold;
