@@ -865,6 +865,11 @@ a:hover {
   cursor: pointer;
 }
 
+.mention-suggestions div.selected {
+  background-color: #b3d9ff;  
+  color: #005b8c;  
+}
+
 .mention-suggestions div:hover {
   background-color: var(--mention-hover, #eef);
 }
