@@ -2482,7 +2482,6 @@ ${chatHistory}`;
 
 const fileUploadInput = document.getElementById("file-upload"); 
 const attachmentBtn = document.getElementById("attachment-btn"); 
-const messageInput = document.getElementById("message-input");
 
 attachmentBtn.addEventListener("click", () => {
   fileUploadInput.click();
