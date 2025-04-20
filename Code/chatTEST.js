@@ -2044,252 +2044,255 @@ ${chatHistory}`;
     }
   }
 
-let mentionSuggestions = document.createElement("div");
-mentionSuggestions.id = "mention-suggestions";
-mentionSuggestions.className = "mention-suggestions";
-document.body.appendChild(mentionSuggestions);
-mentionSuggestions.style.display = "none";
-let activeMention = null;
-let currentMatches = [];
-let mentionIndex = 0;
-let lastInsertedMention = null;
-let cyclingMention = false;
+  let mentionSuggestions = document.createElement("div");
+  mentionSuggestions.id = "mention-suggestions";
+  mentionSuggestions.className = "mention-suggestions";
+  document.body.appendChild(mentionSuggestions);
+  mentionSuggestions.style.display = "none";
+  let activeMention = null;
+  let currentMatches = [];
+  let mentionIndex = 0;
+  let lastInsertedMention = null;
+  let cyclingMention = false;
 
-messageInput.addEventListener("input", async function (e) {
-  const selection = window.getSelection();
-  if (!selection.rangeCount) return;
-  const range = selection.getRangeAt(0);
-  const caretRect = range.getBoundingClientRect();
+  messageInput.addEventListener("input", async function (e) {
+    const selection = window.getSelection();
+    if (!selection.rangeCount) return;
+    const range = selection.getRangeAt(0);
+    const caretRect = range.getBoundingClientRect();
 
-  const text = messageInput.innerText;
-  const cursorPos = getCaretCharacterOffsetWithin(messageInput);
+    const text = messageInput.innerText;
+    const cursorPos = getCaretCharacterOffsetWithin(messageInput);
 
-  const beforeCursor = text.substring(0, cursorPos);
-  const mentionMatch = beforeCursor.match(/@([\w\.\-]*)$/);
+    const beforeCursor = text.substring(0, cursorPos);
+    const mentionMatch = beforeCursor.match(/@([\w\.\-]*)$/);
 
-  if (mentionMatch) {
-    const query = mentionMatch[1].toLowerCase();
-    positionMentionBox();
-    if (!query) {
-        if (!cyclingMention) hideSuggestions();
-  return;
-      return;
-    }
-
-    const accountSnapshot = await get(ref(database, `Accounts`));
-    const matches = [];
-
-    accountSnapshot.forEach((child) => {
-      const email = child.key.replace(/\*/g, ".");
-      const username = child.val().Username;
-      if (
-        email.toLowerCase().includes(query) ||
-        (username && username.toLowerCase().includes(query))
-      ) {
-        matches.push(email);
-      }
-    });
-
-    if (matches.length) {
-      mentionSuggestions.innerHTML = "";
-      matches.slice(0, 5).forEach((email) => {
-        const div = document.createElement("div");
-        div.textContent = email;
-        div.addEventListener("mousedown", (e) => {
-          e.preventDefault();
-          insertMention(email);
-          hideSuggestions();
-        });
-        mentionSuggestions.appendChild(div);
-      });
-
+    if (mentionMatch) {
+      const query = mentionMatch[1].toLowerCase();
       positionMentionBox();
-      activeMention = mentionMatch[0];
-      currentMatches = matches.slice(0, 5);
-      mentionIndex = 0;
-    } else {
-  if (!cyclingMention) hideSuggestions();
-  return;
-    }
-  } else {
-  if (!cyclingMention) hideSuggestions();
-  return;
-  }
-});
+      if (!query) {
+        if (!cyclingMention) hideSuggestions();
+        return;
+        return;
+      }
 
-function positionMentionBox() {
-  const selection = window.getSelection();
-  if (!selection.rangeCount) return;
+      const accountSnapshot = await get(ref(database, `Accounts`));
+      const matches = [];
 
-  const range = selection.getRangeAt(0);
-  const rect = range.getBoundingClientRect();
-  const scrollX = window.scrollX || window.pageXOffset;
-  const scrollY = window.scrollY || window.pageYOffset;
-
-  let left = rect.left + scrollX;
-  let top = rect.top + scrollY;
-
-  mentionSuggestions.style.left = `${left}px`;
-  mentionSuggestions.style.top = `${top - mentionSuggestions.offsetHeight - 5}px`;
-  mentionSuggestions.style.maxHeight = "150px";
-  mentionSuggestions.style.overflowY = "auto";
-  mentionSuggestions.style.display = "block";
-}
-
-messageInput.addEventListener("keydown", async function (e) {
-  if (e.key === "Tab" && activeMention) {
-    e.preventDefault();
-
-    if (!currentMatches.length) return;
-
-    const email = currentMatches[mentionIndex];
-    cyclingMention = true;
-    if (lastInsertedMention && lastInsertedMention.parentNode) {
-      const range = document.createRange();
-      range.selectNode(lastInsertedMention);
-      range.deleteContents();
-    }
-
-    if (email) {
-      lastInsertedMention = await insertMention(email);
-      setTimeout(() => {
-    cyclingMention = false;
-  }, 10);
-      Array.from(mentionSuggestions.children).forEach((item, idx) => {
-        if (idx === mentionIndex) {
-          item.classList.add('selected');
-        } else {
-          item.classList.remove('selected');
+      accountSnapshot.forEach((child) => {
+        const email = child.key.replace(/\*/g, ".");
+        const username = child.val().Username;
+        if (
+          email.toLowerCase().includes(query) ||
+          (username && username.toLowerCase().includes(query))
+        ) {
+          matches.push(email);
         }
       });
+
+      if (matches.length) {
+        mentionSuggestions.innerHTML = "";
+        matches.slice(0, 5).forEach((email) => {
+          const div = document.createElement("div");
+          div.textContent = email;
+          div.addEventListener("mousedown", (e) => {
+            e.preventDefault();
+            insertMention(email);
+            hideSuggestions();
+          });
+          mentionSuggestions.appendChild(div);
+        });
+
+        positionMentionBox();
+        activeMention = mentionMatch[0];
+        currentMatches = matches.slice(0, 5);
+        mentionIndex = 0;
+      } else {
+        if (!cyclingMention) hideSuggestions();
+        return;
+      }
+    } else {
+      if (!cyclingMention) hideSuggestions();
+      return;
     }
+  });
 
-    mentionIndex = (mentionIndex + 1) % currentMatches.length;
-    positionMentionBox(); 
-    mentionSuggestions.style.display = "block";
-    return;
-  }
-
-  if (e.key === " " && activeMention) {
-    e.preventDefault();
-    hideSuggestions(true);
-  }
-
-  if (e.key === "Escape") {
-    if (lastInsertedMention && lastInsertedMention.parentNode) {
-      lastInsertedMention.remove();
-      lastInsertedMention = null;
-    }
-    hideSuggestions();
-  }
-});
-
-async function insertMention(email) {
-  const selection = window.getSelection();
-  if (!selection.rangeCount) return null;
-  const username = await getUsernameFromEmail(email);
-  const range = selection.getRangeAt(0);
-
-  const tempRange = range.cloneRange();
-  tempRange.setStart(messageInput, 0);
-  const textBeforeCursor = tempRange.toString();
-
-  const mentionMatch = textBeforeCursor.match(/@[\w\.\-]*$/);
-  if (!mentionMatch) return null;
-
-  const matchLength = mentionMatch[0].length;
-
-  range.setStart(range.endContainer, range.endOffset - matchLength);
-  range.deleteContents();
-
-  const mentionSpan = document.createElement("span");
-  mentionSpan.className = "mention";
-  mentionSpan.setAttribute("data-email", email);
-  mentionSpan.setAttribute("contenteditable", "false");
-  mentionSpan.textContent = "@" + username;
-
-  range.insertNode(mentionSpan);
-
-  const spaceNode = document.createTextNode("\u00A0");
-  mentionSpan.parentNode.insertBefore(spaceNode, mentionSpan.nextSibling);
-
-  const newRange = document.createRange();
-  newRange.setStartAfter(spaceNode);
-  newRange.collapse(true);
-
-  selection.removeAllRanges();
-  selection.addRange(newRange);
-
-  return mentionSpan;
-}
-
-function hideSuggestions(clearLastMention = true) {
-  mentionSuggestions.style.display = "none";
-  activeMention = null;
-  currentMatches = [];
-  mentionIndex = 0;
-
-  if (clearLastMention) {
-    lastInsertedMention = null;
-  }
-}
-
-function getCaretCharacterOffsetWithin(element) {
-  let caretOffset = 0;
-  const selection = window.getSelection();
-  if (selection.rangeCount) {
-    const range = selection.getRangeAt(0);
-    const preCaretRange = range.cloneRange();
-    preCaretRange.selectNodeContents(element);
-    preCaretRange.setEnd(range.endContainer, range.endOffset);
-    caretOffset = preCaretRange.toString().length;
-  }
-  return caretOffset;
-}
-
-function escapeHtml(text) {
-  const div = document.createElement("div");
-  div.innerText = text;
-  return div.innerHTML;
-}
-
-document.getElementById("message-input").addEventListener("keydown", function (e) {
-  if (e.key === "Backspace") {
+  function positionMentionBox() {
     const selection = window.getSelection();
     if (!selection.rangeCount) return;
 
     const range = selection.getRangeAt(0);
-    const node = range.startContainer;
-    const offset = range.startOffset;
+    const rect = range.getBoundingClientRect();
+    const scrollX = window.scrollX || window.pageXOffset;
+    const scrollY = window.scrollY || window.pageYOffset;
 
-    if (offset === 0) {
-      let previous = node.previousSibling;
-      if (previous && previous.classList && previous.classList.contains("mention")) {
-        e.preventDefault();
-        previous.remove();
+    let left = rect.left + scrollX;
+    let top = rect.top + scrollY;
+
+    mentionSuggestions.style.left = `${left}px`;
+    mentionSuggestions.style.top = `${top - mentionSuggestions.offsetHeight - 5}px`;
+    mentionSuggestions.style.maxHeight = "150px";
+    mentionSuggestions.style.overflowY = "auto";
+    mentionSuggestions.style.display = "block";
+  }
+
+  messageInput.addEventListener("keydown", async function (e) {
+    if (e.key === "Tab" && activeMention) {
+      e.preventDefault();
+      isCyclingMention = true;
+
+      if (!currentMatches.length) return;
+
+      const email = currentMatches[mentionIndex];
+
+      if (lastInsertedMention && lastInsertedMention.parentNode) {
+        lastInsertedMention.remove();
       }
-    } 
 
-    else if (node.nodeType === Node.TEXT_NODE) {
-      const textUpToCaret = node.textContent.slice(0, offset);
+      lastInsertedMention = await insertMention(email);
 
-      if (textUpToCaret.endsWith(" ") && node.previousSibling) {
-        const previous = node.previousSibling;
-        if (previous.classList && previous.classList.contains("mention")) {
-          e.preventDefault();
+      Array.from(mentionSuggestions.children).forEach((item, idx) => {
+        item.classList.toggle("selected", idx === mentionIndex);
+      });
 
-          node.textContent = textUpToCaret.slice(0, -1) + node.textContent.slice(offset);
+      mentionIndex = (mentionIndex + 1) % currentMatches.length;
 
-          const newRange = document.createRange();
-          newRange.setStart(node, offset - 1);
-          newRange.setEnd(node, offset - 1);
-          selection.removeAllRanges();
-          selection.addRange(newRange);
-        }
+      positionMentionBox();
+      mentionSuggestions.style.display = "block";
+
+      setTimeout(() => {
+        isCyclingMention = false;
+      }, 0);
+
+      return;
+    }
+
+    if (e.key === " " && activeMention) {
+      e.preventDefault();
+      hideSuggestions();
+      return;
+    }
+
+    if (e.key === "Escape") {
+      if (lastInsertedMention?.parentNode) {
+        lastInsertedMention.remove();
       }
+      hideSuggestions();
+      return;
+    }
+  });
+
+  async function insertMention(email) {
+    const selection = window.getSelection();
+    if (!selection.rangeCount) return null;
+    const username = await getUsernameFromEmail(email);
+    const range = selection.getRangeAt(0);
+
+    const tempRange = range.cloneRange();
+    tempRange.setStart(messageInput, 0);
+    const textBeforeCursor = tempRange.toString();
+
+    const mentionMatch = textBeforeCursor.match(/@[\w\.\-]*$/);
+    if (!mentionMatch) return null;
+
+    const matchLength = mentionMatch[0].length;
+
+    range.setStart(range.endContainer, range.endOffset - matchLength);
+    range.deleteContents();
+
+    const mentionSpan = document.createElement("span");
+    mentionSpan.className = "mention";
+    mentionSpan.setAttribute("data-email", email);
+    mentionSpan.setAttribute("contenteditable", "false");
+    mentionSpan.textContent = "@" + username;
+
+    range.insertNode(mentionSpan);
+
+    const spaceNode = document.createTextNode("\u00A0");
+    mentionSpan.parentNode.insertBefore(spaceNode, mentionSpan.nextSibling);
+
+    const newRange = document.createRange();
+    newRange.setStartAfter(spaceNode);
+    newRange.collapse(true);
+
+    selection.removeAllRanges();
+    selection.addRange(newRange);
+
+    return mentionSpan;
+  }
+
+  function hideSuggestions(clearLastMention = true) {
+    mentionSuggestions.style.display = "none";
+    activeMention = null;
+    currentMatches = [];
+    mentionIndex = 0;
+
+    if (clearLastMention) {
+      lastInsertedMention = null;
     }
   }
-});
+
+  function getCaretCharacterOffsetWithin(element) {
+    let caretOffset = 0;
+    const selection = window.getSelection();
+    if (selection.rangeCount) {
+      const range = selection.getRangeAt(0);
+      const preCaretRange = range.cloneRange();
+      preCaretRange.selectNodeContents(element);
+      preCaretRange.setEnd(range.endContainer, range.endOffset);
+      caretOffset = preCaretRange.toString().length;
+    }
+    return caretOffset;
+  }
+
+  function escapeHtml(text) {
+    const div = document.createElement("div");
+    div.innerText = text;
+    return div.innerHTML;
+  }
+
+  document
+    .getElementById("message-input")
+    .addEventListener("keydown", function (e) {
+      if (e.key === "Backspace") {
+        const selection = window.getSelection();
+        if (!selection.rangeCount) return;
+
+        const range = selection.getRangeAt(0);
+        const node = range.startContainer;
+        const offset = range.startOffset;
+
+        if (offset === 0) {
+          let previous = node.previousSibling;
+          if (
+            previous &&
+            previous.classList &&
+            previous.classList.contains("mention")
+          ) {
+            e.preventDefault();
+            previous.remove();
+          }
+        } else if (node.nodeType === Node.TEXT_NODE) {
+          const textUpToCaret = node.textContent.slice(0, offset);
+
+          if (textUpToCaret.endsWith(" ") && node.previousSibling) {
+            const previous = node.previousSibling;
+            if (previous.classList && previous.classList.contains("mention")) {
+              e.preventDefault();
+
+              node.textContent =
+                textUpToCaret.slice(0, -1) + node.textContent.slice(offset);
+
+              const newRange = document.createRange();
+              newRange.setStart(node, offset - 1);
+              newRange.setEnd(node, offset - 1);
+              selection.removeAllRanges();
+              selection.addRange(newRange);
+            }
+          }
+        }
+      }
+    });
   messageInput.addEventListener("blur", () => {
     applyFakeHighlight();
   });
