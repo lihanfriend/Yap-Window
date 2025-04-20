@@ -870,16 +870,17 @@ a:hover {
 }
 
 .mention {
-  background-color: ${isDark ? "#555" : "#d0f0ff"};
-  color: ${isDark ? "#fff" : "#0077aa"};
+  background-color: ${isDark ? "#444" : "#d0f0ff"};
+  color: ${isDark ? "#fff" : "#006699"};
   padding: 2px 5px;
   border-radius: 4px;
   font-weight: bold;
 }
 
 .mention.highlight {
-  background-color: ${isDark ? "#004080" : "#b3e5ff"}; 
-  color: ${isDark ? "#66ccff" : "#004080"}; 
+  background-color: ${isDark ? "#666" : "#c0e8ff"};
+  color: ${isDark ? "#ffffff" : "#004466"};
+  border: 1px solid ${isDark ? "#888" : "#0077aa"};
   padding: 2px 5px;
   border-radius: 4px;
   font-weight: bold;
