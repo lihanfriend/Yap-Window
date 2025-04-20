@@ -1511,7 +1511,9 @@
 
     attachments.forEach((att) => {
       if (att.type === "image") {
-        message += `<br><img src="${att.url}" style="max-width:150px;max-height:150px;border-radius:5px;margin:5px 0;">`;
+        messageHtml += `<br><img src="${att.file}" style="max-width:150px;max-height:150px;border-radius:5px;margin:5px 0;">`;
+      } else if (att.type === "file") {
+        messageHtml += `<br><a href="${att.file}" target="_blank" style="text-decoration:underline;color:${isDark ? "#66b2ff" : "#007bff"};">📎 ${att.name}</a>`;
       }
     });
 
@@ -2502,26 +2504,36 @@ ${chatHistory}`;
     attachmentPreview.style.display = attachments.length > 0 ? "flex" : "none";
   }
 
-  function addAttachment(fileUrl, type, fileName = "") {
+  function addAttachment(fileBlobOrUrl, type, fileName = "") {
     const item = document.createElement("div");
     item.className = "attachment-item";
     item.title = fileName;
 
+    const removeBtn = document.createElement("button");
+    removeBtn.textContent = "❌";
+    removeBtn.className = "remove-attachment";
+    removeBtn.onclick = () => {
+      attachments = attachments.filter((a) => a.file !== fileBlobOrUrl);
+      item.remove();
+      updateAttachmentBar();
+    };
+
     if (type === "image") {
       const img = document.createElement("img");
-      img.src = fileUrl;
+      img.src = fileBlobOrUrl;
       img.style.width = "100%";
       img.style.height = "100%";
       img.style.objectFit = "cover";
-      img.onclick = () => window.open(fileUrl, "_blank");
+      img.onclick = () => window.open(fileBlobOrUrl, "_blank");
       item.appendChild(img);
     } else {
       item.innerHTML = "📎";
-      item.onclick = () => window.open(fileUrl, "_blank");
+      item.onclick = () => window.open(fileBlobOrUrl, "_blank");
     }
 
+    item.appendChild(removeBtn);
     attachmentPreview.appendChild(item);
-    attachments.push({ url: fileUrl, type });
+    attachments.push({ file: fileBlobOrUrl, type, name: fileName });
     updateAttachmentBar();
   }
 
