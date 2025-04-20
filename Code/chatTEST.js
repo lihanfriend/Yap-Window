@@ -2221,61 +2221,71 @@ ${chatHistory}`;
     }
   });
 
-  function insertMention(email, username) {
+function insertMention(email, username) {
+  const selection = window.getSelection();
+  if (!selection.rangeCount) return null;
 
-    const selection = window.getSelection();
-    if (!selection.rangeCount) return null;
+  const range = selection.getRangeAt(0);
 
-    const range = selection.getRangeAt(0);
+  const tempRange = range.cloneRange();
+  tempRange.setStart(messageInput, 0);
+  const textBeforeCursor = tempRange.toString();
 
-    const tempRange = range.cloneRange();
-    tempRange.setStart(messageInput, 0);
-    const textBeforeCursor = tempRange.toString();
+  const mentionMatch = textBeforeCursor.match(/@[\w\.\-]*$/);
 
-    const mentionMatch = textBeforeCursor.match(/@[\w\.\-]*$/);
+  function insertMentionSpan() {
+    const mentionSpan = document.createElement("span");
+    mentionSpan.className = "mention";
+    mentionSpan.setAttribute("data-email", email);
+    mentionSpan.setAttribute("contenteditable", "false");
+    mentionSpan.textContent = "@" + username;
 
-    if (mentionMatch) {
-      const matchLength = mentionMatch[0].length;
+    range.insertNode(mentionSpan);
 
-      range.setStart(range.endContainer, range.endOffset - matchLength);
-      range.deleteContents();
+    const spaceNode = document.createTextNode("\u00A0"); 
+    mentionSpan.parentNode.insertBefore(spaceNode, mentionSpan.nextSibling);
 
-      const mentionSpan = document.createElement("span");
-      mentionSpan.className = "mention";
-      mentionSpan.setAttribute("data-email", email);
-      mentionSpan.setAttribute("contenteditable", "false");
-      mentionSpan.textContent = "@" + username;
+    const newRange = document.createRange();
+    newRange.setStartAfter(spaceNode);
+    newRange.collapse(true);
+    selection.removeAllRanges();
+    selection.addRange(newRange);
 
-      range.insertNode(mentionSpan);
-
-      const newRange = document.createRange();
-      newRange.setStartAfter(mentionSpan);
-      newRange.collapse(true);
-      selection.removeAllRanges();
-      selection.addRange(newRange);
-
-      return mentionSpan;
-    } else if (lastInsertedMention && lastInsertedMention.parentNode) {
-      const parent = lastInsertedMention.parentNode;
-      const mentionSpan = document.createElement("span");
-      mentionSpan.className = "mention";
-      mentionSpan.setAttribute("data-email", email);
-      mentionSpan.setAttribute("contenteditable", "false");
-      mentionSpan.textContent = "@" + username;
-
-      parent.replaceChild(mentionSpan, lastInsertedMention);
-
-      const newRange = document.createRange();
-      newRange.setStartAfter(mentionSpan);
-      newRange.collapse(true);
-      selection.removeAllRanges();
-      selection.addRange(newRange);
-
-      return mentionSpan;
-    }
-
-    return null;
+    return mentionSpan;
   }
+
+  if (mentionMatch) {
+    const matchLength = mentionMatch[0].length;
+
+    range.setStart(range.endContainer, range.endOffset - matchLength);
+    range.deleteContents();
+
+    return insertMentionSpan();
+  } 
+  else if (lastInsertedMention && lastInsertedMention.parentNode) {
+    const parent = lastInsertedMention.parentNode;
+    const mentionSpan = document.createElement("span");
+    mentionSpan.className = "mention";
+    mentionSpan.setAttribute("data-email", email);
+    mentionSpan.setAttribute("contenteditable", "false");
+    mentionSpan.textContent = "@" + username;
+
+    parent.replaceChild(mentionSpan, lastInsertedMention);
+
+    const spaceNode = document.createTextNode("\u00A0");
+    mentionSpan.parentNode.insertBefore(spaceNode, mentionSpan.nextSibling);
+
+    const newRange = document.createRange();
+    newRange.setStartAfter(spaceNode);
+    newRange.collapse(true);
+    selection.removeAllRanges();
+    selection.addRange(newRange);
+
+    return mentionSpan;
+  }
+
+  return null;
+}
 
   function hideSuggestions() {
     if (isTabbing || isNavigating) return;
