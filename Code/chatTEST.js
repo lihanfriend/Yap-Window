@@ -2044,216 +2044,186 @@ ${chatHistory}`;
     }
   }
 
-let mentionSuggestions = document.createElement("div");
-mentionSuggestions.id = "mention-suggestions";
-mentionSuggestions.className = "mention-suggestions";
-document.body.appendChild(mentionSuggestions);
-mentionSuggestions.style.display = "none";
-let activeMention = null;
-let currentMatches = [];
-let mentionIndex = 0;
-let lastInsertedMention = null;
-let cyclingMention = false;
-let isProgrammaticInsert = false;
-let keepSuggestionsVisible = false;
+  let mentionSuggestions = document.createElement("div");
+  mentionSuggestions.id = "mention-suggestions";
+  mentionSuggestions.className = "mention-suggestions";
+  document.body.appendChild(mentionSuggestions);
+  mentionSuggestions.style.display = "none";
+  let activeMention = null;
+  let currentMatches = [];
+  let mentionIndex = 0;
+  let lastInsertedMention = null;
+  let isTabbing = false;
 
-messageInput.addEventListener("input", async function (e) {
-  if (isProgrammaticInsert || keepSuggestionsVisible) {
-    console.log("Skipping input handler due to programmatic insert or keepSuggestionsVisible");
-    return;
-  }
+  messageInput.addEventListener("input", async function (e) {
+    if (isTabbing) return;
 
-  const selection = window.getSelection();
-  if (!selection.rangeCount) return;
+    const text = messageInput.innerText;
+    const cursorPos = getCaretCharacterOffsetWithin(messageInput);
+    const beforeCursor = text.substring(0, cursorPos);
+    const mentionMatch = beforeCursor.match(/@([\w\.\-]*)$/);
 
-  const text = messageInput.innerText;
-  const cursorPos = getCaretCharacterOffsetWithin(messageInput);
+    if (mentionMatch) {
+      const query = mentionMatch[1].toLowerCase();
 
-  const beforeCursor = text.substring(0, cursorPos);
-  const mentionMatch = beforeCursor.match(/@([\w\.\-]*)$/);
+      const accountSnapshot = await get(ref(database, `Accounts`));
+      const matches = [];
 
-  if (mentionMatch) {
-    const query = mentionMatch[1].toLowerCase();
-
-    if (!query && !cyclingMention) {
-      hideSuggestions(false);
-      return;
-    }
-
-    const accountSnapshot = await get(ref(database, `Accounts`));
-    const matches = [];
-
-    accountSnapshot.forEach((child) => {
-      const email = child.key.replace(/\*/g, ".");
-      const username = child.val().Username;
-      if (
-        email.toLowerCase().includes(query) ||
-        (username && username.toLowerCase().includes(query))
-      ) {
-        matches.push(email);
-      }
-    });
-
-    if (matches.length) {
-      mentionSuggestions.innerHTML = "";
-      matches.slice(0, 5).forEach((email, idx) => {
-        const div = document.createElement("div");
-        div.textContent = email;
-        if (idx === mentionIndex % matches.slice(0, 5).length) {
-          div.classList.add("selected");
+      accountSnapshot.forEach((child) => {
+        const email = child.key.replace(/\*/g, ".");
+        const username = child.val().Username;
+        if (
+          email.toLowerCase().includes(query) ||
+          (username && username.toLowerCase().includes(query))
+        ) {
+          matches.push({ email, username: username || email });
         }
-        div.addEventListener("mousedown", (e) => {
-          e.preventDefault();
-          insertMention(email);
-          hideSuggestions(true);
-        });
-        mentionSuggestions.appendChild(div);
       });
 
-      positionMentionBox();
-      activeMention = mentionMatch[0];
-      currentMatches = matches.slice(0, 5);
-    } else {
-      if (!cyclingMention && !keepSuggestionsVisible) {
-        hideSuggestions(false);
+      if (matches.length) {
+        if (!isTabbing) {
+          mentionIndex = 0;
+        }
+
+        updateMentionDropdown(matches.slice(0, 5));
+
+        positionMentionBox();
+
+        activeMention = mentionMatch[0];
+        currentMatches = matches.slice(0, 5);
+      } else {
+        hideSuggestions();
       }
+    } else {
+      if (!isTabbing) {
+        hideSuggestions();
+      }
+    }
+  });
+
+  function updateMentionDropdown(matches) {
+    mentionSuggestions.innerHTML = "";
+
+    matches.forEach((match, idx) => {
+      const div = document.createElement("div");
+      div.textContent = match.email;
+
+      if (idx === mentionIndex) {
+        div.className = "selected";
+      }
+
+      div.addEventListener("mousedown", (e) => {
+        e.preventDefault();
+        insertMention(match.email, match.username);
+        hideSuggestions();
+      });
+
+      mentionSuggestions.appendChild(div);
+    });
+
+    mentionSuggestions.style.display = "block";
+  }
+
+  function positionMentionBox() {
+    const selection = window.getSelection();
+    if (!selection.rangeCount) return;
+
+    const range = selection.getRangeAt(0);
+    const rect = range.getBoundingClientRect();
+
+    mentionSuggestions.style.position = "absolute";
+    mentionSuggestions.style.left = `${rect.left}px`;
+    mentionSuggestions.style.top = `${rect.top - mentionSuggestions.offsetHeight - 5}px`;
+    mentionSuggestions.style.display = "block";
+  }
+
+  messageInput.addEventListener("keydown", async function (e) {
+    if (e.key === "Tab" && mentionSuggestions.style.display === "block") {
+      e.preventDefault();
+
+      console.log("Tab pressed, cycling mention at index:", mentionIndex);
+      isTabbing = true;
+
+      try {
+        if (currentMatches.length > 0) {
+          const match = currentMatches[mentionIndex];
+
+          if (lastInsertedMention && lastInsertedMention.parentNode) {
+            lastInsertedMention.remove();
+          }
+
+          lastInsertedMention = insertMention(match.email, match.username);
+
+          mentionIndex = (mentionIndex + 1) % currentMatches.length;
+
+          updateMentionDropdown(currentMatches);
+
+          positionMentionBox();
+        }
+      } catch (error) {
+        console.error("Error during tab cycling:", error);
+      }
+
+      setTimeout(() => {
+        isTabbing = false;
+      }, 50);
+
       return;
     }
-  } else {
-    if (!cyclingMention && !keepSuggestionsVisible) {
-      hideSuggestions(true);
+
+    if (e.key === " " && mentionSuggestions.style.display === "block") {
+      e.preventDefault();
+
+      if (lastInsertedMention && lastInsertedMention.parentNode) {
+        const space = document.createTextNode(" ");
+        lastInsertedMention.parentNode.insertBefore(
+          space,
+          lastInsertedMention.nextSibling,
+        );
+
+        const selection = window.getSelection();
+        const range = document.createRange();
+        range.setStartAfter(space);
+        range.collapse(true);
+        selection.removeAllRanges();
+        selection.addRange(range);
+      }
+
+      hideSuggestions();
+      return;
     }
-    return;
-  }
-});
 
-function positionMentionBox() {
-  const selection = window.getSelection();
-  if (!selection.rangeCount) return;
-
-  const range = selection.getRangeAt(0);
-  const rect = range.getBoundingClientRect();
-  const scrollX = window.scrollX || window.pageXOffset;
-  const scrollY = window.scrollY || window.pageYOffset;
-
-  let left = rect.left + scrollX;
-  let top = rect.top + scrollY;
-
-  mentionSuggestions.style.left = `${left}px`;
-  mentionSuggestions.style.top = `${top - mentionSuggestions.offsetHeight - 5}px`;
-  mentionSuggestions.style.maxHeight = "150px";
-  mentionSuggestions.style.overflowY = "auto";
-  mentionSuggestions.style.display = "block";
-}
-
-messageInput.addEventListener("keydown", async function (e) {
-
-  if (e.key === "Tab" && activeMention && currentMatches.length > 0) {
-    e.preventDefault();
-
-    cyclingMention = true;
-    isProgrammaticInsert = true;
-    keepSuggestionsVisible = true;
-
-    console.log("Tab pressed, mentionIndex:", mentionIndex);
-
-    try {
-
-      const email = currentMatches[mentionIndex];
+    if (e.key === "Escape" && mentionSuggestions.style.display === "block") {
+      e.preventDefault();
 
       if (lastInsertedMention && lastInsertedMention.parentNode) {
         lastInsertedMention.remove();
       }
 
-      lastInsertedMention = await insertMention(email);
-
-      mentionIndex = (mentionIndex + 1) % currentMatches.length;
-
-      updateSelectedItemInDropdown();
-
-      positionMentionBox();
-    } catch (error) {
-      console.error("Error during tab handling:", error);
-    } finally {
-
-      setTimeout(() => {
-        isProgrammaticInsert = false;
-        cyclingMention = false;
-
-      }, 50);
-    }
-    return;
-  }
-
-  if (e.key === " " && activeMention) {
-    if (isProgrammaticInsert) {
+      hideSuggestions();
       return;
     }
-    e.preventDefault();
+  });
+
+  function insertMention(email, username) {
+    console.log(`Inserting mention for: ${email} (${username})`);
 
     const selection = window.getSelection();
-    const spaceNode = document.createTextNode(" ");
-    if (lastInsertedMention && lastInsertedMention.parentNode) {
-      lastInsertedMention.parentNode.insertBefore(spaceNode, lastInsertedMention.nextSibling);
+    if (!selection.rangeCount) return null;
 
-      const range = document.createRange();
-      range.setStartAfter(spaceNode);
-      range.collapse(true);
-      selection.removeAllRanges();
-      selection.addRange(range);
-    }
+    const range = selection.getRangeAt(0);
 
-    activeMention = null;
-    keepSuggestionsVisible = false;
-    hideSuggestions(true);
-    return;
-  }
+    const tempRange = range.cloneRange();
+    tempRange.setStart(messageInput, 0);
+    const textBeforeCursor = tempRange.toString();
 
-  if (e.key === "Escape" && mentionSuggestions.style.display === "block") {
-    if (lastInsertedMention && lastInsertedMention.parentNode) {
-      lastInsertedMention.remove();
-    }
-    activeMention = null;
-    keepSuggestionsVisible = false;
-    hideSuggestions(true);
-    return;
-  }
-});
+    const mentionMatch = textBeforeCursor.match(/@[\w\.\-]*$/);
 
-function updateSelectedItemInDropdown() {
-  Array.from(mentionSuggestions.children).forEach((item, idx) => {
-    if (idx === mentionIndex) {
-      item.classList.add("selected");
-    } else {
-      item.classList.remove("selected");
-    }
-  });
-}
+    if (mentionMatch) {
+      const matchLength = mentionMatch[0].length;
 
-async function insertMention(email) {
-  console.log("Inserting mention for:", email);
-
-  const selection = window.getSelection();
-  if (!selection.rangeCount) return null;
-
-  const username = await getUsernameFromEmail(email);
-  const range = selection.getRangeAt(0);
-
-  const tempRange = range.cloneRange();
-  tempRange.setStart(messageInput, 0);
-  const textBeforeCursor = tempRange.toString();
-
-  const mentionMatch = textBeforeCursor.match(/@[\w\.\-]*$/);
-  if (!mentionMatch) {
-
-    if (lastInsertedMention && lastInsertedMention.parentNode) {
-
-      const parentNode = lastInsertedMention.parentNode;
-
-      const mentionRange = document.createRange();
-      mentionRange.selectNode(lastInsertedMention);
-
-      mentionRange.deleteContents();
+      range.setStart(range.endContainer, range.endOffset - matchLength);
+      range.deleteContents();
 
       const mentionSpan = document.createElement("span");
       mentionSpan.className = "mention";
@@ -2261,7 +2231,24 @@ async function insertMention(email) {
       mentionSpan.setAttribute("contenteditable", "false");
       mentionSpan.textContent = "@" + username;
 
-      mentionRange.insertNode(mentionSpan);
+      range.insertNode(mentionSpan);
+
+      const newRange = document.createRange();
+      newRange.setStartAfter(mentionSpan);
+      newRange.collapse(true);
+      selection.removeAllRanges();
+      selection.addRange(newRange);
+
+      return mentionSpan;
+    } else if (lastInsertedMention && lastInsertedMention.parentNode) {
+      const parent = lastInsertedMention.parentNode;
+      const mentionSpan = document.createElement("span");
+      mentionSpan.className = "mention";
+      mentionSpan.setAttribute("data-email", email);
+      mentionSpan.setAttribute("contenteditable", "false");
+      mentionSpan.textContent = "@" + username;
+
+      parent.replaceChild(mentionSpan, lastInsertedMention);
 
       const newRange = document.createRange();
       newRange.setStartAfter(mentionSpan);
@@ -2271,111 +2258,76 @@ async function insertMention(email) {
 
       return mentionSpan;
     }
+
     return null;
   }
 
-  const matchLength = mentionMatch[0].length;
+  function hideSuggestions() {
+    if (isTabbing) return;
 
-  range.setStart(range.endContainer, range.endOffset - matchLength);
-  range.deleteContents();
-
-  const mentionSpan = document.createElement("span");
-  mentionSpan.className = "mention";
-  mentionSpan.setAttribute("data-email", email);
-  mentionSpan.setAttribute("contenteditable", "false");
-  mentionSpan.textContent = "@" + username;
-
-  range.insertNode(mentionSpan);
-
-  const newRange = document.createRange();
-  newRange.setStartAfter(mentionSpan);
-  newRange.collapse(true);
-
-  selection.removeAllRanges();
-  selection.addRange(newRange);
-
-  return mentionSpan;
-}
-
-function hideSuggestions(clearLastMention = true) {
-  if (keepSuggestionsVisible) {
-    console.log("Not hiding suggestions because keepSuggestionsVisible is true");
-    return;
-  }
-
-  mentionSuggestions.style.display = "none";
-
-  if (clearLastMention) {
+    mentionSuggestions.style.display = "none";
     activeMention = null;
     currentMatches = [];
     mentionIndex = 0;
     lastInsertedMention = null;
   }
-}
 
-function getCaretCharacterOffsetWithin(element) {
-  let caretOffset = 0;
-  const selection = window.getSelection();
-  if (selection.rangeCount) {
-    const range = selection.getRangeAt(0);
-    const preCaretRange = range.cloneRange();
-    preCaretRange.selectNodeContents(element);
-    preCaretRange.setEnd(range.endContainer, range.endOffset);
-    caretOffset = preCaretRange.toString().length;
-  }
-  return caretOffset;
-}
-
-document
-  .getElementById("message-input")
-  .addEventListener("keydown", function (e) {
-    if (e.key === "Backspace") {
-      const selection = window.getSelection();
-      if (!selection.rangeCount) return;
-
+  function getCaretCharacterOffsetWithin(element) {
+    let caretOffset = 0;
+    const selection = window.getSelection();
+    if (selection.rangeCount) {
       const range = selection.getRangeAt(0);
-      const node = range.startContainer;
-      const offset = range.startOffset;
+      const preCaretRange = range.cloneRange();
+      preCaretRange.selectNodeContents(element);
+      preCaretRange.setEnd(range.endContainer, range.endOffset);
+      caretOffset = preCaretRange.toString().length;
+    }
+    return caretOffset;
+  }
 
-      if (offset === 0) {
-        let previous = node.previousSibling;
-        if (
-          previous &&
-          previous.classList &&
-          previous.classList.contains("mention")
-        ) {
-          e.preventDefault();
-          previous.remove();
-          keepSuggestionsVisible = false;
-        }
-      } else if (node.nodeType === Node.TEXT_NODE) {
-        const textUpToCaret = node.textContent.slice(0, offset);
+  document
+    .getElementById("message-input")
+    .addEventListener("keydown", function (e) {
+      if (e.key === "Backspace") {
+        const selection = window.getSelection();
+        if (!selection.rangeCount) return;
 
-        if (textUpToCaret.endsWith(" ") && node.previousSibling) {
-          const previous = node.previousSibling;
-          if (previous.classList && previous.classList.contains("mention")) {
+        const range = selection.getRangeAt(0);
+        const node = range.startContainer;
+        const offset = range.startOffset;
+
+        if (offset === 0) {
+          let previous = node.previousSibling;
+          if (
+            previous &&
+            previous.classList &&
+            previous.classList.contains("mention")
+          ) {
             e.preventDefault();
+            previous.remove();
+          }
+        } else if (node.nodeType === Node.TEXT_NODE) {
+          const textUpToCaret = node.textContent.slice(0, offset);
 
-            node.textContent =
-              textUpToCaret.slice(0, -1) + node.textContent.slice(offset);
+          if (textUpToCaret.endsWith(" ") && node.previousSibling) {
+            const previous = node.previousSibling;
+            if (previous.classList && previous.classList.contains("mention")) {
+              e.preventDefault();
 
-            const newRange = document.createRange();
-            newRange.setStart(node, offset - 1);
-            newRange.setEnd(node, offset - 1);
-            selection.removeAllRanges();
-            selection.addRange(newRange);
+              node.textContent =
+                textUpToCaret.slice(0, -1) + node.textContent.slice(offset);
+
+              const newRange = document.createRange();
+              newRange.setStart(node, offset - 1);
+              newRange.setEnd(node, offset - 1);
+              selection.removeAllRanges();
+              selection.addRange(newRange);
+            }
           }
         }
       }
-    }
-  });
+    });
 
-document.addEventListener('click', function(e) {
-  if (!mentionSuggestions.contains(e.target) && e.target !== messageInput) {
-    keepSuggestionsVisible = false;
-    hideSuggestions(true);
-  }
-});
   messageInput.addEventListener("blur", () => {
     applyFakeHighlight();
   });
