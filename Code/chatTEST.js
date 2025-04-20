@@ -2070,9 +2070,8 @@ ${chatHistory}`;
     if (mentionMatch) {
       const query = mentionMatch[1].toLowerCase();
       positionMentionBox();
-      if (!query) {
-        if (!cyclingMention) hideSuggestions();
-        return;
+      if (!query && !cyclingMention) {
+        hideSuggestions();
         return;
       }
 
@@ -2139,13 +2138,13 @@ ${chatHistory}`;
   messageInput.addEventListener("keydown", async function (e) {
     if (e.key === "Tab" && activeMention) {
       e.preventDefault();
-      isCyclingMention = true;
+      cyclingMention = true;
 
       if (!currentMatches.length) return;
 
       const email = currentMatches[mentionIndex];
 
-      if (lastInsertedMention && lastInsertedMention.parentNode) {
+      if (lastInsertedMention?.parentNode) {
         lastInsertedMention.remove();
       }
 
@@ -2156,19 +2155,16 @@ ${chatHistory}`;
       });
 
       mentionIndex = (mentionIndex + 1) % currentMatches.length;
-
       positionMentionBox();
       mentionSuggestions.style.display = "block";
 
-      setTimeout(() => {
-        isCyclingMention = false;
-      }, 0);
-
+      setTimeout(() => (cyclingMention = false), 0);
       return;
     }
 
     if (e.key === " " && activeMention) {
       e.preventDefault();
+      activeMention = null;
       hideSuggestions();
       return;
     }
@@ -2177,6 +2173,7 @@ ${chatHistory}`;
       if (lastInsertedMention?.parentNode) {
         lastInsertedMention.remove();
       }
+      activeMention = null;
       hideSuggestions();
       return;
     }
