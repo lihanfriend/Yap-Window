@@ -144,6 +144,10 @@
 
             document.getElementById("saved-login-button").onclick =
               async function () {
+                const userRef = ref(
+                  database,
+                  `Accounts/${email.replace(/\./g, "*")}`,
+                );
                 try {
                   const userSnapshot = await get(userRef);
                   if (userSnapshot.exists()) {
@@ -461,6 +465,11 @@
               const user = result.user;
               email = user.email;
               try {
+                const userRef = ref(
+                  database,
+                  `Accounts/${email.replace(/\./g, "*")}`,
+                );
+
                 const userSnapshot = await get(userRef);
                 if (userSnapshot.exists()) {
                   const userData = userSnapshot.val();
