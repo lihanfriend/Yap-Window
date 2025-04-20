@@ -2133,7 +2133,6 @@ function positionMentionBox() {
 }
 
 messageInput.addEventListener("keydown", async function (e) {
-
   if (e.key === "Tab" && activeMention) {
     e.preventDefault();
 
@@ -2146,7 +2145,15 @@ messageInput.addEventListener("keydown", async function (e) {
 
     const email = currentMatches[mentionIndex];
     if (email) {
-      lastInsertedMention = await insertMention(email); 
+      lastInsertedMention = await insertMention(email);
+
+      Array.from(mentionSuggestions.children).forEach((item, idx) => {
+        if (idx === mentionIndex) {
+          item.classList.add('selected');
+        } else {
+          item.classList.remove('selected');
+        }
+      });
     }
 
     mentionIndex++;
@@ -2159,7 +2166,7 @@ messageInput.addEventListener("keydown", async function (e) {
 
   if (e.key === " " && activeMention) {
     e.preventDefault();
-    const email = currentMatches[0];
+    const email = currentMatches[mentionIndex];
     if (email) {
       insertMention(email);
     }
@@ -2214,12 +2221,15 @@ async function insertMention(email) {
   return mentionSpan;
 }
 
-function hideSuggestions() {
+function hideSuggestions(clearLastMention = true) {
   mentionSuggestions.style.display = "none";
   activeMention = null;
   currentMatches = [];
   mentionIndex = 0;
-  lastInsertedMention = null;
+  
+  if (clearLastMention) {
+    lastInsertedMention = null;
+  }
 }
 
 function getCaretCharacterOffsetWithin(element) {
@@ -2241,44 +2251,43 @@ function escapeHtml(text) {
   return div.innerHTML;
 }
 
-  document
-    .getElementById("message-input")
-    .addEventListener("keydown", function (e) {
-      if (e.key === "Backspace") {
-        const selection = window.getSelection();
-        if (!selection.rangeCount) return;
+document.getElementById("message-input").addEventListener("keydown", function (e) {
+  if (e.key === "Backspace") {
+    const selection = window.getSelection();
+    if (!selection.rangeCount) return;
 
-        const range = selection.getRangeAt(0);
-        const node = range.startContainer;
-        const offset = range.startOffset;
+    const range = selection.getRangeAt(0);
+    const node = range.startContainer;
+    const offset = range.startOffset;
 
-        if (offset === 0) {
-          let previous = node.previousSibling;
-          if (
-            previous &&
-            previous.classList &&
-            previous.classList.contains("mention")
-          ) {
-            e.preventDefault();
-            previous.remove();
-          }
-        } else if (node.nodeType === Node.TEXT_NODE) {
-          const textUpToCaret = node.textContent.slice(0, offset);
+    if (offset === 0) {
+      let previous = node.previousSibling;
+      if (previous && previous.classList && previous.classList.contains("mention")) {
+        e.preventDefault();
+        previous.remove();
+      }
+    } 
 
-          if (textUpToCaret.endsWith("\u00A0") && node.previousSibling) {
-            const previous = node.previousSibling;
-            if (previous.classList && previous.classList.contains("mention")) {
-              e.preventDefault();
-              previous.remove();
+    else if (node.nodeType === Node.TEXT_NODE) {
+      const textUpToCaret = node.textContent.slice(0, offset);
 
-              node.textContent =
-                textUpToCaret.slice(0, -1) + node.textContent.slice(offset);
-            }
-          }
+      if (textUpToCaret.endsWith(" ") && node.previousSibling) {
+        const previous = node.previousSibling;
+        if (previous.classList && previous.classList.contains("mention")) {
+          e.preventDefault();
+
+          node.textContent = textUpToCaret.slice(0, -1) + node.textContent.slice(offset);
+
+          const newRange = document.createRange();
+          newRange.setStart(node, offset - 1);
+          newRange.setEnd(node, offset - 1);
+          selection.removeAllRanges();
+          selection.addRange(newRange);
         }
       }
-    });
-
+    }
+  }
+});
   messageInput.addEventListener("blur", () => {
     applyFakeHighlight();
   });
