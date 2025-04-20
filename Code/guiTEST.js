@@ -720,8 +720,8 @@ a:hover {
 }
 
 #attachment-preview {
+  display: none;
   width: 100%;
-  display: flex;
   flex-wrap: wrap;
   gap: 8px;
   margin-top: 8px;
