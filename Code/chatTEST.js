@@ -2185,6 +2185,7 @@ ${chatHistory}`;
 
     if (mentionMatch) {
       const query = mentionMatch[1].toLowerCase();
+      positionMentionBox();
       if (!query) {
         hideSuggestions();
         return;
@@ -2239,18 +2240,9 @@ ${chatHistory}`;
     let left = rect.left + scrollX;
     let top = rect.top + scrollY;
 
-    const boxWidth = 220;
-    const maxBoxHeight = 150;
-    const pageHeight = document.documentElement.clientHeight;
-
-    if (left + boxWidth > document.documentElement.clientWidth - 10) {
-      left = document.documentElement.clientWidth - boxWidth - 10;
-      if (left < 10) left = 10;
-    }
-
     mentionSuggestions.style.left = `${left}px`;
     mentionSuggestions.style.top = `${top - mentionSuggestions.offsetHeight - 5}px`;
-    mentionSuggestions.style.maxHeight = `${maxBoxHeight}px`;
+    mentionSuggestions.style.maxHeight = "150px";
     mentionSuggestions.style.overflowY = "auto";
     mentionSuggestions.style.display = "block";
   }
@@ -2269,24 +2261,30 @@ ${chatHistory}`;
   async function insertMention(email) {
     const selection = window.getSelection();
     if (!selection.rangeCount) return;
-
     const username = await getUsernameFromEmail(email);
-
     const range = selection.getRangeAt(0);
-    const messageInputText = messageInput.innerText;
-    const caretPosition = getCaretCharacterOffsetWithin(messageInput);
 
-    const beforeCursor = messageInputText.substring(0, caretPosition);
-    const afterCursor = messageInputText.substring(caretPosition);
+    const tempRange = range.cloneRange();
+    tempRange.setStart(messageInput, 0);
+    const textBeforeCursor = tempRange.toString();
 
-    const updatedBefore = beforeCursor.replace(/@[\w\.\-]*$/, "");
+    const mentionMatch = textBeforeCursor.match(/@[\w\.\-]*$/);
+    if (!mentionMatch) return;
 
-    messageInput.innerHTML =
-      escapeHtml(updatedBefore) +
-      `<span class="mention" data-email="email@example.com", contenteditable="false">@${username}</span>&nbsp;` +
-      escapeHtml(afterCursor);
+    const matchLength = mentionMatch[0].length;
 
-    const spaceNode = document.createTextNode(" ");
+    range.setStart(range.endContainer, range.endOffset - matchLength);
+    range.deleteContents();
+
+    const mentionSpan = document.createElement("span");
+    mentionSpan.className = "mention";
+    mentionSpan.setAttribute("data-email", email);
+    mentionSpan.setAttribute("contenteditable", "false");
+    mentionSpan.textContent = "@" + username;
+
+    range.insertNode(mentionSpan);
+
+    const spaceNode = document.createTextNode("\u00A0");
     mentionSpan.parentNode.insertBefore(spaceNode, mentionSpan.nextSibling);
 
     const newRange = document.createRange();
