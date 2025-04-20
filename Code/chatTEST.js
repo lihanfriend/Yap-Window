@@ -1500,8 +1500,15 @@
       .innerHTML.substring(0, 2500);
     if (
       !document.getElementById("message-input").textContent.substring(0, 2500)
-    )
-      return;
+    ){    isSending = false;
+    sendButton.disabled = false;       return;}
+    
+    attachments.forEach((att) => {
+      if (att.type === "image") {
+        message += `<br><img src="${att.url}" style="max-width:150px;max-height:150px;border-radius:5px;margin:5px 0;">`;
+      }
+    });
+
     message = joypixels.shortnameToImage(message);
     const div = document.createElement("div");
     div.innerHTML = message;
@@ -1870,6 +1877,7 @@ ${chatHistory}`;
     document.getElementById("bookmarklet-gui").scrollTop = 0;
     resetMessageInput();
     hideAllColorGrids();
+    clearAttachments();
     messagesDiv.scrollTop = messagesDiv.scrollHeight;
     isSending = false;
     sendButton.disabled = false;
@@ -2483,6 +2491,25 @@ ${chatHistory}`;
 const fileUploadInput = document.getElementById("file-upload"); 
 const attachmentBtn = document.getElementById("attachment-btn"); 
 
+
+  let attachments = [];
+const attachmentPreview = document.getElementById("attachment-preview");
+
+function addAttachment(fileUrl, type) {
+  const item = document.createElement("img");
+  item.src = fileUrl;
+  item.className = "attachment-item";
+  item.onclick = () => window.open(fileUrl, "_blank");
+  attachmentPreview.appendChild(item);
+
+  attachments.push({ url: fileUrl, type });
+}
+
+function clearAttachments() {
+  attachments = [];
+  attachmentPreview.innerHTML = "";
+}
+  
 attachmentBtn.addEventListener("click", () => {
   fileUploadInput.click();
 });
@@ -2498,15 +2525,19 @@ fileUploadInput.addEventListener("change", (e) => {
 });
 
 messageInput.addEventListener("paste", (e) => {
-  const items = e.clipboardData.items;
-  for (const item of items) {
-    if (item.type.startsWith("image/")) {
-      const file = item.getAsFile();
-      if (file && file.size <= MAX_FILE_SIZE) {
-        handleFile(file);
-      } else if (file && file.size > MAX_FILE_SIZE) {
-        alert("Pasted image too large! Max 5MB.");
+  if (e.clipboardData && e.clipboardData.files.length > 0) {
+    const file = e.clipboardData.files[0];
+    if (file && file.type.startsWith("image/")) {
+      e.preventDefault();
+      if (file.size > MAX_FILE_SIZE) {
+        alert("Image too large (max 2MB)");
+        return;
       }
+      const reader = new FileReader();
+      reader.onload = function (event) {
+        addAttachment(event.target.result, "image");
+      };
+      reader.readAsDataURL(file);
     }
   }
 });
