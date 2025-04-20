@@ -1498,11 +1498,17 @@
     let message = document
       .getElementById("message-input")
       .innerHTML.substring(0, 2500);
-    if (
-      !document.getElementById("message-input").textContent.substring(0, 2500)
-    ){    isSending = false;
-    sendButton.disabled = false;       return;}
-    
+
+    let textContent = document
+      .getElementById("message-input")
+      .textContent.substring(0, 2500);
+
+    if (!textContent.trim() && attachments.length === 0) {
+      isSending = false;
+      sendButton.disabled = false;
+      return;
+    }
+
     attachments.forEach((att) => {
       if (att.type === "image") {
         message += `<br><img src="${att.url}" style="max-width:150px;max-height:150px;border-radius:5px;margin:5px 0;">`;
@@ -2486,137 +2492,87 @@ ${chatHistory}`;
     });
   }
 
-  const MAX_FILE_SIZE = 5 * 1024 * 1024; 
-
-const fileUploadInput = document.getElementById("file-upload"); 
-const attachmentBtn = document.getElementById("attachment-btn"); 
-
+  const attachmentPreview = document.getElementById("attachment-preview");
+  const fileUploadInput = document.getElementById("file-upload");
+  const attachmentBtn = document.getElementById("attachment-btn");
 
   let attachments = [];
-const attachmentPreview = document.getElementById("attachment-preview");
+  let isSending = false;
 
-function addAttachment(fileUrl, type) {
-  const item = document.createElement("img");
-  item.src = fileUrl;
-  item.className = "attachment-item";
-  item.onclick = () => window.open(fileUrl, "_blank");
-  attachmentPreview.appendChild(item);
-
-  attachments.push({ url: fileUrl, type });
-}
-
-function clearAttachments() {
-  attachments = [];
-  attachmentPreview.innerHTML = "";
-}
-  
-attachmentBtn.addEventListener("click", () => {
-  fileUploadInput.click();
-});
-
-fileUploadInput.addEventListener("change", (e) => {
-  const file = e.target.files[0];
-  if (!file) return;
-  if (file.size > MAX_FILE_SIZE) {
-    alert("File too large! Max size is 5MB.");
-    return;
+  function updateAttachmentBar() {
+    attachmentPreview.style.display = attachments.length > 0 ? "flex" : "none";
   }
-  handleFile(file);
-});
 
-messageInput.addEventListener("paste", (e) => {
-  if (e.clipboardData && e.clipboardData.files.length > 0) {
-    const file = e.clipboardData.files[0];
-    if (file && file.type.startsWith("image/")) {
-      e.preventDefault();
-      if (file.size > MAX_FILE_SIZE) {
-        alert("Image too large (max 2MB)");
-        return;
-      }
-      const reader = new FileReader();
-      reader.onload = function (event) {
-        addAttachment(event.target.result, "image");
-      };
-      reader.readAsDataURL(file);
-    }
-  }
-});
+  function addAttachment(fileUrl, type, fileName = "") {
+    const item = document.createElement("div");
+    item.className = "attachment-item";
+    item.title = fileName;
 
-async function handleFile(file) {
-  const reader = new FileReader();
-  reader.onload = function (event) {
-    const ext = file.name.split('.').pop().toLowerCase();
-    if (["png", "jpg", "jpeg", "gif", "webp"].includes(ext)) {
-
-      const imgHtml = `<img src="${event.target.result}" class="preview-image" onclick="window.open('${event.target.result}', '_blank')">`;
-      insertHtmlAtCursor(imgHtml);
+    if (type === "image") {
+      const img = document.createElement("img");
+      img.src = fileUrl;
+      img.style.width = "100%";
+      img.style.height = "100%";
+      img.style.objectFit = "cover";
+      img.onclick = () => window.open(fileUrl, "_blank");
+      item.appendChild(img);
     } else {
-
-      const icon = pickIconForFile(ext);
-      const linkHtml = `<a href="${event.target.result}" target="_blank" class="preview-link">${icon} ${file.name}</a>`;
-      insertHtmlAtCursor(linkHtml);
+      item.innerHTML = "📎";
+      item.onclick = () => window.open(fileUrl, "_blank");
     }
-  };
-  reader.readAsDataURL(file);
-}
 
-function pickIconForFile(ext) {
-  switch (ext) {
-    case "pdf":
-      return "📄";
-    case "doc":
-    case "docx":
-      return "📝";
-    case "ppt":
-    case "pptx":
-      return "📊";
-    case "xls":
-    case "xlsx":
-      return "📈";
-    case "zip":
-    case "rar":
-    case "7z":
-      return "🗜️";
-    case "txt":
-      return "📃";
-    case "mp4":
-    case "mov":
-    case "avi":
-      return "🎥";
-    case "mp3":
-    case "wav":
-      return "🎵";
-    default:
-      return "📎"; 
-  }
-}
-
-function insertHtmlAtCursor(html) {
-  const selection = window.getSelection();
-  if (!selection.rangeCount) return false;
-
-  const range = selection.getRangeAt(0);
-  range.deleteContents();
-
-  const tempDiv = document.createElement("div");
-  tempDiv.innerHTML = html;
-  const frag = document.createDocumentFragment();
-  let node;
-  let lastNode;
-  while ((node = tempDiv.firstChild)) {
-    lastNode = frag.appendChild(node);
+    attachmentPreview.appendChild(item);
+    attachments.push({ url: fileUrl, type });
+    updateAttachmentBar();
   }
 
-  range.insertNode(frag);
-
-  if (lastNode) {
-    const newRange = document.createRange();
-    newRange.setStartAfter(lastNode);
-    newRange.collapse(true);
-    selection.removeAllRanges();
-    selection.addRange(newRange);
+  function clearAttachments() {
+    attachments = [];
+    attachmentPreview.innerHTML = "";
+    updateAttachmentBar();
   }
-}
+
+  messageInput.addEventListener("paste", (e) => {
+    if (e.clipboardData && e.clipboardData.files.length > 0) {
+      const file = e.clipboardData.files[0];
+      if (file && file.type.startsWith("image/")) {
+        e.preventDefault();
+        if (file.size > 2 * 1024 * 1024) {
+          alert("Image too large (max 2MB)");
+          return;
+        }
+        const reader = new FileReader();
+        reader.onload = function (event) {
+          addAttachment(event.target.result, "image");
+        };
+        reader.readAsDataURL(file);
+      }
+    }
+  });
+
+  attachmentBtn.addEventListener("click", () => {
+    fileUploadInput.click();
+  });
+
+  fileUploadInput.addEventListener("change", (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    if (file.size > 5 * 1024 * 1024) {
+      alert("File too large! Max size 5MB.");
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = function (event) {
+      const ext = file.name.split(".").pop().toLowerCase();
+      if (["png", "jpg", "jpeg", "gif", "webp"].includes(ext)) {
+        addAttachment(event.target.result, "image", file.name);
+      } else {
+        addAttachment(event.target.result, "file", file.name);
+      }
+    };
+    reader.readAsDataURL(file);
+  });
 
   async function markAllMessagesAsRead() {
     try {
