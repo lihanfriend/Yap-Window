@@ -144,6 +144,7 @@
 
             document.getElementById("saved-login-button").onclick =
               async function () {
+                email = auth.currentUser.email
                 const userRef = ref(
                   database,
                   `Accounts/${email.replace(/\./g, "*")}`,
