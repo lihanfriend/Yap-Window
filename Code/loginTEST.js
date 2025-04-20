@@ -108,8 +108,9 @@
         let skip = false;
         let email = "";
 
+        mainScreen.classList.add("hidden");
+        
         const unsubscribe = onAuthStateChanged(auth, async (user) => {
-          mainScreen.classList.add("hidden");
           unsubscribe();
           if (user) {
             const storedForget = localStorage.getItem("neverPersist");
