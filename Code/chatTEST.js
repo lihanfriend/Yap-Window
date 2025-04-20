@@ -2227,7 +2227,7 @@ mentionSuggestions.style.display = "none";
     }
   });
 
-  function positionMentionBox() {
+function positionMentionBox() {
   const selection = window.getSelection();
   if (!selection.rangeCount) return;
 
@@ -2237,18 +2237,27 @@ mentionSuggestions.style.display = "none";
   const scrollY = window.scrollY || window.pageYOffset;
 
   let left = rect.left + scrollX;
-  let top = rect.top + scrollY; 
+  let top = rect.top + scrollY;
 
   const boxWidth = 220; 
+  const boxHeight = 150; 
   const pageWidth = document.documentElement.clientWidth;
+  const pageHeight = document.documentElement.clientHeight;
 
   if (left + boxWidth > pageWidth - 10) {
     left = pageWidth - boxWidth - 10;
     if (left < 10) left = 10;
   }
 
+  top = top - boxHeight - 8; 
+
+  if (top < 10) {
+    top = 10;
+  }
+
   mentionSuggestions.style.left = left + "px";
   mentionSuggestions.style.top = top + "px";
+  mentionSuggestions.style.maxHeight = boxHeight + "px"; 
   mentionSuggestions.style.display = "block";
 }
 
