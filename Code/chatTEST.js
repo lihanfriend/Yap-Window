@@ -2050,6 +2050,9 @@ ${chatHistory}`;
   document.body.appendChild(mentionSuggestions);
   mentionSuggestions.style.display = "none";
   let activeMention = null;
+  let currentMatches = [];
+  let mentionIndex = 0;
+  let lastInsertedMention = null;
 
   messageInput.addEventListener("input", async function (e) {
     const selection = window.getSelection();
@@ -2127,10 +2130,31 @@ ${chatHistory}`;
     mentionSuggestions.style.display = "block";
   }
 
-  messageInput.addEventListener("keydown", function (e) {
+  messageInput.addEventListener("keydown", async function (e) {
+    if (e.key === "Tab" && activeMention) {
+      e.preventDefault();
+
+      if (!currentMatches.length) return;
+
+      if (lastInsertedMention && lastInsertedMention.parentNode) {
+        lastInsertedMention.remove();
+        lastInsertedMention = null;
+      }
+
+      const email = currentMatches[mentionIndex];
+      if (email) {
+        lastInsertedMention = await insertMention(email);
+      }
+
+      mentionIndex++;
+      if (mentionIndex >= currentMatches.length) {
+        hideSuggestions();
+      }
+    }
+
     if (e.key === " " && activeMention) {
       e.preventDefault();
-      const email = mentionSuggestions.firstChild?.textContent;
+      const email = currentMatches[0];
       if (email) {
         insertMention(email);
       }
