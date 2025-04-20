@@ -2138,6 +2138,19 @@ ${chatHistory}`;
     mentionSuggestions.style.overflowY = "auto";
     mentionSuggestions.style.display = "block";
   }
+  messageInput.addEventListener("keydown", async function (e) {
+  console.log(`[KEYDOWN] key="${e.key}", activeMention=${activeMention}, lastInsertedMention=`, lastInsertedMention);
+
+messageInput.addEventListener("input", async function (e) {
+  console.log(`[INPUT] inputType="${e.inputType}", innerText="${messageInput.innerText}"`);
+
+  const cursorPos = getCaretCharacterOffsetWithin(messageInput);
+  const text = messageInput.innerText;
+  const beforeCursor = text.substring(0, cursorPos);
+  const mentionMatch = beforeCursor.match(/@([\w\.\-]*)$/);
+
+  console.log(`[INPUT] CursorPos=${cursorPos}, MentionMatch=`, mentionMatch);
+    
 
   messageInput.addEventListener("keydown", async function (e) {
     if (e.key === "Tab" && activeMention) {
@@ -2163,8 +2176,8 @@ ${chatHistory}`;
       positionMentionBox();
       mentionSuggestions.style.display = "block";
 
-      setTimeout(() => (cyclingMention = false), 0);
-      setTimeout(() => { isProgrammaticInsert = false }, 0);
+      setTimeout(() => (cyclingMention = false), 10);
+      setTimeout(() => { isProgrammaticInsert = false }, 10);
       return;
     }
 
