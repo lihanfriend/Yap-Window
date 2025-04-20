@@ -196,10 +196,11 @@
                           const storedForget =
                             localStorage.getItem("neverPersist");
 
-                          savedAccounScreen.classList.add("hidden");
+                          savedAccountScreen.classList.add("hidden");
                           openChatScreen();
                         }
                       } else {
+                        savedAccountScreen.classList.add("hidden");
                         openChatScreen();
                       }
                     }
@@ -401,9 +402,7 @@
                     document.getElementById("create-bio").value =
                       userData.Bio || "";
                     return;
-                  }
-
-                  if (missingVersion) {
+                  } else if (missingVersion) {
                     const updatesRef = ref(database, "Updates");
                     const updatesSnapshot = await get(updatesRef);
                     if (updatesSnapshot.exists()) {
@@ -437,6 +436,14 @@
                         loginScreen.classList.add("hidden");
                         openChatScreen();
                       }
+                    }
+                  } else {
+                    if (storedForget !== "true") {
+                      loginScreen.classList.add("hidden");
+                      stayloginScreen.classList.remove("hidden");
+                    } else {
+                      loginScreen.classList.add("hidden");
+                      openChatScreen();
                     }
                   }
                 } else {
@@ -480,9 +487,7 @@
                     document.getElementById("create-bio").value =
                       userData.Bio || "";
                     return;
-                  }
-
-                  if (missingVersion) {
+                  } else if (missingVersion) {
                     const updatesRef = ref(database, "Updates");
                     const updatesSnapshot = await get(updatesRef);
                     if (updatesSnapshot.exists()) {
@@ -516,6 +521,14 @@
                         loginScreen.classList.add("hidden");
                         openChatScreen();
                       }
+                    }
+                  } else {
+                    if (storedForget !== "true") {
+                      loginScreen.classList.add("hidden");
+                      stayloginScreen.classList.remove("hidden");
+                    } else {
+                      loginScreen.classList.add("hidden");
+                      openChatScreen();
                     }
                   }
                 } else {
