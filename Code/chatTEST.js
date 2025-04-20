@@ -2168,13 +2168,7 @@ ${chatHistory}`;
         if (currentMatches.length > 0) {
           const match = currentMatches[mentionIndex];
 
-          if (lastInsertedMention && lastInsertedMention.parentNode) {
-            lastInsertedMention.remove();
-          }
-
-          lastInsertedMention = insertMention(match.email, match.username);
-
-          mentionIndex = (mentionIndex + 1) % currentMatches.length;
+          insertMention(match.email, match.username);
 
           updateMentionDropdown(currentMatches);
           positionMentionBox();
