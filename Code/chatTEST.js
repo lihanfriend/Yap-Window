@@ -11,6 +11,7 @@
     ADMIN: "[ADMIN]",
     SNAKE: "[Snake Game]",
   };
+  const users = {};
   const email = auth.currentUser.email;
 
   if (!auth.currentUser || !auth.currentUser.emailVerified) {
@@ -500,6 +501,15 @@
 
     updateReadAllStatus();
   }
+
+  async function loadUsers() {
+  const snapshot = await firebase.database().ref("Accounts").once("value");
+  snapshot.forEach(child => {
+    const email = child.key.replace(/\*/g, ".");
+    const username = child.val().Username;
+    users[email] = username;
+  });
+}
 
   async function getUsernameFromEmail(userEmail) {
     if (!userEmail) return "";
@@ -2163,6 +2173,112 @@ ${chatHistory}`;
     }
   }
 
+  const mentionSuggestions = document.getElementById("mention-suggestions");
+let activeMention = null;
+
+messageInput.addEventListener("input", async function (e) {
+  const selection = window.getSelection();
+  if (!selection.rangeCount) return;
+  const range = selection.getRangeAt(0);
+  const caretRect = range.getBoundingClientRect();
+  
+  const text = messageInput.innerText;
+  const cursorPos = getCaretCharacterOffsetWithin(messageInput);
+
+  const beforeCursor = text.substring(0, cursorPos);
+  const mentionMatch = beforeCursor.match(/@([\w\.\-]*)$/);
+
+  if (mentionMatch) {
+    const query = mentionMatch[1].toLowerCase();
+    if (!Object.keys(users).length) await loadUsers();
+
+    const matches = Object.entries(users)
+      .filter(([email, username]) => 
+        email.toLowerCase().includes(query) || username.toLowerCase().includes(query)
+      )
+      .slice(0, 5);
+
+    if (matches.length) {
+      mentionSuggestions.innerHTML = "";
+      matches.forEach(([email, username]) => {
+        const div = document.createElement("div");
+        div.textContent = email;
+        div.addEventListener("mousedown", (e) => {
+          e.preventDefault();
+          insertMention(email);
+          hideSuggestions();
+        });
+        mentionSuggestions.appendChild(div);
+      });
+
+      mentionSuggestions.style.left = caretRect.left + "px";
+      mentionSuggestions.style.top = caretRect.bottom + "px";
+      mentionSuggestions.style.display = "block";
+      activeMention = mentionMatch[0];
+    } else {
+      hideSuggestions();
+    }
+  } else {
+    hideSuggestions();
+  }
+});
+
+messageInput.addEventListener("keydown", function (e) {
+  if (e.key === " " && activeMention) {
+    e.preventDefault();
+    const email = mentionSuggestions.firstChild?.textContent;
+    if (email) {
+      insertMention(email);
+    }
+    hideSuggestions();
+  }
+});
+
+function insertMention(email) {
+  const selection = window.getSelection();
+  if (!selection.rangeCount) return;
+
+  const range = selection.getRangeAt(0);
+  const messageInputText = messageInput.innerText;
+  const caretPosition = getCaretCharacterOffsetWithin(messageInput);
+
+  const beforeCursor = messageInputText.substring(0, caretPosition);
+  const afterCursor = messageInputText.substring(caretPosition);
+
+  const updatedBefore = beforeCursor.replace(/@[\w\.\-]*$/, '');
+
+  messageInput.innerHTML = 
+    escapeHtml(updatedBefore) + 
+    `<span class="mention">@${email}</span>&nbsp;` + 
+    escapeHtml(afterCursor);
+
+  setCursorPositionInContentEditable(messageInput, (updatedBefore + email + " ").length);
+}
+
+function hideSuggestions() {
+  mentionSuggestions.style.display = "none";
+  activeMention = null;
+}
+
+function getCaretCharacterOffsetWithin(element) {
+  let caretOffset = 0;
+  const selection = window.getSelection();
+  if (selection.rangeCount) {
+    const range = selection.getRangeAt(0);
+    const preCaretRange = range.cloneRange();
+    preCaretRange.selectNodeContents(element);
+    preCaretRange.setEnd(range.endContainer, range.endOffset);
+    caretOffset = preCaretRange.toString().length;
+  }
+  return caretOffset;
+}
+
+function escapeHtml(text) {
+  const div = document.createElement("div");
+  div.innerText = text;
+  return div.innerHTML;
+}
+
   messageInput.addEventListener("blur", () => {
     applyFakeHighlight();
   });
@@ -2549,116 +2665,6 @@ ${chatHistory}`;
     attachmentPreview.style.display = attachments.length > 0 ? "flex" : "none";
   }
 
-  function addAttachmentStyles() {
-    if (document.getElementById("attachment-styles")) return;
-
-    const style = document.createElement("style");
-    style.id = "attachment-styles";
-    style.textContent = `
-    #attachment-preview {
-      display: none;
-      width: 100%;
-      flex-wrap: wrap;
-      gap: 8px;
-      margin-top: 8px;
-      background-color: ${isDark ? "#333333" : "#e0e0e0"};
-      border: 1px solid ${isDark ? "#555555" : "#cccccc"};
-      border-radius: 4px;
-      padding: 6px;
-    }
-
-    .attachment-item {
-      width: 60px;
-      height: 60px;
-      object-fit: cover;
-      border: 1px solid ${isDark ? "#666666" : "#cccccc"};
-      border-radius: 4px;
-      cursor: pointer;
-      position: relative;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      overflow: hidden;
-      background-color: rgba(0,0,0,0.05);
-    }
-
-    .remove-attachment {
-      position: absolute;
-      top: 2px;
-      right: 2px;
-      background: rgba(0,0,0,0.5);
-      border: none;
-      color: white;
-      width: 14px;
-      height: 14px;
-      font-size: 8px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      padding: 0;
-      line-height: 1;
-      border-radius: 2px;
-      z-index: 10;
-    }
-
-    .attachment-filename {
-      background-color: rgba(0,0,0,0.1);
-      width: 100%;
-      font-size: 10px;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-      max-width: 100%;
-      padding: 1px 2px;
-      text-align: center;
-      position: absolute;
-      bottom: 0;
-      left: 0;
-    }
-
-    .preview-image {
-      max-width: 120px;
-      max-height: 120px;
-      display: inline-block;
-      margin: 4px;
-      border: 1px solid ${isDark ? "#555" : "#ccc"};
-      border-radius: 6px;
-      cursor: pointer;
-      transition: transform 0.2s, background-color 0.2s;
-    }
-
-    .preview-image:hover {
-      transform: scale(1.05);
-      background-color: ${isDark ? "#444" : "#f0f0f0"};
-    }
-
-    .preview-link {
-      color: ${isDark ? "#66b2ff" : "#007bff"};
-      text-decoration: underline;
-      font-size: 0.95em;
-      margin: 4px;
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
-      cursor: pointer;
-    }
-
-    .preview-link:hover {
-      text-decoration: none;
-    }
-
-    .file-attachment {
-      display: inline-flex;
-      align-items: center;
-      padding: 2px 6px;
-      background-color: rgba(0,0,0,0.05);
-      border-radius: 4px;
-      margin: 2px 0;
-    }
-  `;
-    document.head.appendChild(style);
-  }
 
   function addAttachment(fileBlobOrUrl, type, fileName = "") {
     const item = document.createElement("div");
