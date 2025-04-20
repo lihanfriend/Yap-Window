@@ -1512,34 +1512,45 @@
     let pureMessage = document
       .getElementById("message-input")
       .textContent.substring(0, 2500);
-
     attachments.forEach((att, index) => {
       if (!att.file) return;
-
       if (att.type === "image") {
         message += `<br><img src="${att.file}" style="max-width:150px;max-height:150px;border-radius:5px;margin:5px 0;">`;
       } else if (att.type === "file") {
         const linkId = `attachment-link-${Date.now()}-${index}`;
         const safeName = att.name?.replace(/"/g, "&quot;") || "file";
-        message += `<br><a href="${att.file}" id="${linkId}" style="text-decoration:underline;color:${isDark ? "#66b2ff" : "#007bff"};">📎 ${safeName}</a>`;
+
+        message += `<br><a data-fileurl="${encodeURIComponent(att.file)}" id="${linkId}" style="text-decoration:underline;color:${isDark ? "#66b2ff" : "#007bff"};">📎 ${safeName}</a>`;
 
         setTimeout(() => {
           const el = document.getElementById(linkId);
           if (!el) return;
-
           el.addEventListener("click", (e) => {
             e.preventDefault();
 
-            const win = window.open();
-            win.opener = null;
-            win.document.write(`
-          <html>
-            <head><title>${safeName}</title></head>
-            <body style="margin:0">
-              <iframe src="${att.file}" style="border:none;width:100vw;height:100vh;"></iframe>
-            </body>
-          </html>
-        `);
+            const dataUrl = decodeURIComponent(el.getAttribute("data-fileurl"));
+            if (dataUrl) {
+              const byteString = atob(dataUrl.split(",")[1]);
+              const mimeType = dataUrl
+                .split(",")[0]
+                .split(":")[1]
+                .split(";")[0];
+              const ab = new ArrayBuffer(byteString.length);
+              const ia = new Uint8Array(ab);
+              for (let i = 0; i < byteString.length; i++) {
+                ia[i] = byteString.charCodeAt(i);
+              }
+              const blob = new Blob([ab], { type: mimeType });
+              const blobUrl = URL.createObjectURL(blob);
+
+              const newTab = window.open(blobUrl, "_blank");
+              if (newTab) {
+                newTab.opener = null;
+                newTab.addEventListener("unload", () => {
+                  URL.revokeObjectURL(blobUrl);
+                });
+              }
+            }
           });
         }, 0);
       }
@@ -2521,16 +2532,26 @@ ${chatHistory}`;
       item.onclick = (e) => {
         if (e.target.classList.contains("remove-attachment")) return;
 
-        const win = window.open();
-        win.opener = null;
-        win.document.write(`
-    <html>
-      <head><title>${fileName || "Attachment"}</title></head>
-      <body style="margin:0">
-        <iframe src="${fileBlobOrUrl}" style="border:none;width:100vw;height:100vh;"></iframe>
-      </body>
-    </html>
-  `);
+        const byteString = atob(fileBlobOrUrl.split(",")[1]);
+        const mimeType = fileBlobOrUrl
+          .split(",")[0]
+          .split(":")[1]
+          .split(";")[0];
+        const ab = new ArrayBuffer(byteString.length);
+        const ia = new Uint8Array(ab);
+        for (let i = 0; i < byteString.length; i++) {
+          ia[i] = byteString.charCodeAt(i);
+        }
+        const blob = new Blob([ab], { type: mimeType });
+        const blobUrl = URL.createObjectURL(blob);
+        const newTab = window.open(blobUrl, "_blank");
+        if (newTab) {
+          newTab.opener = null;
+          // Clean up the URL object when tab is closed
+          newTab.addEventListener("unload", () => {
+            URL.revokeObjectURL(blobUrl);
+          });
+        }
       };
       item.appendChild(img);
     } else {
@@ -2538,16 +2559,27 @@ ${chatHistory}`;
       item.onclick = (e) => {
         if (e.target.classList.contains("remove-attachment")) return;
 
-        const win = window.open();
-        win.opener = null;
-        win.document.write(`
-    <html>
-      <head><title>${fileName || "Attachment"}</title></head>
-      <body style="margin:0">
-        <iframe src="${fileBlobOrUrl}" style="border:none;width:100vw;height:100vh;"></iframe>
-      </body>
-    </html>
-  `);
+        const byteString = atob(fileBlobOrUrl.split(",")[1]);
+        const mimeType = fileBlobOrUrl
+          .split(",")[0]
+          .split(":")[1]
+          .split(";")[0];
+        const ab = new ArrayBuffer(byteString.length);
+        const ia = new Uint8Array(ab);
+        for (let i = 0; i < byteString.length; i++) {
+          ia[i] = byteString.charCodeAt(i);
+        }
+        const blob = new Blob([ab], { type: mimeType });
+        const blobUrl = URL.createObjectURL(blob);
+
+        const newTab = window.open(blobUrl, "_blank");
+        if (newTab) {
+          newTab.opener = null;
+          // Clean up the URL object when tab is closed
+          newTab.addEventListener("unload", () => {
+            URL.revokeObjectURL(blobUrl);
+          });
+        }
       };
     }
 
