@@ -2133,16 +2133,19 @@ function positionMentionBox() {
 }
 
 messageInput.addEventListener("keydown", async function (e) {
-if (e.key === "Tab" && activeMention) {
+  if (e.key === "Tab" && activeMention) {
     e.preventDefault();
 
     if (!currentMatches.length) return;
 
+    const email = currentMatches[mentionIndex];
+
     if (lastInsertedMention && lastInsertedMention.parentNode) {
-      lastInsertedMention.remove();
+      const range = document.createRange();
+      range.selectNode(lastInsertedMention);
+      range.deleteContents();
     }
 
-    const email = currentMatches[mentionIndex];
     if (email) {
       lastInsertedMention = await insertMention(email);
 
@@ -2156,20 +2159,14 @@ if (e.key === "Tab" && activeMention) {
     }
 
     mentionIndex = (mentionIndex + 1) % currentMatches.length;
-
+    positionMentionBox(); 
     mentionSuggestions.style.display = "block";
-    positionMentionBox();
-
     return;
   }
 
   if (e.key === " " && activeMention) {
     e.preventDefault();
-    const email = currentMatches[mentionIndex];
-    if (email) {
-      insertMention(email);
-    }
-    hideSuggestions(); 
+    hideSuggestions(true);
   }
 
   if (e.key === "Escape") {
@@ -2177,7 +2174,7 @@ if (e.key === "Tab" && activeMention) {
       lastInsertedMention.remove();
       lastInsertedMention = null;
     }
-    hideSuggestions(); 
+    hideSuggestions();
   }
 });
 
@@ -2225,7 +2222,7 @@ function hideSuggestions(clearLastMention = true) {
   activeMention = null;
   currentMatches = [];
   mentionIndex = 0;
-  
+
   if (clearLastMention) {
     lastInsertedMention = null;
   }
