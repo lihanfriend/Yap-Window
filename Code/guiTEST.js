@@ -719,6 +719,39 @@ a:hover {
 	text-decoration: underline;
 }
 
+#attachment-preview {
+  width: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
+  background-color: ${isDark ? "#333333" : "#e0e0e0"};
+  border: 1px solid ${isDark ? "#555555" : "#cccccc"};
+  border-radius: 4px;
+  padding: 6px;
+}
+
+.attachment-item {
+  width: 60px;
+  height: 60px;
+  object-fit: cover;
+  border: 1px solid ${isDark ? "#666666" : "#cccccc"};
+  border-radius: 4px;
+  cursor: pointer;
+  position: relative;
+}
+
+.attachment-item:hover::after {
+  content: "🗙";
+  position: absolute;
+  top: 2px;
+  right: 4px;
+  color: ${isDark ? "#ffcccc" : "#ff0000"};
+  background: ${isDark ? "#222222" : "#ffffff"};
+  border-radius: 50%;
+  font-size: 14px;
+}
+
 .preview-image {
   max-width: 120px;
   max-height: 120px;
@@ -903,6 +936,7 @@ a:hover {
                <div id="message-input" contenteditable="true" placeholder="Type a message..."></div>
                <button id="send-button">Send</button>
             </div>
+	    <div id="attachment-preview"></div>
          </div>
       </div>
    </div>
