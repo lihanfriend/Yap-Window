@@ -1489,56 +1489,69 @@
     };
   }
 
-function setupGlobalFileViewer() {
-  if (!window.openFileViewer) {
-    window.openFileViewer = function(dataUrl, fileName, mimeType) {
-      try {
-        const base64 = dataUrl.split(',')[1];
-        const binaryString = atob(base64);
-        const bytes = new Uint8Array(binaryString.length);
-        for (let i = 0; i < binaryString.length; i++) {
-          bytes[i] = binaryString.charCodeAt(i);
+  function setupGlobalFileViewer() {
+    if (!window.openFileViewer) {
+      window.openFileViewer = function (dataUrl, fileName, mimeType) {
+        try {
+          const base64 = dataUrl.split(",")[1];
+          const binaryString = atob(base64);
+          const bytes = new Uint8Array(binaryString.length);
+          for (let i = 0; i < binaryString.length; i++) {
+            bytes[i] = binaryString.charCodeAt(i);
+          }
+
+          const blob = new Blob([bytes], {
+            type: mimeType || "application/octet-stream",
+          });
+
+          const blobUrl = URL.createObjectURL(blob);
+
+          const newWindow = window.open(blobUrl, "_blank");
+          if (!newWindow) {
+            alert("Please allow popups for this site to view files");
+            return;
+          }
+
+          setTimeout(() => {
+            URL.revokeObjectURL(blobUrl);
+          }, 60000); // Clean up after a minute
+        } catch (err) {
+          console.error("Error opening file:", err);
+          alert("Could not open the file. It may be corrupted or too large.");
         }
+      };
+    }
 
-        const blob = new Blob([bytes], { type: mimeType || 'application/octet-stream' });
-
-        const blobUrl = URL.createObjectURL(blob);
-
-        const newWindow = window.open(blobUrl, '_blank');
-        if (!newWindow) {
-          alert('Please allow popups for this site to view files');
-          return;
-        }
-
-        setTimeout(() => {
-          URL.revokeObjectURL(blobUrl);
-        }, 60000); // Clean up after a minute
-      } catch (err) {
-        console.error('Error opening file:', err);
-        alert('Could not open the file. It may be corrupted or too large.');
+    document.addEventListener("click", function (e) {
+      const target = e.target.closest(".file-attachment");
+      if (target) {
+        e.preventDefault();
+        const fileData = decodeURIComponent(target.getAttribute("data-file"));
+        const fileName = decodeURIComponent(
+          target.getAttribute("data-filename") || "file",
+        );
+        const mimeType = decodeURIComponent(
+          target.getAttribute("data-mime") || "",
+        );
+        window.openFileViewer(fileData, fileName, mimeType);
       }
-    };
+    });
+
+    document.addEventListener("click", function (e) {
+      if (
+        e.target.tagName === "IMG" &&
+        e.target.src.startsWith("data:image/")
+      ) {
+        e.preventDefault();
+        window.openFileViewer(
+          e.target.src,
+          "image",
+          e.target.src.split(",")[0].split(":")[1].split(";")[0],
+        );
+      }
+    });
   }
 
-  document.addEventListener('click', function(e) {
-    const target = e.target.closest('.file-attachment');
-    if (target) {
-      e.preventDefault();
-      const fileData = decodeURIComponent(target.getAttribute('data-file'));
-      const fileName = decodeURIComponent(target.getAttribute('data-filename') || 'file');
-      const mimeType = decodeURIComponent(target.getAttribute('data-mime') || '');
-      window.openFileViewer(fileData, fileName, mimeType);
-    }
-  });
-
-  document.addEventListener('click', function(e) {
-    if (e.target.tagName === 'IMG' && e.target.src.startsWith('data:image/')) {
-      e.preventDefault();
-      window.openFileViewer(e.target.src, 'image', e.target.src.split(',')[0].split(':')[1].split(';')[0]);
-    }
-  });
-}
-  
   async function sendMessage() {
     if (isSending) return;
     isSending = true;
@@ -1563,17 +1576,17 @@ function setupGlobalFileViewer() {
       .getElementById("message-input")
       .textContent.substring(0, 2500);
     attachments.forEach((att, index) => {
-    if (!att.file) return;
-    if (att.type === "image") {
-      message += `<br><img src="${att.file}" style="max-width:150px;max-height:150px;border-radius:5px;margin:5px 0;">`;
-    } else if (att.type === "file") {
-      const linkId = `attachment-link-${Date.now()}-${index}`;
-      const safeName = att.name?.replace(/"/g, "&quot;") || "file";
+      if (!att.file) return;
+      if (att.type === "image") {
+        message += `<br><img src="${att.file}" style="max-width:150px;max-height:150px;border-radius:5px;margin:5px 0;">`;
+      } else if (att.type === "file") {
+        const linkId = `attachment-link-${Date.now()}-${index}`;
+        const safeName = att.name?.replace(/"/g, "&quot;") || "file";
 
-      message += `<br><a href="javascript:void(0)" class="file-attachment" data-file="${encodeURIComponent(att.file)}" data-filename="${encodeURIComponent(safeName)}" data-mime="${encodeURIComponent(att.file.split(',')[0].split(':')[1].split(';')[0])}"
+        message += `<br><a href="javascript:void(0)" class="file-attachment" data-file="${encodeURIComponent(att.file)}" data-filename="${encodeURIComponent(safeName)}" data-mime="${encodeURIComponent(att.file.split(",")[0].split(":")[1].split(";")[0])}"
       style="text-decoration:underline;color:${isDark ? "#66b2ff" : "#007bff"};">📎 ${safeName}</a>`;
-    }
-  });
+      }
+    });
     message = joypixels.shortnameToImage(message);
     const div = document.createElement("div");
     div.innerHTML = message;
@@ -2527,75 +2540,79 @@ ${chatHistory}`;
     attachmentPreview.style.display = attachments.length > 0 ? "flex" : "none";
   }
 
-function addAttachment(fileBlobOrUrl, type, fileName = "") {
-  const item = document.createElement("div");
-  item.className = "attachment-item";
-  item.title = fileName;
-  const removeBtn = document.createElement("button");
-  removeBtn.textContent = "❌";
-  removeBtn.className = "remove-attachment";
-  removeBtn.onclick = (e) => {
-    e.stopPropagation();
-    attachments = attachments.filter((a) => a.file !== fileBlobOrUrl);
-    item.remove();
+  function addAttachment(fileBlobOrUrl, type, fileName = "") {
+    const item = document.createElement("div");
+    item.className = "attachment-item";
+    item.title = fileName;
+    const removeBtn = document.createElement("button");
+    removeBtn.textContent = "❌";
+    removeBtn.className = "remove-attachment";
+    removeBtn.onclick = (e) => {
+      e.stopPropagation();
+      attachments = attachments.filter((a) => a.file !== fileBlobOrUrl);
+      item.remove();
+      updateAttachmentBar();
+    };
+
+    const fileNameDisplay = document.createElement("div");
+    fileNameDisplay.className = "attachment-filename";
+    fileNameDisplay.style.fontSize = "10px";
+    fileNameDisplay.style.overflow = "hidden";
+    fileNameDisplay.style.textOverflow = "ellipsis";
+    fileNameDisplay.style.whiteSpace = "nowrap";
+    fileNameDisplay.style.maxWidth = "100%";
+    fileNameDisplay.style.padding = "0 2px";
+    fileNameDisplay.style.textAlign = "center";
+    fileNameDisplay.textContent = fileName
+      ? fileName.length > 12
+        ? fileName.substring(0, 10) + "..."
+        : fileName
+      : "";
+
+    const mimeType = fileBlobOrUrl.split(",")[0].split(":")[1].split(";")[0];
+
+    if (type === "image") {
+      const imgContainer = document.createElement("div");
+      imgContainer.style.width = "100%";
+      imgContainer.style.height = "calc(100% - 15px)";
+      imgContainer.style.position = "relative";
+
+      const img = document.createElement("img");
+      img.src = fileBlobOrUrl;
+      img.style.width = "100%";
+      img.style.height = "100%";
+      img.style.objectFit = "cover";
+
+      imgContainer.appendChild(img);
+      item.appendChild(imgContainer);
+      item.appendChild(fileNameDisplay);
+
+      item.onclick = (e) => {
+        if (e.target.classList.contains("remove-attachment")) return;
+        window.openFileViewer(fileBlobOrUrl, fileName, mimeType);
+      };
+    } else {
+      const fileIcon = document.createElement("div");
+      fileIcon.innerHTML = "📎";
+      fileIcon.style.fontSize = "24px";
+      fileIcon.style.height = "calc(100% - 15px)";
+      fileIcon.style.display = "flex";
+      fileIcon.style.alignItems = "center";
+      fileIcon.style.justifyContent = "center";
+
+      item.appendChild(fileIcon);
+      item.appendChild(fileNameDisplay);
+
+      item.onclick = (e) => {
+        if (e.target.classList.contains("remove-attachment")) return;
+        window.openFileViewer(fileBlobOrUrl, fileName, mimeType);
+      };
+    }
+    item.appendChild(removeBtn);
+    attachmentPreview.appendChild(item);
+    attachments.push({ file: fileBlobOrUrl, type, name: fileName });
     updateAttachmentBar();
-  };
-
-  const fileNameDisplay = document.createElement("div");
-  fileNameDisplay.className = "attachment-filename";
-  fileNameDisplay.style.fontSize = "10px";
-  fileNameDisplay.style.overflow = "hidden";
-  fileNameDisplay.style.textOverflow = "ellipsis";
-  fileNameDisplay.style.whiteSpace = "nowrap";
-  fileNameDisplay.style.maxWidth = "100%";
-  fileNameDisplay.style.padding = "0 2px";
-  fileNameDisplay.style.textAlign = "center";
-  fileNameDisplay.textContent = fileName ? (fileName.length > 12 ? fileName.substring(0, 10) + "..." : fileName) : "";
-
-  const mimeType = fileBlobOrUrl.split(',')[0].split(':')[1].split(';')[0];
-
-  if (type === "image") {
-    const imgContainer = document.createElement("div");
-    imgContainer.style.width = "100%";
-    imgContainer.style.height = "calc(100% - 15px)"; 
-    imgContainer.style.position = "relative";
-
-    const img = document.createElement("img");
-    img.src = fileBlobOrUrl;
-    img.style.width = "100%";
-    img.style.height = "100%";
-    img.style.objectFit = "cover";
-
-    imgContainer.appendChild(img);
-    item.appendChild(imgContainer);
-    item.appendChild(fileNameDisplay);
-
-    item.onclick = (e) => {
-      if (e.target.classList.contains("remove-attachment")) return;
-      window.openFileViewer(fileBlobOrUrl, fileName, mimeType);
-    };
-  } else {
-    const fileIcon = document.createElement("div");
-    fileIcon.innerHTML = "📎";
-    fileIcon.style.fontSize = "24px";
-    fileIcon.style.height = "calc(100% - 15px)"; 
-    fileIcon.style.display = "flex";
-    fileIcon.style.alignItems = "center";
-    fileIcon.style.justifyContent = "center";
-
-    item.appendChild(fileIcon);
-    item.appendChild(fileNameDisplay);
-
-    item.onclick = (e) => {
-      if (e.target.classList.contains("remove-attachment")) return;
-      window.openFileViewer(fileBlobOrUrl, fileName, mimeType);
-    };
   }
-  item.appendChild(removeBtn);
-  attachmentPreview.appendChild(item);
-  attachments.push({ file: fileBlobOrUrl, type, name: fileName });
-  updateAttachmentBar();
-}
 
   function clearAttachments() {
     attachments = [];
@@ -2642,11 +2659,6 @@ function addAttachment(fileBlobOrUrl, type, fileName = "") {
     fileUploadInput.value = "";
   });
 
-  function initializeFileHandling() {
-  setupGlobalFileViewer();
-  addAttachmentStyles();
-}
-  
   async function markAllMessagesAsRead() {
     try {
       document.querySelectorAll(".message.unread").forEach((msg) => {
@@ -3280,7 +3292,7 @@ function addAttachment(fileBlobOrUrl, type, fileName = "") {
   }
 
   checkForUpdates();
-  initializeFileHandling();
+  setupGlobalFileViewer();
   fetchChatList();
   setupUnreadCountUpdates();
   await initializeReadMessages();
