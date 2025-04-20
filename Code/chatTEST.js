@@ -2482,7 +2482,8 @@ ${chatHistory}`;
     const removeBtn = document.createElement("button");
     removeBtn.textContent = "❌";
     removeBtn.className = "remove-attachment";
-    removeBtn.onclick = () => {
+    removeBtn.onclick = (e) => {
+      e.stopPropagation();
       attachments = attachments.filter((a) => a.file !== fileBlobOrUrl);
       item.remove();
       updateAttachmentBar();
@@ -2552,7 +2553,18 @@ ${chatHistory}`;
         addAttachment(event.target.result, "file", file.name);
       }
     };
-    reader.readAsDataURL(file);
+    const ext = file.name.split(".").pop().toLowerCase();
+    if (["png", "jpg", "jpeg", "gif", "webp"].includes(ext)) {
+      const reader = new FileReader();
+      reader.onload = function (event) {
+        addAttachment(event.target.result, "image", file.name);
+      };
+      reader.readAsDataURL(file);
+    } else {
+      const objectUrl = URL.createObjectURL(file);
+      addAttachment(objectUrl, "file", file.name);
+    }
+    fileUploadInput.value = "";
   });
 
   async function markAllMessagesAsRead() {
