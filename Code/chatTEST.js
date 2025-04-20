@@ -2495,11 +2495,27 @@ ${chatHistory}`;
       img.style.width = "100%";
       img.style.height = "100%";
       img.style.objectFit = "cover";
-      img.onclick = () => window.open(fileBlobOrUrl, "_blank");
+      item.onclick = (e) => {
+        const link = document.createElement("a");
+        link.href = fileBlobOrUrl;
+        link.target = "_blank";
+        link.rel = "noopener noreferrer";
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      };
       item.appendChild(img);
     } else {
       item.innerHTML = "📎";
-      item.onclick = () => window.open(fileBlobOrUrl, "_blank");
+      item.onclick = (e) => {
+        const link = document.createElement("a");
+        link.href = fileBlobOrUrl;
+        link.target = "_blank";
+        link.rel = "noopener noreferrer";
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      };
     }
 
     item.appendChild(removeBtn);
@@ -2536,22 +2552,22 @@ ${chatHistory}`;
     fileUploadInput.click();
   });
 
-fileUploadInput.addEventListener("change", (e) => {
-  const files = e.target.files;
-  if (!files.length) return;
+  fileUploadInput.addEventListener("change", (e) => {
+    const files = e.target.files;
+    if (!files.length) return;
 
-  [...files].forEach((file) => {
-    const reader = new FileReader();
-    reader.onload = function (event) {
-      const result = event.target.result;
-      const type = file.type.startsWith("image/") ? "image" : "file";
-      addAttachment(result, type, file.name);
-    };
-    reader.readAsDataURL(file);
+    [...files].forEach((file) => {
+      const reader = new FileReader();
+      reader.onload = function (event) {
+        const result = event.target.result;
+        const type = file.type.startsWith("image/") ? "image" : "file";
+        addAttachment(result, type, file.name);
+      };
+      reader.readAsDataURL(file);
+    });
+
+    fileUploadInput.value = "";
   });
-
-  fileUploadInput.value = "";
-});
 
   async function markAllMessagesAsRead() {
     try {
