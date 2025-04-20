@@ -13,7 +13,7 @@
       storageBucket: "yap--window.firebasestorage.app",
       messagingSenderId: "331436638756",
       appId: "1:331436638756:web:15affa3bf7a433d7a04eb1",
-      measurementId: "G-R6NQW8X18R"
+      measurementId: "G-R6NQW8X18R",
     };
 
     var database, auth, provider, email, mostRecentVersionKey;
@@ -105,8 +105,10 @@
         );
         const stayloginScreen = document.getElementById("stay-login-screen");
         const savedAccountScreen = document.getElementById("saved-account");
+        let skip = false;
 
         const unsubscribe = onAuthStateChanged(auth, async (user) => {
+          mainScreen.classList.add("hidden");
           unsubscribe();
           if (user) {
             const storedForget = localStorage.getItem("neverPersist");
@@ -141,9 +143,71 @@
               "Email: " + email;
 
             document.getElementById("saved-login-button").onclick =
-              function () {
-                savedAccountScreen.classList.add("hidden");
-                openChatScreen();
+              async function () {
+                try {
+                  const userSnapshot = await get(userRef);
+                  if (userSnapshot.exists()) {
+                    const userData = userSnapshot.val();
+                    const missingUsername = !userData.Username;
+                    const missingBio = !userData.Bio;
+                    const missingVersion = !userData.Version;
+
+                    if (missingUsername || missingBio) {
+                      customizeScreen.classList.remove("hidden");
+                      savedAccountScreen.classList.add("hidden");
+                      document.getElementById("create-username").value =
+                        userData.Username || "Anonymous";
+                      document.getElementById("create-bio").value =
+                        userData.Bio || "";
+                      skip = true;
+                      return;
+                    }
+
+                    if (missingVersion) {
+                      const updatesRef = ref(database, "Updates");
+                      const updatesSnapshot = await get(updatesRef);
+                      if (updatesSnapshot.exists()) {
+                        const updates = updatesSnapshot.val();
+                        const versionKeys = Object.keys(updates).sort(
+                          (a, b) => {
+                            const aParts = a.split("*").map(Number);
+                            const bParts = b.split("*").map(Number);
+                            for (
+                              let i = 0;
+                              i < Math.max(aParts.length, bParts.length);
+                              i++
+                            ) {
+                              const aSegment = aParts[i] || 0;
+                              const bSegment = bParts[i] || 0;
+                              if (aSegment < bSegment) return -1;
+                              if (aSegment > bSegment) return 1;
+                            }
+                            return 0;
+                          },
+                        );
+                        mostRecentVersionKey =
+                          versionKeys[versionKeys.length - 1];
+
+                        await update(userRef, {
+                          Version: mostRecentVersionKey,
+                        });
+
+                        const storedForget =
+                          localStorage.getItem("neverPersist");
+
+                        savedAccounScreen.classList.add("hidden");
+                        openChatScreen();
+                      }
+                    }
+                  } else {
+                    console.error("User record not found in database.");
+                    customizeScreen.classList.remove("hidden");
+                    savedAccounScreen.classList.add("hidden");
+                    return;
+                  }
+                } catch (error) {
+                  console.error("Error checking user info:", error);
+                }
               };
 
             document.getElementById("saved-signout-button").onclick =
@@ -309,7 +373,6 @@
               const user = result.user;
 
               if (!user.emailVerified) {
-                console.log("yay!");
                 await handleEmailVerification(user, loginScreen);
               }
 
@@ -317,15 +380,73 @@
               emailInput.value = "";
               passwordInput.value = "";
               errorLabel.textContent = "";
+              const userRef = ref(
+                database,
+                `Accounts/${email.replace(/\./g, "*")}`,
+              );
 
-              const storedForget = localStorage.getItem("neverPersist");
+              try {
+                const userSnapshot = await get(userRef);
+                if (userSnapshot.exists()) {
+                  const userData = userSnapshot.val();
+                  const missingUsername = !userData.Username;
+                  const missingBio = !userData.Bio;
+                  const missingVersion = !userData.Version;
 
-              if (storedForget !== "true") {
-                loginScreen.classList.add("hidden");
-                stayloginScreen.classList.remove("hidden");
-              } else {
-                loginScreen.classList.add("hidden");
-                openChatScreen();
+                  if (missingUsername || missingBio) {
+                    customizeScreen.classList.remove("hidden");
+                    loginScreen.classList.add("hidden");
+                    document.getElementById("create-username").value =
+                      userData.Username || "Anonymous";
+                    document.getElementById("create-bio").value =
+                      userData.Bio || "";
+                    return;
+                  }
+
+                  if (missingVersion) {
+                    const updatesRef = ref(database, "Updates");
+                    const updatesSnapshot = await get(updatesRef);
+                    if (updatesSnapshot.exists()) {
+                      const updates = updatesSnapshot.val();
+                      const versionKeys = Object.keys(updates).sort((a, b) => {
+                        const aParts = a.split("*").map(Number);
+                        const bParts = b.split("*").map(Number);
+                        for (
+                          let i = 0;
+                          i < Math.max(aParts.length, bParts.length);
+                          i++
+                        ) {
+                          const aSegment = aParts[i] || 0;
+                          const bSegment = bParts[i] || 0;
+                          if (aSegment < bSegment) return -1;
+                          if (aSegment > bSegment) return 1;
+                        }
+                        return 0;
+                      });
+                      mostRecentVersionKey =
+                        versionKeys[versionKeys.length - 1];
+
+                      await update(userRef, { Version: mostRecentVersionKey });
+
+                      const storedForget = localStorage.getItem("neverPersist");
+
+                      if (storedForget !== "true") {
+                        loginScreen.classList.add("hidden");
+                        stayloginScreen.classList.remove("hidden");
+                      } else {
+                        loginScreen.classList.add("hidden");
+                        openChatScreen();
+                      }
+                    }
+                  }
+                } else {
+                  console.error("User record not found in database.");
+                  customizeScreen.classList.remove("hidden");
+                  loginScreen.classList.add("hidden");
+                  return;
+                }
+              } catch (error) {
+                console.error("Error checking user info:", error);
               }
             } catch (error) {
               errorLabel.textContent = error.message;
@@ -339,14 +460,68 @@
               result = await signInWithPopup(auth, provider);
               const user = result.user;
               email = user.email;
-              const storedForget = localStorage.getItem("neverPersist");
+              try {
+                const userSnapshot = await get(userRef);
+                if (userSnapshot.exists()) {
+                  const userData = userSnapshot.val();
+                  const missingUsername = !userData.Username;
+                  const missingBio = !userData.Bio;
+                  const missingVersion = !userData.Version;
 
-              if (storedForget !== "true") {
-                loginScreen.classList.add("hidden");
-                stayloginScreen.classList.remove("hidden");
-              } else {
-                loginScreen.classList.add("hidden");
-                openChatScreen();
+                  if (missingUsername || missingBio) {
+                    customizeScreen.classList.remove("hidden");
+                    loginScreen.classList.add("hidden");
+                    document.getElementById("create-username").value =
+                      userData.Username || "Anonymous";
+                    document.getElementById("create-bio").value =
+                      userData.Bio || "";
+                    return;
+                  }
+
+                  if (missingVersion) {
+                    const updatesRef = ref(database, "Updates");
+                    const updatesSnapshot = await get(updatesRef);
+                    if (updatesSnapshot.exists()) {
+                      const updates = updatesSnapshot.val();
+                      const versionKeys = Object.keys(updates).sort((a, b) => {
+                        const aParts = a.split("*").map(Number);
+                        const bParts = b.split("*").map(Number);
+                        for (
+                          let i = 0;
+                          i < Math.max(aParts.length, bParts.length);
+                          i++
+                        ) {
+                          const aSegment = aParts[i] || 0;
+                          const bSegment = bParts[i] || 0;
+                          if (aSegment < bSegment) return -1;
+                          if (aSegment > bSegment) return 1;
+                        }
+                        return 0;
+                      });
+                      mostRecentVersionKey =
+                        versionKeys[versionKeys.length - 1];
+
+                      await update(userRef, { Version: mostRecentVersionKey });
+
+                      const storedForget = localStorage.getItem("neverPersist");
+
+                      if (storedForget !== "true") {
+                        loginScreen.classList.add("hidden");
+                        stayloginScreen.classList.remove("hidden");
+                      } else {
+                        loginScreen.classList.add("hidden");
+                        openChatScreen();
+                      }
+                    }
+                  }
+                } else {
+                  console.error("User record not found in database.");
+                  customizeScreen.classList.remove("hidden");
+                  loginScreen.classList.add("hidden");
+                  return;
+                }
+              } catch (error) {
+                console.error("Error checking user info:", error);
               }
             } catch (error) {
               const errorLabel = document.getElementById("login-email-error");
@@ -443,8 +618,15 @@
                 console.error("Error updating profile:", error);
                 alert("Failed to update profile. Please try again.");
               });
-            stayloginScreen.classList.remove("hidden");
-            customizeScreen.classList.add("hidden");
+            const storedForget = localStorage.getItem("neverPersist");
+
+            if (storedForget !== "true" && !skip) {
+              customizeScreen.classList.add("hidden");
+              stayloginScreen.classList.remove("hidden");
+            } else {
+              customizeScreen.classList.add("hidden");
+              openChatScreen();
+            }
           };
 
         document.getElementById("stay-yes").onclick = async function () {
