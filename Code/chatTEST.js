@@ -2133,14 +2133,13 @@ function positionMentionBox() {
 }
 
 messageInput.addEventListener("keydown", async function (e) {
-  if (e.key === "Tab" && activeMention) {
+if (e.key === "Tab" && activeMention) {
     e.preventDefault();
 
     if (!currentMatches.length) return;
 
     if (lastInsertedMention && lastInsertedMention.parentNode) {
       lastInsertedMention.remove();
-      lastInsertedMention = null;
     }
 
     const email = currentMatches[mentionIndex];
@@ -2156,12 +2155,12 @@ messageInput.addEventListener("keydown", async function (e) {
       });
     }
 
-    mentionIndex++;
-    if (mentionIndex >= currentMatches.length) {
-      mentionIndex = 0;
-    }
+    mentionIndex = (mentionIndex + 1) % currentMatches.length;
 
+    mentionSuggestions.style.display = "block";
     positionMentionBox();
+
+    return;
   }
 
   if (e.key === " " && activeMention) {
