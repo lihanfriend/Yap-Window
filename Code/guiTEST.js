@@ -415,6 +415,33 @@
 	box-shadow: 0 1px 3px ${isDark ? "rgba(0,0,0,0.3)" : "rgba(0,0,0,0.1)"};
 }
 
+.message.winston.sent {
+  text-align: right;
+  background-color: ${isDark ? "#4a4a4a" : "#e0f7fa"};
+  color: ${isDark ? "#cccccc" : "#006064"};
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80' viewBox='0 0 80 80' style='transform: rotate(-10deg);'%3E%3Ctext x='0' y='50' font-size='40' opacity='0.08'%3E🐼%3C/text%3E%3C/svg%3E");
+  background-repeat: repeat;
+  background-size: 80px 80px;
+}
+
+.message.winston.recieved {
+  text-align: left;
+  background-color: ${isDark ? "#3a3a3a" : "#f1f8e9"};
+  color: ${isDark ? "#cccccc" : "#33691e"};
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80' viewBox='0 0 80 80' style='transform: rotate(-10deg);'%3E%3Ctext x='0' y='50' font-size='40' opacity='0.08'%3E🐼%3C/text%3E%3C/svg%3E");
+  background-repeat: repeat;
+  background-size: 80px 80px;
+}
+
+.message.winston.recieved.unread {
+  background-color: ${isDark ? "#4a3a3a" : "#e8f5e9"};
+  border-left: 3px solid ${isDark ? "#ff6b6b" : "#4caf50"};
+  box-shadow: 0 1px 3px ${isDark ? "rgba(0,0,0,0.3)" : "rgba(0,0,0,0.1)"};
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80' viewBox='0 0 80 80' style='transform: rotate(-10deg);'%3E%3Ctext x='0' y='50' font-size='40' opacity='0.08'%3E🐼%3C/text%3E%3C/svg%3E");
+  background-repeat: repeat;
+  background-size: 80px 80px;
+}
+
 .send-info {
 	font-size: 8px;
 	color: ${isDark ? "#888" : "#666"};
