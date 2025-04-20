@@ -877,13 +877,13 @@ a:hover {
   font-weight: bold;
 }
 
-  .mention.highlight {
-    background-color: ${isDark ? "#551111" : "#ffd6d6"};
-    color: ${isDark ? "#ff5555" : "#aa0000"};
-    padding: 2px 5px;
-    border-radius: 4px;
-    font-weight: bold;
-  }
+.mention.highlight {
+  background-color: ${isDark ? "#004080" : "#b3e5ff"}; 
+  color: ${isDark ? "#66ccff" : "#004080"}; 
+  padding: 2px 5px;
+  border-radius: 4px;
+  font-weight: bold;
+}
 
   `;
   }
