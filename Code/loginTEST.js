@@ -595,6 +595,19 @@
               .value.trim();
             const bio = document.getElementById("create-bio").value.trim();
 
+            if (!email) {
+              console.error("Email is undefined! Cannot update account.");
+              alert("Missing email. Please refresh.");
+              return;
+            }
+            if (!database) {
+              console.error("Database is undefined! Cannot update account.");
+              alert("Missing database. Please refresh.");
+              return;
+            }
+
+            let versionToSave = mostRecentVersionKey; 
+
             const accountsRef = ref(
               database,
               `Accounts/${email.replace(/\./g, "*")}`,
@@ -603,52 +616,64 @@
               database,
               `Accounts/${email.replace(/\./g, "*")}`,
             );
-            const userSnapshot = await get(userRef);
-            const userData = userSnapshot.val();
-            const missingVersion = !userData.Version;
-            if (missingVersion) {
-              const updatesRef = ref(database, "Updates");
-              const updatesSnapshot = await get(updatesRef);
-              if (updatesSnapshot.exists()) {
-                const updates = updatesSnapshot.val();
-                const versionKeys = Object.keys(updates).sort((a, b) => {
-                  const aParts = a.split("*").map(Number);
-                  const bParts = b.split("*").map(Number);
-                  for (
-                    let i = 0;
-                    i < Math.max(aParts.length, bParts.length);
-                    i++
-                  ) {
-                    const aSegment = aParts[i] || 0;
-                    const bSegment = bParts[i] || 0;
-                    if (aSegment < bSegment) return -1;
-                    if (aSegment > bSegment) return 1;
-                  }
-                  return 0;
-                });
-                mostRecentVersionKey = versionKeys[versionKeys.length - 1];
+
+            try {
+              const userSnapshot = await get(userRef);
+              const userData = userSnapshot.val();
+              const missingVersion = !userData || !userData.Version;
+
+              if (missingVersion) {
+                const updatesRef = ref(database, "Updates");
+                const updatesSnapshot = await get(updatesRef);
+                if (updatesSnapshot.exists()) {
+                  const updates = updatesSnapshot.val();
+                  const versionKeys = Object.keys(updates).sort((a, b) => {
+                    const aParts = a.split("*").map(Number);
+                    const bParts = b.split("*").map(Number);
+                    for (
+                      let i = 0;
+                      i < Math.max(aParts.length, bParts.length);
+                      i++
+                    ) {
+                      const aSegment = aParts[i] || 0;
+                      const bSegment = bParts[i] || 0;
+                      if (aSegment < bSegment) return -1;
+                      if (aSegment > bSegment) return 1;
+                    }
+                    return 0;
+                  });
+                  versionToSave = versionKeys[versionKeys.length - 1];
+                }
               }
-            }
-            const updatedAccountData = {
-              Username: username || "Anonymous",
-              Bio: bio || "I'm a yapper",
-              Version: mostRecentVersionKey,
-            };
 
-            set(accountsRef, updatedAccountData)
-              .then(() => {})
-              .catch((error) => {
-                console.error("Error updating profile:", error);
-                alert("Failed to update profile. Please try again.");
-              });
-            const storedForget = localStorage.getItem("neverPersist");
+              if (!versionToSave) {
+                console.warn(
+                  "No version key found. Setting default version '1*0'.",
+                );
+                versionToSave = "1*0";
+              }
 
-            if (storedForget !== "true" && !skip) {
-              customizeScreen.classList.add("hidden");
-              stayloginScreen.classList.remove("hidden");
-            } else {
-              customizeScreen.classList.add("hidden");
-              openChatScreen();
+              const updatedAccountData = {
+                Username: username || "Anonymous",
+                Bio: bio || "I'm a yapper",
+                Version: versionToSave,
+              };
+
+              await set(accountsRef, updatedAccountData);
+              console.log("Profile updated successfully!");
+
+              const storedForget = localStorage.getItem("neverPersist");
+
+              if (storedForget !== "true" && !skip) {
+                customizeScreen.classList.add("hidden");
+                stayloginScreen.classList.remove("hidden");
+              } else {
+                customizeScreen.classList.add("hidden");
+                openChatScreen();
+              }
+            } catch (error) {
+              console.error("Error updating profile:", error);
+              alert("Failed to update profile. Please try again.");
             }
           };
 
