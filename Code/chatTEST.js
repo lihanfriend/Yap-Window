@@ -2237,19 +2237,19 @@ ${chatHistory}`;
     const scrollY = window.scrollY || window.pageYOffset;
 
     let left = rect.left + scrollX;
-    let bottom = rect.bottom + scrollY;
+    let top = rect.top + scrollY;
 
     const boxWidth = 220;
     const maxBoxHeight = 150;
-    const pageWidth = document.documentElement.clientWidth;
+    const pageHeight = document.documentElement.clientHeight;
 
-    if (left + boxWidth > pageWidth - 10) {
-      left = pageWidth - boxWidth - 10;
+    if (left + boxWidth > document.documentElement.clientWidth - 10) {
+      left = document.documentElement.clientWidth - boxWidth - 10;
       if (left < 10) left = 10;
     }
 
     mentionSuggestions.style.left = `${left}px`;
-    mentionSuggestions.style.top = `${bottom + 5}px`;
+    mentionSuggestions.style.top = `${top - mentionSuggestions.offsetHeight - 5}px`;
     mentionSuggestions.style.maxHeight = `${maxBoxHeight}px`;
     mentionSuggestions.style.overflowY = "auto";
     mentionSuggestions.style.display = "block";
@@ -2283,7 +2283,7 @@ ${chatHistory}`;
 
     messageInput.innerHTML =
       escapeHtml(updatedBefore) +
-      `<span class="mention" data-email="email@example.com", contenteditable="false">@username</span>&nbsp;` +
+      `<span class="mention" data-email="email@example.com", contenteditable="false">@${username}</span>&nbsp;` +
       escapeHtml(afterCursor);
 
     const spaceNode = document.createTextNode(" ");
