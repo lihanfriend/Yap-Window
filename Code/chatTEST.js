@@ -2165,10 +2165,10 @@ ${chatHistory}`;
   }
 
   let mentionSuggestions = document.createElement("div");
-mentionSuggestions.id = "mention-suggestions";
-mentionSuggestions.className = "mention-suggestions";
-document.body.appendChild(mentionSuggestions);
-mentionSuggestions.style.display = "none";
+  mentionSuggestions.id = "mention-suggestions";
+  mentionSuggestions.className = "mention-suggestions";
+  document.body.appendChild(mentionSuggestions);
+  mentionSuggestions.style.display = "none";
   let activeMention = null;
 
   messageInput.addEventListener("input", async function (e) {
@@ -2227,39 +2227,33 @@ mentionSuggestions.style.display = "none";
     }
   });
 
-function positionMentionBox() {
-  const selection = window.getSelection();
-  if (!selection.rangeCount) return;
+  function positionMentionBox() {
+    const selection = window.getSelection();
+    if (!selection.rangeCount) return;
 
-  const range = selection.getRangeAt(0);
-  const rect = range.getBoundingClientRect();
-  const scrollX = window.scrollX || window.pageXOffset;
-  const scrollY = window.scrollY || window.pageYOffset;
+    const range = selection.getRangeAt(0);
+    const rect = range.getBoundingClientRect();
+    const scrollX = window.scrollX || window.pageXOffset;
+    const scrollY = window.scrollY || window.pageYOffset;
 
-  let left = rect.left + scrollX;
-  let top = rect.top + scrollY;
+    let left = rect.left + scrollX;
+    let bottom = rect.bottom + scrollY;
 
-  const boxWidth = 220; 
-  const boxHeight = 150; 
-  const pageWidth = document.documentElement.clientWidth;
-  const pageHeight = document.documentElement.clientHeight;
+    const boxWidth = 220;
+    const maxBoxHeight = 150;
+    const pageWidth = document.documentElement.clientWidth;
 
-  if (left + boxWidth > pageWidth - 10) {
-    left = pageWidth - boxWidth - 10;
-    if (left < 10) left = 10;
+    if (left + boxWidth > pageWidth - 10) {
+      left = pageWidth - boxWidth - 10;
+      if (left < 10) left = 10;
+    }
+
+    mentionSuggestions.style.left = `${left}px`;
+    mentionSuggestions.style.top = `${bottom + 5}px`;
+    mentionSuggestions.style.maxHeight = `${maxBoxHeight}px`;
+    mentionSuggestions.style.overflowY = "auto";
+    mentionSuggestions.style.display = "block";
   }
-
-  top = top - boxHeight - 8; 
-
-  if (top < 10) {
-    top = 10;
-  }
-
-  mentionSuggestions.style.left = left + "px";
-  mentionSuggestions.style.top = top + "px";
-  mentionSuggestions.style.maxHeight = boxHeight + "px"; 
-  mentionSuggestions.style.display = "block";
-}
 
   messageInput.addEventListener("keydown", function (e) {
     if (e.key === " " && activeMention) {
@@ -2289,13 +2283,18 @@ function positionMentionBox() {
 
     messageInput.innerHTML =
       escapeHtml(updatedBefore) +
-      `<span class="mention">@${username}</span>&nbsp;` +
+      `<span class="mention" data-email="email@example.com", contenteditable="false">@username</span>&nbsp;` +
       escapeHtml(afterCursor);
 
-    setCursorPositionInContentEditable(
-      messageInput,
-      (updatedBefore + username + " ").length,
-    );
+    const spaceNode = document.createTextNode(" ");
+    mentionSpan.parentNode.insertBefore(spaceNode, mentionSpan.nextSibling);
+
+    const newRange = document.createRange();
+    newRange.setStartAfter(spaceNode);
+    newRange.collapse(true);
+
+    selection.removeAllRanges();
+    selection.addRange(newRange);
   }
 
   function hideSuggestions() {
@@ -2321,6 +2320,27 @@ function positionMentionBox() {
     div.innerText = text;
     return div.innerHTML;
   }
+
+  document
+    .getElementById("message-input")
+    .addEventListener("keydown", function (e) {
+      if (e.key === "Backspace") {
+        const selection = window.getSelection();
+        if (!selection.rangeCount) return;
+
+        const range = selection.getRangeAt(0);
+        const node = range.startContainer;
+
+        if (
+          node.previousSibling &&
+          node.previousSibling.classList &&
+          node.previousSibling.classList.contains("mention")
+        ) {
+          e.preventDefault();
+          node.previousSibling.remove();
+        }
+      }
+    });
 
   messageInput.addEventListener("blur", () => {
     applyFakeHighlight();
