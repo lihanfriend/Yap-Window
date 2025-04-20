@@ -2164,7 +2164,11 @@ ${chatHistory}`;
     }
   }
 
-  const mentionSuggestions = document.getElementById("mention-suggestions");
+  let mentionSuggestions = document.createElement("div");
+mentionSuggestions.id = "mention-suggestions";
+mentionSuggestions.className = "mention-suggestions";
+document.body.appendChild(mentionSuggestions);
+mentionSuggestions.style.display = "none";
   let activeMention = null;
 
   messageInput.addEventListener("input", async function (e) {
@@ -2213,9 +2217,7 @@ ${chatHistory}`;
           mentionSuggestions.appendChild(div);
         });
 
-        mentionSuggestions.style.left = caretRect.left + "px";
-        mentionSuggestions.style.top = caretRect.bottom + "px";
-        mentionSuggestions.style.display = "block";
+        positionMentionBox();
         activeMention = mentionMatch[0];
       } else {
         hideSuggestions();
@@ -2224,6 +2226,31 @@ ${chatHistory}`;
       hideSuggestions();
     }
   });
+
+  function positionMentionBox() {
+  const selection = window.getSelection();
+  if (!selection.rangeCount) return;
+
+  const range = selection.getRangeAt(0);
+  const rect = range.getBoundingClientRect();
+  const scrollX = window.scrollX || window.pageXOffset;
+  const scrollY = window.scrollY || window.pageYOffset;
+
+  let left = rect.left + scrollX;
+  let top = rect.top + scrollY; 
+
+  const boxWidth = 220; 
+  const pageWidth = document.documentElement.clientWidth;
+
+  if (left + boxWidth > pageWidth - 10) {
+    left = pageWidth - boxWidth - 10;
+    if (left < 10) left = 10;
+  }
+
+  mentionSuggestions.style.left = left + "px";
+  mentionSuggestions.style.top = top + "px";
+  mentionSuggestions.style.display = "block";
+}
 
   messageInput.addEventListener("keydown", function (e) {
     if (e.key === " " && activeMention) {
