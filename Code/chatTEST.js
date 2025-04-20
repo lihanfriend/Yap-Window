@@ -2054,8 +2054,12 @@ ${chatHistory}`;
   let mentionIndex = 0;
   let lastInsertedMention = null;
   let cyclingMention = false;
+  let isProgrammaticInsert = false;
 
   messageInput.addEventListener("input", async function (e) {
+    if (isProgrammaticInsert) {
+       return;
+    }
     const selection = window.getSelection();
     if (!selection.rangeCount) return;
     const range = selection.getRangeAt(0);
@@ -2139,6 +2143,7 @@ ${chatHistory}`;
     if (e.key === "Tab" && activeMention) {
       e.preventDefault();
       cyclingMention = true;
+      isProgrammaticInsert = true;
 
       if (!currentMatches.length) return;
 
@@ -2159,10 +2164,14 @@ ${chatHistory}`;
       mentionSuggestions.style.display = "block";
 
       setTimeout(() => (cyclingMention = false), 0);
+      setTimeout(() => { isProgrammaticInsert = false }, 0);
       return;
     }
 
     if (e.key === " " && activeMention) {
+      if (isProgrammaticInsert) {
+        return;
+      }
       e.preventDefault();
       activeMention = null;
       hideSuggestions();
