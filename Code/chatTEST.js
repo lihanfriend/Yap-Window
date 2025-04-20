@@ -676,7 +676,12 @@
         ) {
           adjacentMessageDiv.classList.add("unread");
         }
-
+        const mentions = messageContent.querySelectorAll(".mention");
+        mentions.forEach((mention) => {
+          if (mention.dataset.email === email) {
+            mention.classList.add("highlight");
+          }
+        });
         adjacentMessageDiv.appendChild(messageContent);
       } else {
         const messageDiv = document.createElement("div");
@@ -733,6 +738,13 @@
         const messageContent = document.createElement("p");
         messageContent.innerHTML = message.Message;
         messageContent.style.marginTop = "5px";
+
+        const mentions = messageContent.querySelectorAll(".mention");
+        mentions.forEach((mention) => {
+          if (mention.dataset.email === email) {
+            mention.classList.add("highlight");
+          }
+        });
         messageDiv.appendChild(messageContent);
 
         if (prepend) {
@@ -752,152 +764,6 @@
 
       appendedMessages.add(message.id);
       return adjacentMessageDiv;
-    }
-
-    async function appendMessages(newMessages, prepend = false) {
-      if (currentChat !== chatName) return;
-
-      let lastUser = null;
-      let lastTimestamp = null;
-      let lastMessageDiv = null;
-      const lastReadMessage = readMessages[chatName] || "";
-
-      const fragment = document.createDocumentFragment();
-
-      const messagesToProcess = [...newMessages].sort(
-        (a, b) => new Date(a.Date) - new Date(b.Date),
-      );
-
-      logMessageOrder(
-        messagesToProcess,
-        prepend ? "Prepending messages" : "Appending messages",
-      );
-      if (!prepend && messagesDiv.children.length > 0) {
-        lastMessageDiv = messagesDiv.lastChild;
-        lastUser = lastMessageDiv.dataset.user;
-        lastTimestamp = new Date(lastMessageDiv.dataset.date);
-      }
-
-      const wasNearBottom =
-        messagesDiv.scrollHeight -
-          messagesDiv.scrollTop -
-          messagesDiv.clientHeight <=
-        20;
-
-      for (const message of messagesToProcess) {
-        if (appendedMessages.has(message.id)) continue;
-
-        const messageDate = new Date(message.Date);
-        const username = message.User;
-        const isSameUser = username === lastUser;
-        const isCloseInTime =
-          lastTimestamp && messageDate - lastTimestamp < 5 * 60 * 1000;
-
-        if (!isSameUser || !isCloseInTime || !lastMessageDiv) {
-          const messageDiv = document.createElement("div");
-          messageDiv.classList.add("message");
-          if (
-            message.User.includes("elianag30@lakesideschoo.org") &&
-            !email.includes("elianag30@lakesideschool.org")
-          ) {
-            messageDiv.classList.add("Eliana");
-            if (!lastReadMessage || message.id > lastReadMessage) {
-              messageDiv.classList.add("unread");
-            } else {
-              messageDiv.classList.remove("unread");
-            }
-          } else if (Object.values(BOT_USERS).includes(message.User)) {
-            messageDiv.classList.add("bot");
-            if (!lastReadMessage || message.id > lastReadMessage) {
-              messageDiv.classList.add("unread");
-            } else {
-              messageDiv.classList.remove("unread");
-            }
-          } else if (message.User === email) {
-            messageDiv.classList.add("sent");
-          } else {
-            messageDiv.classList.add("received");
-            if (!lastReadMessage || message.id > lastReadMessage) {
-              messageDiv.classList.add("unread");
-            } else {
-              messageDiv.classList.remove("unread");
-            }
-          }
-
-          messageDiv.style.marginTop = "10px";
-          messageDiv.dataset.messageId = message.id;
-          messageDiv.dataset.user = username;
-          messageDiv.dataset.date = messageDate;
-          messageDiv.dataset.lastMessageId = message.id;
-
-          const headerInfo = document.createElement("p");
-          headerInfo.className = "send-info";
-
-          headerInfo.textContent = `${username}   ${formatDate(message.Date)}`;
-          messageDiv.appendChild(headerInfo);
-
-          getUsernameFromEmail(username).then((displayName) => {
-            if (displayName && displayName !== username) {
-              headerInfo.textContent = `${displayName} (${username}) ${formatDate(message.Date)}`;
-            } else {
-              headerInfo.textContent = `${username} ${formatDate(message.Date)}`;
-            }
-          });
-          const messageContent = document.createElement("p");
-          messageContent.innerHTML = message.Message;
-          messageContent.style.marginTop = "5px";
-
-          const mentions = messageContent.querySelectorAll(".mention");
-          mentions.forEach((mention) => {
-            if (mention.dataset.email === email) {
-              mention.classList.add("highlight-self-mention");
-            }
-          });
-
-          messageDiv.appendChild(messageContent);
-
-          if (prepend) {
-            fragment.insertBefore(messageDiv, fragment.firstChild);
-          } else {
-            fragment.appendChild(messageDiv);
-          }
-          lastMessageDiv = messageDiv;
-        } else {
-          const messageContent = document.createElement("p");
-          messageContent.innerHTML = message.Message;
-          messageContent.style.marginTop = "5px";
-          const mentions = messageContent.querySelectorAll(".mention");
-          mentions.forEach((mention) => {
-            if (mention.dataset.email === email) {
-              mention.classList.add("highlight-self-mention");
-            }
-          });
-          lastMessageDiv.appendChild(messageContent);
-          lastMessageDiv.dataset.lastMessageId = message.id;
-          if (
-            message.User !== email &&
-            (!lastReadMessage || message.id > lastReadMessage)
-          ) {
-            lastMessageDiv.classList.add("unread");
-          }
-        }
-        document.getElementById("bookmarklet-gui").scrollTop = 0;
-        lastUser = username;
-        lastTimestamp = messageDate;
-        appendedMessages.add(message.id);
-      }
-
-      if (prepend) {
-        messagesDiv.insertBefore(fragment, messagesDiv.firstChild);
-      } else {
-        messagesDiv.appendChild(fragment);
-        if (initialLoad || wasNearBottom) {
-          requestAnimationFrame(() => {
-            messagesDiv.scrollTop = messagesDiv.scrollHeight;
-          });
-        }
-      }
-      document.getElementById("bookmarklet-gui").scrollTop = 0;
     }
 
     currentChatListener = onValue(messagesRef, async (snapshot) => {
