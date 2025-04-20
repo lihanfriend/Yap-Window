@@ -846,6 +846,14 @@
           const messageContent = document.createElement("p");
           messageContent.innerHTML = message.Message;
           messageContent.style.marginTop = "5px";
+
+          const mentions = messageContent.querySelectorAll(".mention");
+          mentions.forEach((mention) => {
+            if (mention.dataset.email === email) {
+              mention.classList.add("highlight-self-mention");
+            }
+          });
+
           messageDiv.appendChild(messageContent);
 
           if (prepend) {
@@ -858,6 +866,12 @@
           const messageContent = document.createElement("p");
           messageContent.innerHTML = message.Message;
           messageContent.style.marginTop = "5px";
+          const mentions = messageContent.querySelectorAll(".mention");
+          mentions.forEach((mention) => {
+            if (mention.dataset.email === email) {
+              mention.classList.add("highlight-self-mention");
+            }
+          });
           lastMessageDiv.appendChild(messageContent);
           lastMessageDiv.dataset.lastMessageId = message.id;
           if (
@@ -2328,14 +2342,31 @@ ${chatHistory}`;
 
         const range = selection.getRangeAt(0);
         const node = range.startContainer;
+        const offset = range.startOffset;
 
-        if (
-          node.previousSibling &&
-          node.previousSibling.classList &&
-          node.previousSibling.classList.contains("mention")
-        ) {
-          e.preventDefault();
-          node.previousSibling.remove();
+        if (offset === 0) {
+          let previous = node.previousSibling;
+          if (
+            previous &&
+            previous.classList &&
+            previous.classList.contains("mention")
+          ) {
+            e.preventDefault();
+            previous.remove();
+          }
+        } else if (node.nodeType === Node.TEXT_NODE) {
+          const textUpToCaret = node.textContent.slice(0, offset);
+
+          if (textUpToCaret.endsWith("\u00A0") && node.previousSibling) {
+            const previous = node.previousSibling;
+            if (previous.classList && previous.classList.contains("mention")) {
+              e.preventDefault();
+              previous.remove();
+
+              node.textContent =
+                textUpToCaret.slice(0, -1) + node.textContent.slice(offset);
+            }
+          }
         }
       }
     });
