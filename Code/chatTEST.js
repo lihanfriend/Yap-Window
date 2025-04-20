@@ -680,9 +680,18 @@
       } else {
         const messageDiv = document.createElement("div");
         messageDiv.classList.add("message");
-
-        if (
-          message.User.includes("elianag30@lakesideschoo.org") &&
+        if (message.User === "w.n.lazypanda5050@gmail.com") {
+          messageDiv.classList.add("winston");
+          if (email === "w.n.lazypanda5050@gmail.com") {
+            messageDiv.classList.add("sent");
+          } else {
+            messageDiv.classList.add("received");
+            if (!lastReadMessage || message.id > lastReadMessage) {
+              messageDiv.classList.add("unread");
+            }
+          }
+        } else if (
+          message.User.includes("elianag30@lakesideschool.org") &&
           !email.includes("elianag30@lakesideschool.org")
         ) {
           messageDiv.classList.add("Eliana");
@@ -2540,12 +2549,12 @@ ${chatHistory}`;
     attachmentPreview.style.display = attachments.length > 0 ? "flex" : "none";
   }
 
-function addAttachmentStyles() {
-  if (document.getElementById('attachment-styles')) return;
+  function addAttachmentStyles() {
+    if (document.getElementById("attachment-styles")) return;
 
-  const style = document.createElement('style');
-  style.id = 'attachment-styles';
-  style.textContent = `
+    const style = document.createElement("style");
+    style.id = "attachment-styles";
+    style.textContent = `
     #attachment-preview {
       display: none;
       width: 100%;
@@ -2648,74 +2657,86 @@ function addAttachmentStyles() {
       margin: 2px 0;
     }
   `;
-  document.head.appendChild(style);
-}
-
-function addAttachment(fileBlobOrUrl, type, fileName = "") {
-  const item = document.createElement("div");
-  item.className = "attachment-item";
-  item.title = fileName;
-
-  const removeBtn = document.createElement("button");
-  removeBtn.innerHTML = "&#10005;"; 
-  removeBtn.className = "remove-attachment";
-  removeBtn.onclick = (e) => {
-    e.stopPropagation();
-    attachments = attachments.filter((a) => a.file !== fileBlobOrUrl);
-    item.remove();
-    updateAttachmentBar();
-  };
-
-  const fileNameDisplay = document.createElement("div");
-  fileNameDisplay.className = "attachment-filename";
-  fileNameDisplay.textContent = fileName ? (fileName.length > 12 ? fileName.substring(0, 10) + "..." : fileName) : "";
-
-  const mimeType = fileBlobOrUrl.split(',')[0].split(':')[1].split(';')[0];
-
-  if (type === "image") {
-    const imgContainer = document.createElement("div");
-    imgContainer.style.width = "100%";
-    imgContainer.style.height = "100%";
-    imgContainer.style.position = "relative";
-
-    const img = document.createElement("img");
-    img.src = fileBlobOrUrl;
-    img.style.width = "100%";
-    img.style.height = "calc(100% - 14px)"; 
-    img.style.objectFit = "cover";
-
-    imgContainer.appendChild(img);
-    item.appendChild(imgContainer);
-
-    item.onclick = (e) => {
-      if (e.target.classList.contains("remove-attachment") || e.target === removeBtn) return;
-      window.openFileViewer(fileBlobOrUrl, fileName, mimeType);
-    };
-  } else {
-    const fileIcon = document.createElement("div");
-    fileIcon.innerHTML = "📎";
-    fileIcon.style.fontSize = "24px";
-    fileIcon.style.height = "calc(100% - 14px)"; 
-    fileIcon.style.display = "flex";
-    fileIcon.style.alignItems = "center";
-    fileIcon.style.justifyContent = "center";
-    fileIcon.style.width = "100%";
-
-    item.appendChild(fileIcon);
-
-    item.onclick = (e) => {
-      if (e.target.classList.contains("remove-attachment") || e.target === removeBtn) return;
-      window.openFileViewer(fileBlobOrUrl, fileName, mimeType);
-    };
+    document.head.appendChild(style);
   }
 
-  item.appendChild(fileNameDisplay);
-  item.appendChild(removeBtn); 
+  function addAttachment(fileBlobOrUrl, type, fileName = "") {
+    const item = document.createElement("div");
+    item.className = "attachment-item";
+    item.title = fileName;
 
-  attachmentPreview.appendChild(item);
-  attachments.push({ file: fileBlobOrUrl, type, name: fileName });
-  updateAttachmentBar();
-}
+    const removeBtn = document.createElement("button");
+    removeBtn.innerHTML = "&#10005;";
+    removeBtn.className = "remove-attachment";
+    removeBtn.onclick = (e) => {
+      e.stopPropagation();
+      attachments = attachments.filter((a) => a.file !== fileBlobOrUrl);
+      item.remove();
+      updateAttachmentBar();
+    };
+
+    const fileNameDisplay = document.createElement("div");
+    fileNameDisplay.className = "attachment-filename";
+    fileNameDisplay.textContent = fileName
+      ? fileName.length > 12
+        ? fileName.substring(0, 10) + "..."
+        : fileName
+      : "";
+
+    const mimeType = fileBlobOrUrl.split(",")[0].split(":")[1].split(";")[0];
+
+    if (type === "image") {
+      const imgContainer = document.createElement("div");
+      imgContainer.style.width = "100%";
+      imgContainer.style.height = "100%";
+      imgContainer.style.position = "relative";
+
+      const img = document.createElement("img");
+      img.src = fileBlobOrUrl;
+      img.style.width = "100%";
+      img.style.height = "calc(100% - 14px)";
+      img.style.objectFit = "cover";
+
+      imgContainer.appendChild(img);
+      item.appendChild(imgContainer);
+
+      item.onclick = (e) => {
+        if (
+          e.target.classList.contains("remove-attachment") ||
+          e.target === removeBtn
+        )
+          return;
+        window.openFileViewer(fileBlobOrUrl, fileName, mimeType);
+      };
+    } else {
+      const fileIcon = document.createElement("div");
+      fileIcon.innerHTML = "📎";
+      fileIcon.style.fontSize = "24px";
+      fileIcon.style.height = "calc(100% - 14px)";
+      fileIcon.style.display = "flex";
+      fileIcon.style.alignItems = "center";
+      fileIcon.style.justifyContent = "center";
+      fileIcon.style.width = "100%";
+
+      item.appendChild(fileIcon);
+
+      item.onclick = (e) => {
+        if (
+          e.target.classList.contains("remove-attachment") ||
+          e.target === removeBtn
+        )
+          return;
+        window.openFileViewer(fileBlobOrUrl, fileName, mimeType);
+      };
+    }
+
+    item.appendChild(fileNameDisplay);
+    item.appendChild(removeBtn);
+
+    attachmentPreview.appendChild(item);
+    attachments.push({ file: fileBlobOrUrl, type, name: fileName });
+    updateAttachmentBar();
+  }
   function clearAttachments() {
     attachments = [];
     attachmentPreview.innerHTML = "";
