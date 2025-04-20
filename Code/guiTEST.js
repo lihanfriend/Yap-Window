@@ -741,17 +741,6 @@ a:hover {
   position: relative;
 }
 
-.attachment-item:hover::after {
-  content: "🗙";
-  position: absolute;
-  top: 2px;
-  right: 4px;
-  color: ${isDark ? "#ffcccc" : "#ff0000"};
-  background: ${isDark ? "#222222" : "#ffffff"};
-  border-radius: 50%;
-  font-size: 14px;
-}
-
 .preview-image {
   max-width: 120px;
   max-height: 120px;
