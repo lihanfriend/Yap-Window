@@ -2148,7 +2148,7 @@ ${chatHistory}`;
 
       mentionIndex++;
       if (mentionIndex >= currentMatches.length) {
-        hideSuggestions();
+        mentionIndex = 0;
       }
     }
 
@@ -2157,6 +2157,14 @@ ${chatHistory}`;
       const email = currentMatches[0];
       if (email) {
         insertMention(email);
+      }
+      hideSuggestions();
+    }
+
+    if (e.key === "Escape") {
+      if (lastInsertedMention && lastInsertedMention.parentNode) {
+        lastInsertedMention.remove();
+        lastInsertedMention = null;
       }
       hideSuggestions();
     }
@@ -2202,6 +2210,9 @@ ${chatHistory}`;
   function hideSuggestions() {
     mentionSuggestions.style.display = "none";
     activeMention = null;
+    currentMatches = [];
+    mentionIndex = 0;
+    lastInsertedMention = null;
   }
 
   function getCaretCharacterOffsetWithin(element) {
