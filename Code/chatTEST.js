@@ -73,16 +73,15 @@
     });
 
     if (messagesDiv.children.length === 0) {
-      console.log("Chat is empty, nothing to scroll to");
       return;
     }
 
-    const hasUnreadMessages = document.querySelector(".message.unread") !== null;
+    const hasUnreadMessages =
+      document.querySelector(".message.unread") !== null;
 
-  if (!hasUnreadMessages) {
-    console.log("No unread messages found, nothing to scroll to");
-    return;
-  }
+    if (!hasUnreadMessages) {
+      return;
+    }
 
     const lastReadMessageId = readMessages[chatName];
 
@@ -94,7 +93,6 @@
           lastMessage.dataset.lastMessageId || lastMessage.dataset.messageId;
         if (lastMessageId) {
           await markMessagesAsRead(chatName, lastMessageId);
-          console.log("Marked latest message as read for new chat");
         }
       }
       return;
@@ -129,9 +127,6 @@
             lastMessage.dataset.lastMessageId || lastMessage.dataset.messageId;
           if (lastMessageId) {
             await markMessagesAsRead(chatName, lastMessageId);
-            console.log(
-              "Marked latest message as read - no unread messages found",
-            );
           }
         }
 
@@ -151,9 +146,6 @@
             lastMessage.dataset.lastMessageId || lastMessage.dataset.messageId;
           if (lastMessageId) {
             await markMessagesAsRead(chatName, lastMessageId);
-            console.log(
-              "Marked latest message as read - couldn't load more messages",
-            );
           }
         }
 
@@ -554,11 +546,7 @@
     let initialLoad = true;
     let oldestLoadedTimestamp = null;
     const MESSAGES_PER_LOAD = 100;
-    function logMessageOrder(messages, label) {
-      console.log(
-        `${label} - First message: ${new Date(messages[0]?.Date)}, Last message: ${new Date(messages[messages.length - 1]?.Date)}`,
-      );
-    }
+    function logMessageOrder(messages, label) {}
     messagesDiv.addEventListener("scroll", async () => {
       if (
         messagesDiv.scrollTop <= 100 &&
@@ -594,10 +582,6 @@
               const newScrollHeight = messagesDiv.scrollHeight;
               const heightDifference = newScrollHeight - oldScrollHeight;
               messagesDiv.scrollTop = oldScrollTop + heightDifference;
-
-              console.log(
-                `Scroll adjusted: old=${oldScrollTop}, diff=${heightDifference}, new=${messagesDiv.scrollTop}`,
-              );
             });
           }
         }
@@ -3026,13 +3010,10 @@ ${chatHistory}`;
           const channelRef = ref(database, `Chat Info/${channelNameToDelete}`);
           remove(channelRef)
             .then(() => {
-              console.log("Chat Info deleted successfully");
-
               const messagesRef = ref(database, `Chats/${channelNameToDelete}`);
               return remove(messagesRef);
             })
             .then(() => {
-              console.log("Messages deleted successfully");
               document.getElementById("channel-screen").classList.add("hidden");
               chatScreen.style.display = "flex";
               resetForm();
