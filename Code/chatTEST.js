@@ -2281,6 +2281,8 @@ function insertMention(email, username) {
     selection.removeAllRanges();
     selection.addRange(newRange);
 
+    hideSuggestions()
+
     return mentionSpan;
   }
 
