@@ -162,48 +162,51 @@
                         userData.Bio || "";
                       skip = true;
                       return;
-                    }
-                    const missingVersion = !userData.Version;
-                    if (missingVersion) {
-                      const updatesRef = ref(database, "Updates");
-                      const updatesSnapshot = await get(updatesRef);
-                      if (updatesSnapshot.exists()) {
-                        const updates = updatesSnapshot.val();
-                        const versionKeys = Object.keys(updates).sort(
-                          (a, b) => {
-                            const aParts = a.split("*").map(Number);
-                            const bParts = b.split("*").map(Number);
-                            for (
-                              let i = 0;
-                              i < Math.max(aParts.length, bParts.length);
-                              i++
-                            ) {
-                              const aSegment = aParts[i] || 0;
-                              const bSegment = bParts[i] || 0;
-                              if (aSegment < bSegment) return -1;
-                              if (aSegment > bSegment) return 1;
-                            }
-                            return 0;
-                          },
-                        );
-                        mostRecentVersionKey =
-                          versionKeys[versionKeys.length - 1];
+                    } else {
+                      const missingVersion = !userData.Version;
+                      if (missingVersion) {
+                        const updatesRef = ref(database, "Updates");
+                        const updatesSnapshot = await get(updatesRef);
+                        if (updatesSnapshot.exists()) {
+                          const updates = updatesSnapshot.val();
+                          const versionKeys = Object.keys(updates).sort(
+                            (a, b) => {
+                              const aParts = a.split("*").map(Number);
+                              const bParts = b.split("*").map(Number);
+                              for (
+                                let i = 0;
+                                i < Math.max(aParts.length, bParts.length);
+                                i++
+                              ) {
+                                const aSegment = aParts[i] || 0;
+                                const bSegment = bParts[i] || 0;
+                                if (aSegment < bSegment) return -1;
+                                if (aSegment > bSegment) return 1;
+                              }
+                              return 0;
+                            },
+                          );
+                          mostRecentVersionKey =
+                            versionKeys[versionKeys.length - 1];
 
-                        await update(userRef, {
-                          Version: mostRecentVersionKey,
-                        });
+                          await update(userRef, {
+                            Version: mostRecentVersionKey,
+                          });
 
-                        const storedForget =
-                          localStorage.getItem("neverPersist");
+                          const storedForget =
+                            localStorage.getItem("neverPersist");
 
-                        savedAccounScreen.classList.add("hidden");
+                          savedAccounScreen.classList.add("hidden");
+                          openChatScreen();
+                        }
+                      } else {
                         openChatScreen();
                       }
                     }
                   } else {
                     console.error("User record not found in database.");
                     customizeScreen.classList.remove("hidden");
-                    savedAccounScreen.classList.add("hidden");
+                    savedAccountScreen.classList.add("hidden");
                     return;
                   }
                 } catch (error) {
@@ -606,7 +609,7 @@
               return;
             }
 
-            let versionToSave = mostRecentVersionKey; 
+            let versionToSave = mostRecentVersionKey;
 
             const accountsRef = ref(
               database,
