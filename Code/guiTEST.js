@@ -877,6 +877,14 @@ a:hover {
   font-weight: bold;
 }
 
+  .mention.highlight {
+    background-color: ${isDark ? "#777" : "#a0e0ff"};
+    color: ${isDark ? "#fff" : "#005577"};
+    padding: 2px 5px;
+    border-radius: 4px;
+    font-weight: bold;
+  }
+
   `;
   }
 
