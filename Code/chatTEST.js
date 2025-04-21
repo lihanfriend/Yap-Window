@@ -508,10 +508,12 @@
 
   function trackUserInteraction() {
     hasInteracted = true;
+    console.log("interact!");
   }
 
   async function updateLastInteractTime() {
     if (!email) return;
+    console.log("Sending Update");
 
     const formattedEmail = email.replace(/\./g, "*");
 
@@ -562,6 +564,8 @@
       if (hasInteracted && currentTime - lastUpdateTime >= UPDATE_INTERVAL) {
         updateLastInteractTime();
       }
+
+      console.log("update!")
     }, UPDATE_INTERVAL);
   }
 
