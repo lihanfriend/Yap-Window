@@ -2587,16 +2587,16 @@ Make sure to follow all the instructions while answering questions.
   });
 
   document.getElementById("bold-btn").onclick = () => {
-    messageInput.execCommand("bold");
+    document.execCommand("bold");
   };
   document.getElementById("italic-btn").onclick = () => {
-    messageInput.execCommand("italic");
+    document.execCommand("italic");
   };
   document.getElementById("underline-btn").onclick = () => {
-    messageInput.execCommand("underline");
+    document.execCommand("underline");
   };
   document.getElementById("strike-btn").onclick = () => {
-    messageInput.execCommand("strikeThrough");
+    document.execCommand("strikeThrough");
   };
 
   function wrapSelectedText(wrapperNode) {
