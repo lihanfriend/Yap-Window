@@ -1465,6 +1465,9 @@
     let pureMessage = document
       .getElementById("message-input")
       .textContent.substring(0, 2500);
+
+    noFilesMessage = message
+    
     attachments.forEach((att, index) => {
       if (!att.file) return;
       if (att.type === "image") {
@@ -1563,7 +1566,7 @@ Here are some instructions on how to respond.
 3c. When a user asks a question, respond to the question only. Do not refer to the chat log without user request. Do not include any response of the history in your message. When referring to the chat log upon request, any messages from "[AI]" are your previous responses.
 
 Now, respond to the user's question naturally:
-User: ${email} asks: ${question}
+User: ${email} asks: ${noFilesMessage}
 
 Make sure to follow all the instructions while answering questions.
 `;
