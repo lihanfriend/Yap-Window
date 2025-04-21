@@ -678,7 +678,7 @@
         }
         const mentions = messageContent.querySelectorAll(".mention");
         mentions.forEach((mention) => {
-          if (mention.dataset.email === email) {
+          if (mention.dataset.email === email || mention.dataset.email === "Everyone") {
             mention.classList.add("highlight");
           }
         });
@@ -741,7 +741,7 @@
 
         const mentions = messageContent.querySelectorAll(".mention");
         mentions.forEach((mention) => {
-          if (mention.dataset.email === email) {
+          if (mention.dataset.email === email || mention.dataset.email === "Everyone") {
             mention.classList.add("highlight");
           }
         });
