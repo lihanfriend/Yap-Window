@@ -2104,6 +2104,19 @@ Make sure to follow all the instructions while answering questions.
         }
       });
 
+      const items = ["[AI]", "[EOD]", "[RNG]", "[Snake Game]", "Everyone"];
+      const usernames = ["AI", "EOD", "RNG", "Snake", "Everyone"];
+      
+      items.forEach((item, index) => {
+        const username = usernames[index];
+        if (
+          item.toLowerCase().includes(query) ||
+          username.toLowerCase().includes(query)
+        ) {
+          matches.push({ email: item, username });
+        }
+      });
+
       if (matches.length) {
         mentionIndex = 0;
         updateMentionDropdown(matches.slice(0, 5));
