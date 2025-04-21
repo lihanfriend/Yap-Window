@@ -508,12 +508,10 @@
 
   function trackUserInteraction() {
     hasInteracted = true;
-    console.log("interact!");
   }
 
   async function updateLastInteractTime() {
     if (!email) return;
-    console.log("Sending Update");
 
     const formattedEmail = email.replace(/\./g, "*");
 
@@ -529,17 +527,17 @@
 
       hasInteracted = false;
       lastUpdateTime = timestamp;
-
-      console.log(`Updated last interaction time for ${email}`);
     } catch (error) {
       console.error("Error updating last interaction time:", error);
     }
   }
 
   function setupInteractionTracking(gui) {
-    if (gui.domElement) {
-      gui.domElement.addEventListener("click", () => trackUserInteraction());
-      gui.domElement.addEventListener("change", () => trackUserInteraction());
+    const target = gui.domElement || gui;
+
+    if (target) {
+      target.addEventListener("click", () => trackUserInteraction());
+      target.addEventListener("change", () => trackUserInteraction());
     }
 
     if (gui.controllers) {
@@ -564,11 +562,8 @@
       if (hasInteracted && currentTime - lastUpdateTime >= UPDATE_INTERVAL) {
         updateLastInteractTime();
       }
-
-      console.log("update!")
     }, UPDATE_INTERVAL);
   }
-
   async function getUsernameFromEmail(userEmail) {
     if (!userEmail) return "";
     if (
