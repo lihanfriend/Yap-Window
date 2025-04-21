@@ -1543,7 +1543,7 @@
 
         const chatHistory = messageEntries
           .map(([id, msg]) => {
-            return `${msg.User}: ${msg.Message}`;
+            return `${msg.User}: ${msg.Message.substring(0, 500)}`;
           })
           .join("\n");
 
