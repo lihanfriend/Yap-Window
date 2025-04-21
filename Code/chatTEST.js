@@ -502,6 +502,61 @@
     updateReadAllStatus();
   }
 
+    function trackUserInteraction() {
+  hasInteracted = true;
+}
+
+async function updateLastInteractTime() {
+  if (!email) return;
+
+  const formattedEmail = email.replace(/\./g, "*");
+
+  const lastInteractRef = ref(database, `Accounts/${formattedEmail}/LastInteract`);
+
+  try {
+
+    const timestamp = Date.now();
+
+    await set(lastInteractRef, timestamp);
+
+    hasInteracted = false;
+    lastUpdateTime = timestamp;
+
+    console.log(`Updated last interaction time for ${email}`);
+  } catch (error) {
+    console.error("Error updating last interaction time:", error);
+  }
+}
+
+function setupInteractionTracking(gui) {
+
+  if (gui.domElement) {
+    gui.domElement.addEventListener("click", () => trackUserInteraction());
+    gui.domElement.addEventListener("change", () => trackUserInteraction());
+
+  }
+
+  if (gui.controllers) {
+    gui.controllers.forEach(controller => {
+      if (controller.domElement) {
+        controller.domElement.addEventListener("mousedown", () => trackUserInteraction());
+        controller.domElement.addEventListener("touchstart", () => trackUserInteraction());
+        controller.domElement.addEventListener("change", () => trackUserInteraction());
+      }
+    });
+  }
+
+  setInterval(() => {
+    const currentTime = Date.now();
+
+    if (hasInteracted && (currentTime - lastUpdateTime >= UPDATE_INTERVAL)) {
+      updateLastInteractTime();
+    }
+  }, UPDATE_INTERVAL);
+}
+
+  
+
   async function getUsernameFromEmail(userEmail) {
     if (!userEmail) return "";
     if (
@@ -1404,7 +1459,7 @@
 
           setTimeout(() => {
             URL.revokeObjectURL(blobUrl);
-          }, 60000); // Clean up after a minute
+          }, 60000);
         } catch (err) {
           console.error("Error opening file:", err);
           alert("Could not open the file. It may be corrupted or too large.");
@@ -3531,4 +3586,5 @@ function insertMention(email, username) {
   const messagesDiv = document.getElementById("messages");
   messagesDiv.scrollTop = messagesDiv.scrollHeight;
   updateModifyButtonVisibility();
+  setupInteractionTracking(gui);
 })();
