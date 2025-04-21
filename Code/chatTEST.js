@@ -2588,18 +2588,22 @@ Make sure to follow all the instructions while answering questions.
 
   document.getElementById("bold-btn").onclick = (e) => {
     e.preventDefault();
+    messageInput.focus();
     document.execCommand("bold");
   };
   document.getElementById("italic-btn").onclick = (e) => {
     e.preventDefault();
+    messageInput.focus();
     document.execCommand("italic");
   };
   document.getElementById("underline-btn").onclick = (e) => {
     e.preventDefault();
+    messageInput.focus();
     document.execCommand("underline");
   };
   document.getElementById("strike-btn").onclick = (e) => {
     e.preventDefault();
+    messageInput.focus();
     document.execCommand("strikeThrough");
   };
 
