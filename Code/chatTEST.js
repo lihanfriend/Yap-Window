@@ -3596,8 +3596,8 @@ Make sure to follow all the instructions while answering questions.
   setupUnreadCountUpdates();
   await initializeReadMessages();
   loadMessages("General");
+  setupInteractionTracking(document.getElementById("bookmarklet-gui"));
   const messagesDiv = document.getElementById("messages");
   messagesDiv.scrollTop = messagesDiv.scrollHeight;
   updateModifyButtonVisibility();
-  setupInteractionTracking(gui);
 })();
