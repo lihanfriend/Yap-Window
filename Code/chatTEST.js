@@ -502,60 +502,68 @@
     updateReadAllStatus();
   }
 
-    function trackUserInteraction() {
-  hasInteracted = true;
-}
+  let hasInteracted = false;
+  let lastUpdateTime = 0;
+  const UPDATE_INTERVAL = 60000;
 
-async function updateLastInteractTime() {
-  if (!email) return;
-
-  const formattedEmail = email.replace(/\./g, "*");
-
-  const lastInteractRef = ref(database, `Accounts/${formattedEmail}/LastInteract`);
-
-  try {
-
-    const timestamp = Date.now();
-
-    await set(lastInteractRef, timestamp);
-
-    hasInteracted = false;
-    lastUpdateTime = timestamp;
-
-    console.log(`Updated last interaction time for ${email}`);
-  } catch (error) {
-    console.error("Error updating last interaction time:", error);
-  }
-}
-
-function setupInteractionTracking(gui) {
-
-  if (gui.domElement) {
-    gui.domElement.addEventListener("click", () => trackUserInteraction());
-    gui.domElement.addEventListener("change", () => trackUserInteraction());
-
+  function trackUserInteraction() {
+    hasInteracted = true;
   }
 
-  if (gui.controllers) {
-    gui.controllers.forEach(controller => {
-      if (controller.domElement) {
-        controller.domElement.addEventListener("mousedown", () => trackUserInteraction());
-        controller.domElement.addEventListener("touchstart", () => trackUserInteraction());
-        controller.domElement.addEventListener("change", () => trackUserInteraction());
-      }
-    });
-  }
+  async function updateLastInteractTime() {
+    if (!email) return;
 
-  setInterval(() => {
-    const currentTime = Date.now();
+    const formattedEmail = email.replace(/\./g, "*");
 
-    if (hasInteracted && (currentTime - lastUpdateTime >= UPDATE_INTERVAL)) {
-      updateLastInteractTime();
+    const lastInteractRef = ref(
+      database,
+      `Accounts/${formattedEmail}/LastInteract`,
+    );
+
+    try {
+      const timestamp = Date.now();
+
+      await set(lastInteractRef, timestamp);
+
+      hasInteracted = false;
+      lastUpdateTime = timestamp;
+
+      console.log(`Updated last interaction time for ${email}`);
+    } catch (error) {
+      console.error("Error updating last interaction time:", error);
     }
-  }, UPDATE_INTERVAL);
-}
+  }
 
-  
+  function setupInteractionTracking(gui) {
+    if (gui.domElement) {
+      gui.domElement.addEventListener("click", () => trackUserInteraction());
+      gui.domElement.addEventListener("change", () => trackUserInteraction());
+    }
+
+    if (gui.controllers) {
+      gui.controllers.forEach((controller) => {
+        if (controller.domElement) {
+          controller.domElement.addEventListener("mousedown", () =>
+            trackUserInteraction(),
+          );
+          controller.domElement.addEventListener("touchstart", () =>
+            trackUserInteraction(),
+          );
+          controller.domElement.addEventListener("change", () =>
+            trackUserInteraction(),
+          );
+        }
+      });
+    }
+
+    setInterval(() => {
+      const currentTime = Date.now();
+
+      if (hasInteracted && currentTime - lastUpdateTime >= UPDATE_INTERVAL) {
+        updateLastInteractTime();
+      }
+    }, UPDATE_INTERVAL);
+  }
 
   async function getUsernameFromEmail(userEmail) {
     if (!userEmail) return "";
@@ -733,7 +741,10 @@ function setupInteractionTracking(gui) {
         }
         const mentions = messageContent.querySelectorAll(".mention");
         mentions.forEach((mention) => {
-          if (mention.dataset.email === email || mention.dataset.email === "Everyone") {
+          if (
+            mention.dataset.email === email ||
+            mention.dataset.email === "Everyone"
+          ) {
             mention.classList.add("highlight");
           }
         });
@@ -796,7 +807,10 @@ function setupInteractionTracking(gui) {
 
         const mentions = messageContent.querySelectorAll(".mention");
         mentions.forEach((mention) => {
-          if (mention.dataset.email === email || mention.dataset.email === "Everyone") {
+          if (
+            mention.dataset.email === email ||
+            mention.dataset.email === "Everyone"
+          ) {
             mention.classList.add("highlight");
           }
         });
@@ -1521,8 +1535,8 @@ function setupInteractionTracking(gui) {
       .getElementById("message-input")
       .textContent.substring(0, 2500);
 
-    noFilesMessage = message
-    
+    noFilesMessage = message;
+
     attachments.forEach((att, index) => {
       if (!att.file) return;
       if (att.type === "image") {
@@ -2136,7 +2150,7 @@ Make sure to follow all the instructions while answering questions.
 
   messageInput.addEventListener("input", async function (e) {
     if (isNavigating) {
-      isNavigating=false;
+      isNavigating = false;
       return;
     }
 
@@ -2164,7 +2178,7 @@ Make sure to follow all the instructions while answering questions.
 
       const items = ["[AI]", "[EOD]", "[RNG]", "[Snake Game]", "Everyone"];
       const usernames = ["AI", "EOD", "RNG", "Snake", "Everyone"];
-      
+
       items.forEach((item, index) => {
         const username = usernames[index];
         if (
@@ -2303,73 +2317,72 @@ Make sure to follow all the instructions while answering questions.
     }
   });
 
-function insertMention(email, username) {
-  const selection = window.getSelection();
-  if (!selection.rangeCount) return null;
+  function insertMention(email, username) {
+    const selection = window.getSelection();
+    if (!selection.rangeCount) return null;
 
-  const range = selection.getRangeAt(0);
+    const range = selection.getRangeAt(0);
 
-  const tempRange = range.cloneRange();
-  tempRange.setStart(messageInput, 0);
-  const textBeforeCursor = tempRange.toString();
+    const tempRange = range.cloneRange();
+    tempRange.setStart(messageInput, 0);
+    const textBeforeCursor = tempRange.toString();
 
-  const mentionMatch = textBeforeCursor.match(/@[\w\.\-]*$/);
+    const mentionMatch = textBeforeCursor.match(/@[\w\.\-]*$/);
 
-  function insertMentionSpan() {
-    const mentionSpan = document.createElement("span");
-    mentionSpan.className = "mention";
-    mentionSpan.setAttribute("data-email", email);
-    mentionSpan.setAttribute("contenteditable", "false");
-    mentionSpan.textContent = "@" + username;
+    function insertMentionSpan() {
+      const mentionSpan = document.createElement("span");
+      mentionSpan.className = "mention";
+      mentionSpan.setAttribute("data-email", email);
+      mentionSpan.setAttribute("contenteditable", "false");
+      mentionSpan.textContent = "@" + username;
 
-    range.insertNode(mentionSpan);
+      range.insertNode(mentionSpan);
 
-    const spaceNode = document.createTextNode("\u00A0"); 
-    mentionSpan.parentNode.insertBefore(spaceNode, mentionSpan.nextSibling);
+      const spaceNode = document.createTextNode("\u00A0");
+      mentionSpan.parentNode.insertBefore(spaceNode, mentionSpan.nextSibling);
 
-    const newRange = document.createRange();
-    newRange.setStartAfter(spaceNode);
-    newRange.collapse(true);
-    selection.removeAllRanges();
-    selection.addRange(newRange);
+      const newRange = document.createRange();
+      newRange.setStartAfter(spaceNode);
+      newRange.collapse(true);
+      selection.removeAllRanges();
+      selection.addRange(newRange);
 
-    return mentionSpan;
+      return mentionSpan;
+    }
+
+    if (mentionMatch) {
+      const matchLength = mentionMatch[0].length;
+
+      range.setStart(range.endContainer, range.endOffset - matchLength);
+      range.deleteContents();
+
+      return insertMentionSpan();
+    } else if (lastInsertedMention && lastInsertedMention.parentNode) {
+      const parent = lastInsertedMention.parentNode;
+      const mentionSpan = document.createElement("span");
+      mentionSpan.className = "mention";
+      mentionSpan.setAttribute("data-email", email);
+      mentionSpan.setAttribute("contenteditable", "false");
+      mentionSpan.textContent = "@" + username;
+
+      parent.replaceChild(mentionSpan, lastInsertedMention);
+
+      const spaceNode = document.createTextNode("\u00A0");
+      mentionSpan.parentNode.insertBefore(spaceNode, mentionSpan.nextSibling);
+
+      const newRange = document.createRange();
+      newRange.setStartAfter(spaceNode);
+      newRange.collapse(true);
+      selection.removeAllRanges();
+      selection.addRange(newRange);
+
+      hideSuggestions();
+
+      return mentionSpan;
+    }
+
+    return null;
   }
-
-  if (mentionMatch) {
-    const matchLength = mentionMatch[0].length;
-
-    range.setStart(range.endContainer, range.endOffset - matchLength);
-    range.deleteContents();
-
-    return insertMentionSpan();
-  } 
-  else if (lastInsertedMention && lastInsertedMention.parentNode) {
-    const parent = lastInsertedMention.parentNode;
-    const mentionSpan = document.createElement("span");
-    mentionSpan.className = "mention";
-    mentionSpan.setAttribute("data-email", email);
-    mentionSpan.setAttribute("contenteditable", "false");
-    mentionSpan.textContent = "@" + username;
-
-    parent.replaceChild(mentionSpan, lastInsertedMention);
-
-    const spaceNode = document.createTextNode("\u00A0");
-    mentionSpan.parentNode.insertBefore(spaceNode, mentionSpan.nextSibling);
-
-    const newRange = document.createRange();
-    newRange.setStartAfter(spaceNode);
-    newRange.collapse(true);
-    selection.removeAllRanges();
-    selection.addRange(newRange);
-
-    hideSuggestions()
-
-    return mentionSpan;
-  }
-
-  return null;
-}
 
   function hideSuggestions() {
     if (isTabbing || isNavigating) return;
