@@ -2586,16 +2586,20 @@ Make sure to follow all the instructions while answering questions.
     hideAllColorGrids();
   });
 
-  document.getElementById("bold-btn").onclick = () => {
+  document.getElementById("bold-btn").onclick = (e) => {
+    e.preventDefault();
     document.execCommand("bold");
   };
-  document.getElementById("italic-btn").onclick = () => {
+  document.getElementById("italic-btn").onclick = (e) => {
+    e.preventDefault();
     document.execCommand("italic");
   };
-  document.getElementById("underline-btn").onclick = () => {
+  document.getElementById("underline-btn").onclick = (e) => {
+    e.preventDefault();
     document.execCommand("underline");
   };
-  document.getElementById("strike-btn").onclick = () => {
+  document.getElementById("strike-btn").onclick = (e) => {
+    e.preventDefault();
     document.execCommand("strikeThrough");
   };
 
