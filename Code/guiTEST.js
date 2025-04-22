@@ -477,7 +477,15 @@
 }
 
 .color-picker-container {
+	width: 24px;
+	height: 24px;
+	font-size: 12px;
 	border: 1px solid ${isDark ? "#555" : "#ccc"};
+ 	background: ${isDark ? "#444" : "#eee"};
+  	color: ${isDark ? "#fff" : "#333"};
+ 	border-radius: 3px;
+  	cursor: pointer;
+   	text-align: center;
 }
 
 #formatting-bar select {
