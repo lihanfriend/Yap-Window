@@ -1179,7 +1179,7 @@ a:hover {
                <button id="underline-btn"><u>U</u></button>
                <button id="strike-btn"><s>S</s></button>
                <div class="color-picker-container" id="text-color-picker">
-                  🖍️
+                  🖊️
                   <div class="color-grid" id="text-color-grid"></div>
                </div>
                <div class="color-picker-container" id="highlight-color-picker">
