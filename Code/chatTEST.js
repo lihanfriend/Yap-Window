@@ -572,6 +572,7 @@
 
     userActivityBtn.addEventListener("click", () => {
       rightUserSidebar.classList.toggle("visible");
+      rightUserSidebar.classList.toggle("hidden");
 
       if (rightUserSidebar.classList.contains("visible")) {
         updateUserActivityList();
