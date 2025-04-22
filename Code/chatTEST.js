@@ -607,6 +607,9 @@
       const recentlyActiveUsers = [];
       const inactiveUsers = [];
 
+      const currentUserEmail = email;
+      const currentUserFormattedEmail = currentUserEmail.replace(/\./g, '*');
+
       Object.keys(accounts).forEach((formattedEmail) => {
         if (formattedEmail === currentUserFormattedEmail) {
           return;
