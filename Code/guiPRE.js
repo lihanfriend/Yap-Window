@@ -403,18 +403,6 @@
 	box-shadow: 0 1px 3px ${isDark ? "rgba(0,0,0,0.3)" : "rgba(0,0,0,0.1)"};
 }
 
-.message.Eliana {
-	text-align: left;
-	background-color: ${isDark ? "#a83a32" : "#fc7d74"};
-	color: ${isDark ? "#cccccc" : "#33691e"};
-}
-
-.message.Eliana.unread {
-	background-color: ${isDark ? "#732822" : "#c26059"};
-	border-left: 3px solid ${isDark ? "#ff6b6b" : "#4caf50"};
-	box-shadow: 0 1px 3px ${isDark ? "rgba(0,0,0,0.3)" : "rgba(0,0,0,0.1)"};
-}
-
 .message.winston.sent {
   text-align: right;
   background-color: ${isDark ? "#4a4a4a" : "#e0f7fa"};
