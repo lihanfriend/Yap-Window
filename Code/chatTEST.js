@@ -564,6 +564,134 @@
       }
     }, UPDATE_INTERVAL);
   }
+
+  function initializeUserActivitySidebar() {
+    const userActivityBtn = document.getElementById("user-activity");
+    const rightUserSidebar = document.getElementById("right-user-sidebar");
+    const closeUserSidebarBtn = document.getElementById("close-user-sidebar");
+
+    userActivityBtn.addEventListener("click", () => {
+      rightUserSidebar.classList.toggle("visible");
+
+      if (rightUserSidebar.classList.contains("visible")) {
+        updateUserActivityList();
+
+        window.userActivityInterval = setInterval(
+          updateUserActivityList,
+          60000,
+        );
+      } else {
+        clearInterval(window.userActivityInterval);
+      }
+    });
+
+    closeUserSidebarBtn.addEventListener("click", () => {
+      rightUserSidebar.classList.remove("visible");
+      clearInterval(window.userActivityInterval);
+    });
+  }
+
+  async function updateUserActivityList() {
+    try {
+      const accountsRef = ref(database, "Accounts");
+      const accountsSnapshot = await get(accountsRef);
+
+      if (!accountsSnapshot.exists()) {
+        return;
+      }
+
+      const accounts = accountsSnapshot.val();
+      const currentTime = Date.now();
+
+      const activeUsers = [];
+      const recentlyActiveUsers = [];
+      const inactiveUsers = [];
+
+      Object.keys(accounts).forEach((formattedEmail) => {
+        const account = accounts[formattedEmail];
+        const lastInteract = account.LastInteract || 0;
+        const username = account.Username || "Unknown";
+        const email = formattedEmail.replace(/\*/g, ".");
+        const timeDiff = currentTime - lastInteract;
+
+        const userInfo = {
+          username,
+          email,
+          lastInteract,
+        };
+
+        if (timeDiff < 2 * 60 * 1000) {
+          activeUsers.push(userInfo);
+        } else if (timeDiff < 5 * 60 * 1000) {
+          recentlyActiveUsers.push(userInfo);
+        } else {
+          inactiveUsers.push(userInfo);
+        }
+      });
+
+      const sortByEmail = (a, b) => a.email.localeCompare(b.email);
+      activeUsers.sort(sortByEmail);
+      recentlyActiveUsers.sort(sortByEmail);
+      inactiveUsers.sort(sortByEmail);
+
+      updateUserListInDOM("active-users", activeUsers);
+      updateUserListInDOM("recently-active-users", recentlyActiveUsers);
+      updateUserListInDOM("inactive-users", inactiveUsers);
+    } catch (error) {
+      console.error("Error updating user activity list:", error);
+    }
+  }
+
+  function updateUserListInDOM(elementId, users) {
+    const listElement = document.getElementById(elementId);
+    listElement.innerHTML = "";
+
+    if (users.length === 0) {
+      const noUsersElement = document.createElement("div");
+      noUsersElement.className = "no-users";
+      noUsersElement.textContent = "No users in this category";
+      listElement.appendChild(noUsersElement);
+      return;
+    }
+
+    users.forEach((user) => {
+      const userElement = document.createElement("div");
+      userElement.className = "user-item";
+
+      const statusIndicator = document.createElement("span");
+      statusIndicator.className = "status-indicator";
+      if (elementId === "active-users") {
+        statusIndicator.classList.add("active");
+      } else if (elementId === "recently-active-users") {
+        statusIndicator.classList.add("recently-active");
+      } else {
+        statusIndicator.classList.add("inactive");
+      }
+
+      const userInfo = document.createElement("div");
+      userInfo.style.display = "flex";
+      userInfo.style.flexDirection = "column";
+      userInfo.style.marginLeft = "8px";
+      userInfo.style.overflow = "hidden";
+
+      const userName = document.createElement("span");
+      userName.className = "user-name";
+      userName.textContent = user.username;
+
+      const userEmail = document.createElement("span");
+      userEmail.className = "user-email";
+      userEmail.textContent = `(${user.email})`;
+
+      userInfo.appendChild(userName);
+      userInfo.appendChild(userEmail);
+
+      userElement.appendChild(statusIndicator);
+      userElement.appendChild(userInfo);
+
+      listElement.appendChild(userElement);
+    });
+  }
+
   async function getUsernameFromEmail(userEmail) {
     if (!userEmail) return "";
     if (
@@ -3604,6 +3732,7 @@ Make sure to follow all the instructions while answering questions.
   await initializeReadMessages();
   loadMessages("General");
   setupInteractionTracking(document.getElementById("bookmarklet-gui"));
+  initializeUserActivitySidebar();
   const messagesDiv = document.getElementById("messages");
   messagesDiv.scrollTop = messagesDiv.scrollHeight;
   updateModifyButtonVisibility();
