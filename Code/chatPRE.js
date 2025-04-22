@@ -897,14 +897,6 @@
               messageDiv.classList.add("unread");
             }
           }
-        } else if (
-          message.User.includes("elianag30@lakesideschool.org") &&
-          !email.includes("elianag30@lakesideschool.org")
-        ) {
-          messageDiv.classList.add("Eliana");
-          if (!lastReadMessage || message.id > lastReadMessage) {
-            messageDiv.classList.add("unread");
-          }
         } else if (Object.values(BOT_USERS).includes(message.User)) {
           messageDiv.classList.add("bot");
           if (!lastReadMessage || message.id > lastReadMessage) {
