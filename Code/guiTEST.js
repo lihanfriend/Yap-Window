@@ -1184,6 +1184,37 @@ a:hover {
 	    <div id="attachment-preview"></div>
          </div>
       </div>
+      <div id="right-user-sidebar" class="hidden">
+	  <div id="user-sidebar-header">
+	    <h3>Users</h3>
+	    <span id="close-user-sidebar">×</span>
+	  </div>
+	  <div id="user-lists-container">
+	    <div class="user-category">
+	      <div class="category-header active">
+	        <span class="status-indicator active"></span>
+	        <h4>Active</h4>
+	      </div>
+	      <div id="active-users" class="user-list"></div>
+	    </div>
+	    
+	    <div class="user-category">
+	      <div class="category-header recently-active">
+	        <span class="status-indicator recently-active"></span>
+	        <h4>Recently Active</h4>
+	      </div>
+	      <div id="recently-active-users" class="user-list"></div>
+	    </div>
+	    
+	    <div class="user-category">
+	      <div class="category-header inactive">
+	        <span class="status-indicator inactive"></span>
+	        <h4>Inactive</h4>
+	      </div>
+	      <div id="inactive-users" class="user-list"></div>
+    	</div>
+  </div>
+</div>
    </div>
 </div>
 <div id="channel-screen" class="screen hidden">
