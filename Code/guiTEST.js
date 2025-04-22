@@ -890,7 +890,142 @@ a:hover {
   border-radius: 4px;
   font-weight: bold;
 }
+#right-user-sidebar {
+  position: absolute;
+  top: 40px;
+  right: 0;
+  width: 250px;
+  height: calc(100% - 40px);
+  background-color: ${isDark ? "#222" : "#f7f7f7"};
+  border-left: 1px solid ${isDark ? "#444" : "#e0e0e0"};
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.3s ease-in-out;
+  transform: translateX(100%);
+  overflow: hidden;
+}
 
+#right-user-sidebar.visible {
+  transform: translateX(0);
+}
+
+#user-sidebar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 15px;
+  background-color: ${isDark ? "#333" : "#eee"};
+  border-bottom: 1px solid ${isDark ? "#555" : "#ddd"};
+}
+
+#user-sidebar-header h3 {
+  margin: 0;
+  color: ${isDark ? "#ddd" : "#333"};
+  font-size: 16px;
+}
+
+#close-user-sidebar {
+  font-size: 18px;
+  cursor: pointer;
+  color: ${isDark ? "#aaa" : "#666"};
+  transition: color 0.2s ease;
+}
+
+#close-user-sidebar:hover {
+  color: ${isDark ? "#fff" : "#333"};
+}
+
+#user-lists-container {
+  flex: 1;
+  overflow-y: auto;
+  padding: 10px;
+}
+
+.user-category {
+  margin-bottom: 15px;
+}
+
+.category-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 5px;
+  padding: 3px 5px;
+  border-radius: 4px;
+}
+
+.category-header h4 {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 500;
+  color: ${isDark ? "#ccc" : "#444"};
+}
+
+.status-indicator {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  margin-right: 8px;
+}
+
+.status-indicator.active {
+  background-color: #4CAF50;
+  box-shadow: 0 0 4px #4CAF50;
+}
+
+.status-indicator.recently-active {
+  background-color: #FFC107;
+  box-shadow: 0 0 4px #FFC107;
+}
+
+.status-indicator.inactive {
+  background-color: #F44336;
+  box-shadow: 0 0 4px #F44336;
+}
+
+.user-list {
+  margin-left: 16px;
+}
+
+.user-item {
+  display: flex;
+  align-items: center;
+  padding: 5px 8px;
+  border-radius: 4px;
+  margin: 2px 0;
+  font-size: 13px;
+  color: ${isDark ? "#bbb" : "#555"};
+  transition: background-color 0.2s ease;
+}
+
+.user-item:hover {
+  background-color: ${isDark ? "#333" : "#e9e9e9"};
+}
+
+.user-item .status-indicator {
+  width: 6px;
+  height: 6px;
+}
+
+.user-item .user-name {
+  font-weight: 500;
+  margin-right: 5px;
+}
+
+.user-item .user-email {
+  font-size: 11px;
+  color: ${isDark ? "#888" : "#888"};
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.no-users {
+  font-size: 12px;
+  color: ${isDark ? "#888" : "#999"};
+  font-style: italic;
+  margin-left: 16px;
+  padding: 4px 0;
+}
   `;
   }
 
@@ -1005,6 +1140,7 @@ a:hover {
       <button id="dark-mode" class="setting-button">${isDark ? "☀️" : "🌙"}</button>
       <button id="read-all" class="setting-button">📖</button>
       <button id="hide-left-sidebar" class="setting-button">☰</button>
+      <button id="user-activity" class="setting-button">👥</button>
       <button id="modify-channel" class="setting-button" style="display: none">✏️</button>
    </div>
    <div id="lower-chat" class="chat">
