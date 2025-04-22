@@ -608,6 +608,10 @@
       const inactiveUsers = [];
 
       Object.keys(accounts).forEach((formattedEmail) => {
+        if (formattedEmail === currentUserFormattedEmail) {
+          return;
+        }
+        
         const account = accounts[formattedEmail];
         const lastInteract = account.LastInteract || 0;
         const username = account.Username || "Unknown";
