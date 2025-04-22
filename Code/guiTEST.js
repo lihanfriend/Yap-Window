@@ -476,6 +476,18 @@
 	padding: 0;
 }
 
+#formatting-bar div {
+	width: 24px;
+	height: 24px;
+	font-size: 12px;
+	border: 1px solid ${isDark ? "#555" : "#ccc"};
+	background: ${isDark ? "#444" : "#eee"};
+	color: ${isDark ? "#fff" : "#333"};
+	border-radius: 3px;
+	cursor: pointer;
+	padding: 0;
+}
+
 #formatting-bar select {
 	height: 28px;
 	font-size: 10px;
