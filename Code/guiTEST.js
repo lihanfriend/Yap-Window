@@ -477,8 +477,8 @@
 }
 
 .color-picker-container {
-	width: 24px;
-	height: 24px;
+	width: 23px;
+	height: 23px;
 	font-size: 12px;
 	border: 1px solid ${isDark ? "#555" : "#ccc"};
  	background: ${isDark ? "#444" : "#eee"};
