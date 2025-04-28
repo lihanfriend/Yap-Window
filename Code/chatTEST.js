@@ -18,7 +18,6 @@
     alert("Please verify your email before using chat.");
     return;
   }
-
   const sc = document.createElement("script");
   sc.setAttribute(
     "src",
@@ -31,7 +30,6 @@
     "https://cdn.jsdelivr.net/npm/emoji-toolkit@8.0.0/extras/css/joypixels.min.css",
   );
   document.head.appendChild(ss);
-
   const gui = document.getElementById("bookmarklet-gui");
   chatScreen = document.getElementById("chat-screen");
   chatScreen.classList.remove("hidden");
