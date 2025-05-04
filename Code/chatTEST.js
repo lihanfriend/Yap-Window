@@ -553,7 +553,7 @@
         }
       });
     }
-
+    updateLastInteractTime();
     setInterval(() => {
       const currentTime = Date.now();
 
@@ -607,15 +607,14 @@
       const inactiveUsers = [];
 
       const currentUserEmail = email;
-      const currentUserFormattedEmail = currentUserEmail.replace(/\./g, '*');
+      const currentUserFormattedEmail = currentUserEmail.replace(/\./g, "*");
 
       Object.keys(accounts).forEach((formattedEmail) => {
-        if (formattedEmail === currentUserFormattedEmail) {
-          return;
-        }
-        
         const account = accounts[formattedEmail];
         const lastInteract = account.LastInteract || 0;
+        if (formattedEmail === currentUserFormattedEmail) {
+          lastInteract = currentTime;
+        }
         const username = account.Username || "Unknown";
         const email = formattedEmail.replace(/\*/g, ".");
         const timeDiff = currentTime - lastInteract;
@@ -3721,6 +3720,287 @@ Make sure to follow all the instructions while answering questions.
       }
     });
     await loadMessages(channelName);
+  }
+
+  function initializeVotingSystem() {
+    document
+      .getElementById("submit-votes")
+      ?.addEventListener("click", submitVotes);
+    document
+      .getElementById("view-leaderboard")
+      ?.addEventListener("click", viewLeaderboard);
+    document
+      .getElementById("back-to-chat")
+      ?.addEventListener("click", backToChat);
+    document.getElementById("edit-votes")?.addEventListener("click", editVotes);
+    document
+      .getElementById("refresh-leaderboard")
+      ?.addEventListener("click", refreshLeaderboard);
+    document
+      .getElementById("back-from-leaderboard")
+      ?.addEventListener("click", backToChat);
+
+    const botsRef = firebase.database().ref("Bots");
+    const votesRef = firebase.database().ref("BotVote");
+  }
+
+  let userVotes = {};
+  let allBots = {};
+  let hasVotedForAllBots = false;
+
+  function sanitizeEmail(email) {
+    return email.replace(/\./g, "*");
+  }
+
+  function openVotingScreen() {
+    const sanitizedEmail = sanitizeEmail(email);
+    const votingList = document.getElementById("voting-list");
+    votingList.innerHTML =
+      '<div class="loading-indicator"><div class="loading-spinner"></div><div>Loading bots...</div></div>';
+
+    showScreen("voting-screen");
+
+    firebase
+      .database()
+      .ref("Bots")
+      .once("value")
+      .then((snapshot) => {
+        allBots = snapshot.val() || {};
+
+        return firebase
+          .database()
+          .ref(`BotVote/${sanitizedEmail}`)
+          .once("value");
+      })
+      .then((snapshot) => {
+        userVotes = snapshot.val() || {};
+
+        const votedForAll = Object.keys(allBots).every((botName) =>
+          userVotes.hasOwnProperty(botName),
+        );
+
+        hasVotedForAllBots = votedForAll;
+
+        if (hasVotedForAllBots) {
+          viewLeaderboard();
+          return;
+        }
+
+        renderVotingList();
+      })
+      .catch((error) => {
+        console.error("Error loading voting data:", error);
+        votingList.innerHTML = `<div class="error-message">Error loading bots: ${error.message}</div>`;
+      });
+  }
+
+  function renderVotingList() {
+    const votingList = document.getElementById("voting-list");
+    votingList.innerHTML = "";
+
+    if (Object.keys(allBots).length === 0) {
+      votingList.innerHTML =
+        '<div class="no-votes-message">No bots available for voting</div>';
+      return;
+    }
+
+    Object.keys(allBots).forEach((botName) => {
+      const description = allBots[botName];
+      const userVote = userVotes[botName];
+
+      const voteItem = document.createElement("div");
+      voteItem.className = "voting-item";
+      voteItem.innerHTML = `
+      <div class="bot-info">
+        <div class="bot-name">${botName}</div>
+        <div class="bot-description">${description || "No description available"}</div>
+      </div>
+      <div class="vote-options">
+        <button class="vote-button yes ${userVote === true ? "selected" : ""}" data-bot="${botName}">Yes</button>
+        <button class="vote-button no ${userVote === false ? "selected" : ""}" data-bot="${botName}">No</button>
+      </div>
+    `;
+
+      votingList.appendChild(voteItem);
+    });
+
+    document.querySelectorAll(".vote-button").forEach((button) => {
+      button.addEventListener("click", function () {
+        const botName = this.getAttribute("data-bot");
+        const isYesVote = this.classList.contains("yes");
+
+        document
+          .querySelectorAll(`.vote-button[data-bot="${botName}"]`)
+          .forEach((btn) => {
+            btn.classList.remove("selected");
+          });
+        this.classList.add("selected");
+
+        userVotes[botName] = isYesVote;
+      });
+    });
+  }
+
+  function submitVotes() {
+    const sanitizedEmail = sanitizeEmail(email);
+    const votingButtons = document.getElementById("voting-buttons");
+    const submitButton = document.getElementById("submit-votes");
+
+    const missingVotes = Object.keys(allBots).filter(
+      (botName) => !userVotes.hasOwnProperty(botName),
+    );
+
+    if (missingVotes.length > 0) {
+      alert(`Please vote for the following bots: ${missingVotes.join(", ")}`);
+      return;
+    }
+
+    submitButton.disabled = true;
+    submitButton.innerText = "Submitting...";
+
+    const updates = {};
+    Object.keys(userVotes).forEach((botName) => {
+      updates[`BotVote/${sanitizedEmail}/${botName}`] = userVotes[botName];
+    });
+
+    firebase
+      .database()
+      .ref()
+      .update(updates)
+      .then(() => {
+        submitButton.innerText = "Votes Submitted!";
+        hasVotedForAllBots = true;
+
+        setTimeout(() => {
+          viewLeaderboard();
+        }, 1000);
+      })
+      .catch((error) => {
+        console.error("Error submitting votes:", error);
+        submitButton.innerText = "Error! Try Again";
+        submitButton.disabled = false;
+      });
+  }
+
+  function viewLeaderboard() {
+    const leaderboardList = document.getElementById("leaderboard-list");
+    leaderboardList.innerHTML =
+      '<div class="loading-indicator"><div class="loading-spinner"></div><div>Loading results...</div></div>';
+
+    showScreen("leaderboard-screen");
+    refreshLeaderboard();
+  }
+
+  function refreshLeaderboard() {
+    const leaderboardList = document.getElementById("leaderboard-list");
+    leaderboardList.innerHTML =
+      '<div class="loading-indicator"><div class="loading-spinner"></div><div>Refreshing data...</div></div>';
+
+    Promise.all([
+      firebase.database().ref("Bots").once("value"),
+      firebase.database().ref("BotVote").once("value"),
+    ])
+      .then(([botsSnapshot, votesSnapshot]) => {
+        const bots = botsSnapshot.val() || {};
+        const allVotes = votesSnapshot.val() || {};
+
+        const approvalData = calculateApprovalRatings(bots, allVotes);
+
+        const sortedBots = Object.keys(approvalData).sort((a, b) => {
+          return (
+            approvalData[b].approvalPercentage -
+            approvalData[a].approvalPercentage
+          );
+        });
+
+        renderLeaderboard(sortedBots, approvalData);
+      })
+      .catch((error) => {
+        console.error("Error loading leaderboard data:", error);
+        leaderboardList.innerHTML = `<div class="error-message">Error loading leaderboard: ${error.message}</div>`;
+      });
+  }
+
+  function calculateApprovalRatings(bots, allVotes) {
+    const approvalData = {};
+
+    Object.keys(bots).forEach((botName) => {
+      let yesVotes = 0;
+      let totalVotes = 0;
+
+      Object.values(allVotes).forEach((userVote) => {
+        if (userVote.hasOwnProperty(botName)) {
+          totalVotes++;
+          if (userVote[botName] === true) {
+            yesVotes++;
+          }
+        }
+      });
+
+      const approvalPercentage =
+        totalVotes > 0 ? (yesVotes / totalVotes) * 100 : 0;
+
+      approvalData[botName] = {
+        yesVotes,
+        totalVotes,
+        approvalPercentage,
+        description: bots[botName] || "No description available",
+      };
+    });
+
+    return approvalData;
+  }
+
+  function renderLeaderboard(sortedBots, approvalData) {
+    const leaderboardList = document.getElementById("leaderboard-list");
+    leaderboardList.innerHTML = "";
+
+    if (sortedBots.length === 0) {
+      leaderboardList.innerHTML =
+        '<div class="no-votes-message">No voting data available</div>';
+      return;
+    }
+
+    sortedBots.forEach((botName, index) => {
+      const data = approvalData[botName];
+      const percentage = data.approvalPercentage.toFixed(1);
+
+      const leaderboardItem = document.createElement("div");
+      leaderboardItem.className = "leaderboard-item";
+      leaderboardItem.innerHTML = `
+      <div class="bot-info">
+        <div class="bot-name">
+          ${index + 1}. ${botName}
+          <span class="bot-tooltip">ℹ️
+            <span class="tooltip-text">${data.description}</span>
+          </span>
+        </div>
+        <div class="approval-bar-container">
+          <div class="approval-bar" style="width: ${percentage}%"></div>
+        </div>
+        <div class="vote-count">${data.yesVotes} of ${data.totalVotes} votes</div>
+      </div>
+      <div class="approval-percentage">${percentage}%</div>
+    `;
+
+      leaderboardList.appendChild(leaderboardItem);
+    });
+  }
+
+  function editVotes() {
+    openVotingScreen();
+  }
+
+  function backToChat() {
+    showScreen("chat-screen");
+  }
+
+  function showScreen(screenId) {
+    document.querySelectorAll(".screen").forEach((screen) => {
+      screen.classList.add("hidden");
+    });
+
+    document.getElementById(screenId).classList.remove("hidden");
   }
 
   checkForUpdates();
