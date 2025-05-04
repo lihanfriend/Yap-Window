@@ -833,7 +833,8 @@
           messagesDiv.clientHeight <=
         20;
 
-      let adjacentMessageDiv = null;f
+      let adjacentMessageDiv = null;
+      f;
       const timeThreshold = 5 * 60 * 1000;
 
       if (prepend) {
@@ -3749,7 +3750,7 @@ Make sure to follow all the instructions while answering questions.
 
   let userVotes = {};
   let allBots = {};
-  let hasVotedForAllBots = false;
+  let hasVotedBefore = false;
 
   function sanitizeEmail(email) {
     return email.replace(/\./g, "*");
@@ -3773,18 +3774,7 @@ Make sure to follow all the instructions while answering questions.
       })
       .then((snapshot) => {
         userVotes = snapshot.val() || {};
-
-        const votedForAll = Object.keys(allBots).every((botName) =>
-          userVotes.hasOwnProperty(botName),
-        );
-
-        hasVotedForAllBots = votedForAll;
-
-        if (hasVotedForAllBots) {
-          viewLeaderboard();
-          return;
-        }
-
+        hasVotedBefore = Object.keys(userVotes).length > 0;
         renderVotingList();
       })
       .catch((error) => {
@@ -3804,21 +3794,19 @@ Make sure to follow all the instructions while answering questions.
     }
 
     Object.keys(allBots).forEach((botName) => {
-      const description = allBots[botName];
       const userVote = userVotes[botName];
 
       const voteItem = document.createElement("div");
       voteItem.className = "voting-item";
       voteItem.innerHTML = `
-    <div class="bot-info">
-      <div class="bot-name">${botName}</div>
-      <div class="bot-description">${description || "No description available"}</div>
-    </div>
-    <div class="vote-options">
-      <button class="vote-button yes ${userVote === true ? "selected" : ""}" data-bot="${botName}">Yes</button>
-      <button class="vote-button no ${userVote === false ? "selected" : ""}" data-bot="${botName}">No</button>
-    </div>
-  `;
+  <div class="bot-info">
+    <div class="bot-name">${botName}</div>
+  </div>
+  <div class="vote-options">
+    <button class="vote-button yes ${userVote === true ? "selected" : ""}" data-bot="${botName}">Yes</button>
+    <button class="vote-button no ${userVote === false ? "selected" : ""}" data-bot="${botName}">No</button>
+  </div>
+`;
 
       votingList.appendChild(voteItem);
     });
@@ -3838,11 +3826,17 @@ Make sure to follow all the instructions while answering questions.
         userVotes[botName] = isYesVote;
       });
     });
+
+    const submitButton = document.getElementById("submit-votes");
+    if (hasVotedBefore) {
+      submitButton.innerText = "Update Votes";
+    } else {
+      submitButton.innerText = "Submit Votes";
+    }
   }
 
   function submitVotes() {
     const sanitizedEmail = sanitizeEmail(email);
-    const votingButtons = document.getElementById("voting-buttons");
     const submitButton = document.getElementById("submit-votes");
 
     const missingVotes = Object.keys(allBots).filter(
@@ -3855,7 +3849,7 @@ Make sure to follow all the instructions while answering questions.
     }
 
     submitButton.disabled = true;
-    submitButton.innerText = "Submitting...";
+    submitButton.innerText = hasVotedBefore ? "Updating..." : "Submitting...";
 
     const updates = {};
     Object.keys(userVotes).forEach((botName) => {
@@ -3864,11 +3858,22 @@ Make sure to follow all the instructions while answering questions.
 
     update(ref(database), updates)
       .then(() => {
-        submitButton.innerText = "Votes Submitted!";
-        hasVotedForAllBots = true;
+        submitButton.innerText = hasVotedBefore
+          ? "Votes Updated!"
+          : "Votes Submitted!";
+        hasVotedBefore = true;
 
         setTimeout(() => {
-          viewLeaderboard();
+          submitButton.disabled = false;
+          submitButton.innerText = "Update Votes";
+
+          if (
+            confirm(
+              "Your votes have been saved! Would you like to view the leaderboard?",
+            )
+          ) {
+            viewLeaderboard();
+          }
         }, 1000);
       })
       .catch((error) => {
@@ -3964,7 +3969,7 @@ Make sure to follow all the instructions while answering questions.
       const leaderboardItem = document.createElement("div");
       leaderboardItem.className = "leaderboard-item";
       leaderboardItem.innerHTML = `
-    <div class="bot-info">
+    <div class="bot-info" style="width: 100%;">
       <div class="bot-name">
         ${index + 1}. ${botName}
         <span class="bot-tooltip">ℹ️
