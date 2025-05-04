@@ -114,7 +114,7 @@
 }
 
 .screen.hidden {
-	display: none;
+	display: none !important;
 }
 
 .screen input,
