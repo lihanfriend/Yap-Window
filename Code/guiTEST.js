@@ -1038,6 +1038,272 @@ a:hover {
   margin-left: 16px;
   padding: 4px 0;
 }
+/* Voting System Styles */
+#voting-screen, #leaderboard-screen {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+  padding: 20px;
+  color: ${isDark ? "#ddd" : "#333"};
+  background-color: ${isDark ? "#333" : "#fff"};
+  height: 100%;
+  overflow-y: auto;
+}
+
+#voting-header, #leaderboard-header {
+  width: 100%;
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+#voting-description {
+  font-size: 14px;
+  margin-bottom: 20px;
+  color: ${isDark ? "#bbb" : "#555"};
+}
+
+#voting-container, #leaderboard-container {
+  width: 90%;
+  max-width: 800px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+#voting-list, #leaderboard-list {
+  width: 100%;
+  margin-bottom: 20px;
+}
+
+.voting-item, .leaderboard-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 15px;
+  margin-bottom: 10px;
+  border-radius: 8px;
+  background-color: ${isDark ? "#444" : "#f5f5f5"};
+  transition: transform 0.2s, background-color 0.2s;
+}
+
+.voting-item:hover {
+  background-color: ${isDark ? "#4a4a4a" : "#eaeaea"};
+}
+
+.bot-info {
+  flex: 1;
+}
+
+.bot-name {
+  font-weight: bold;
+  font-size: 16px;
+  margin-bottom: 4px;
+  color: ${isDark ? "#fff" : "#222"};
+}
+
+.bot-description {
+  font-size: 13px;
+  color: ${isDark ? "#ccc" : "#666"};
+  line-height: 1.4;
+}
+
+.vote-options {
+  display: flex;
+  gap: 10px;
+}
+
+.vote-button {
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-weight: bold;
+  cursor: pointer;
+  border: none;
+  transition: all 0.2s ease;
+}
+
+.vote-button.yes {
+  background-color: ${isDark ? "#2e7d32" : "#4caf50"};
+  color: white;
+}
+
+.vote-button.no {
+  background-color: ${isDark ? "#c62828" : "#f44336"};
+  color: white;
+}
+
+.vote-button.yes.selected {
+  background-color: ${isDark ? "#1b5e20" : "#388e3c"};
+  box-shadow: 0 0 0 2px #81c784;
+  transform: scale(1.05);
+}
+
+.vote-button.no.selected {
+  background-color: ${isDark ? "#b71c1c" : "#d32f2f"};
+  box-shadow: 0 0 0 2px #e57373;
+  transform: scale(1.05);
+}
+
+.vote-button:not(.selected) {
+  opacity: 0.7;
+}
+
+.vote-button:hover:not(.selected) {
+  opacity: 0.9;
+  transform: translateY(-2px);
+}
+
+#voting-buttons, #leaderboard-buttons {
+  display: flex;
+  gap: 15px;
+  margin-top: 20px;
+  justify-content: center;
+  width: 100%;
+}
+
+.voting-button {
+  padding: 10px 20px;
+  border-radius: 6px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: none;
+  background-color: ${isDark ? "#546e7a" : "#64b5f6"};
+  color: white;
+}
+
+.voting-button:hover {
+  transform: translateY(-2px);
+  background-color: ${isDark ? "#607d8b" : "#42a5f5"};
+  box-shadow: 0 3px 8px rgba(0,0,0,0.2);
+}
+
+.voting-button:active {
+  transform: translateY(0);
+}
+
+#submit-votes {
+  background-color: ${isDark ? "#388e3c" : "#4caf50"};
+}
+
+#submit-votes:hover {
+  background-color: ${isDark ? "#2e7d32" : "#43a047"};
+}
+
+/* Leaderboard specific styles */
+.leaderboard-item {
+  position: relative;
+  padding-right: 60px;
+}
+
+.approval-bar-container {
+  position: relative;
+  width: 100%;
+  height: 8px;
+  background-color: ${isDark ? "#555" : "#e0e0e0"};
+  border-radius: 4px;
+  margin-top: 8px;
+  overflow: hidden;
+}
+
+.approval-bar {
+  position: absolute;
+  height: 100%;
+  background: linear-gradient(to right, #4caf50, #8bc34a);
+  border-radius: 4px;
+  transition: width 1s ease-out;
+}
+
+.approval-percentage {
+  position: absolute;
+  right: 15px;
+  top: 12px;
+  font-weight: bold;
+  font-size: 18px;
+  color: ${isDark ? "#8bc34a" : "#388e3c"};
+}
+
+.vote-count {
+  font-size: 12px;
+  color: ${isDark ? "#bbb" : "#777"};
+  margin-top: 4px;
+}
+
+.loading-indicator {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: 30px 0;
+}
+
+.loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid ${isDark ? "#444" : "#f3f3f3"};
+  border-top: 4px solid ${isDark ? "#80cbc4" : "#3498db"};
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 15px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.no-votes-message {
+  text-align: center;
+  padding: 20px;
+  color: ${isDark ? "#bbb" : "#777"};
+  font-style: italic;
+}
+
+/* Tooltip */
+.bot-tooltip {
+  position: relative;
+  display: inline-block;
+  margin-left: 5px;
+  font-size: 14px;
+  color: ${isDark ? "#aaa" : "#777"};
+  cursor: help;
+}
+
+.bot-tooltip .tooltip-text {
+  visibility: hidden;
+  width: 200px;
+  background-color: ${isDark ? "#212121" : "#555"};
+  color: #fff;
+  text-align: center;
+  border-radius: 6px;
+  padding: 8px;
+  position: absolute;
+  z-index: 1;
+  bottom: 125%;
+  left: 50%;
+  margin-left: -100px;
+  opacity: 0;
+  transition: opacity 0.3s;
+  font-size: 12px;
+  font-weight: normal;
+}
+
+.bot-tooltip .tooltip-text::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  margin-left: -5px;
+  border-width: 5px;
+  border-style: solid;
+  border-color: ${isDark ? "#212121" : "#555"} transparent transparent transparent;
+}
+
+.bot-tooltip:hover .tooltip-text {
+  visibility: visible;
+  opacity: 1;
+}
   `;
   }
 
@@ -1154,6 +1420,7 @@ a:hover {
       <button id="hide-left-sidebar" class="setting-button">☰</button>
       <button id="user-activity" class="setting-button">👥</button>
       <button id="modify-channel" class="setting-button" style="display: none">✏️</button>
+      <button id="vote-bots-button" class="setting-button">🗳️</button>
    </div>
    <div id="lower-chat" class="chat">
       <div id="left-sidebar">
@@ -1251,6 +1518,34 @@ a:hover {
    <button id="submit-channel">Save</button>
    <button id="delete-channel" style="display: none">Delete</button>
    <button id="back-channel">Back</button>
+</div>
+<div id="voting-screen" class="screen hidden">
+  <div id="voting-header">
+    <h2>Bot Approval Voting</h2>
+    <p id="voting-description">Vote yes or no for each bot below. Your votes help determine which bots are most helpful.</p>
+  </div>
+  <div id="voting-container">
+    <div id="voting-list"></div>
+    <div id="voting-buttons">
+      <button id="submit-votes" class="voting-button">Submit Votes</button>
+      <button id="view-leaderboard" class="voting-button">View Leaderboard</button>
+      <button id="back-to-chat" class="voting-button">Back to Chat</button>
+    </div>
+  </div>
+</div>
+<div id="leaderboard-screen" class="screen hidden">
+  <div id="leaderboard-header">
+    <h2>Bot Leaderboard</h2>
+    <p>Current approval ratings for all bots</p>
+  </div>
+  <div id="leaderboard-container">
+    <div id="leaderboard-list"></div>
+    <div id="leaderboard-buttons">
+      <button id="edit-votes" class="voting-button">Edit My Votes</button>
+      <button id="refresh-leaderboard" class="voting-button">Refresh Data</button>
+      <button id="back-from-leaderboard" class="voting-button">Back to Chat</button>
+    </div>
+  </div>
 </div>
 <div id="link-dialog" style="display: none; position: absolute; padding: 10px; background-color: #fff; border: 1px solid #ccc; box-shadow: 0 4px 8px rgba(0,0,0,0.2); border-radius: 4px; z-index: 1000">
    <div>
