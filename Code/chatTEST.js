@@ -3763,12 +3763,13 @@ Make sure to follow all the instructions while answering questions.
 
     showScreen("voting-screen");
 
-    ref(database, "Bots")
-      .once("value")
+    const botsRef = ref(database, "Bots");
+    get(botsRef)
       .then((snapshot) => {
         allBots = snapshot.val() || {};
 
-        return ref(database, `BotVote/${sanitizedEmail}`).once("value");
+        const userVotesRef = ref(database, `BotVote/${sanitizedEmail}`);
+        return get(userVotesRef);
       })
       .then((snapshot) => {
         userVotes = snapshot.val() || {};
@@ -3809,15 +3810,15 @@ Make sure to follow all the instructions while answering questions.
       const voteItem = document.createElement("div");
       voteItem.className = "voting-item";
       voteItem.innerHTML = `
-      <div class="bot-info">
-        <div class="bot-name">${botName}</div>
-        <div class="bot-description">${description || "No description available"}</div>
-      </div>
-      <div class="vote-options">
-        <button class="vote-button yes ${userVote === true ? "selected" : ""}" data-bot="${botName}">Yes</button>
-        <button class="vote-button no ${userVote === false ? "selected" : ""}" data-bot="${botName}">No</button>
-      </div>
-    `;
+    <div class="bot-info">
+      <div class="bot-name">${botName}</div>
+      <div class="bot-description">${description || "No description available"}</div>
+    </div>
+    <div class="vote-options">
+      <button class="vote-button yes ${userVote === true ? "selected" : ""}" data-bot="${botName}">Yes</button>
+      <button class="vote-button no ${userVote === false ? "selected" : ""}" data-bot="${botName}">No</button>
+    </div>
+  `;
 
       votingList.appendChild(voteItem);
     });
@@ -3861,8 +3862,7 @@ Make sure to follow all the instructions while answering questions.
       updates[`BotVote/${sanitizedEmail}/${botName}`] = userVotes[botName];
     });
 
-    ref(database)
-      .update(updates)
+    update(ref(database), updates)
       .then(() => {
         submitButton.innerText = "Votes Submitted!";
         hasVotedForAllBots = true;
@@ -3892,10 +3892,10 @@ Make sure to follow all the instructions while answering questions.
     leaderboardList.innerHTML =
       '<div class="loading-indicator"><div class="loading-spinner"></div><div>Refreshing data...</div></div>';
 
-    Promise.all([
-      ref(database, "Bots").once("value"),
-      ref(database, "BotVote").once("value"),
-    ])
+    const botsRef = ref(database, "Bots");
+    const votesRef = ref(database, "BotVote");
+
+    Promise.all([get(botsRef), get(votesRef)])
       .then(([botsSnapshot, votesSnapshot]) => {
         const bots = botsSnapshot.val() || {};
         const allVotes = votesSnapshot.val() || {};
@@ -3964,20 +3964,20 @@ Make sure to follow all the instructions while answering questions.
       const leaderboardItem = document.createElement("div");
       leaderboardItem.className = "leaderboard-item";
       leaderboardItem.innerHTML = `
-      <div class="bot-info">
-        <div class="bot-name">
-          ${index + 1}. ${botName}
-          <span class="bot-tooltip">ℹ️
-            <span class="tooltip-text">${data.description}</span>
-          </span>
-        </div>
-        <div class="approval-bar-container">
-          <div class="approval-bar" style="width: ${percentage}%"></div>
-        </div>
-        <div class="vote-count">${data.yesVotes} of ${data.totalVotes} votes</div>
+    <div class="bot-info">
+      <div class="bot-name">
+        ${index + 1}. ${botName}
+        <span class="bot-tooltip">ℹ️
+          <span class="tooltip-text">${data.description}</span>
+        </span>
       </div>
-      <div class="approval-percentage">${percentage}%</div>
-    `;
+      <div class="approval-bar-container">
+        <div class="approval-bar" style="width: ${percentage}%"></div>
+      </div>
+      <div class="vote-count">${data.yesVotes} of ${data.totalVotes} votes</div>
+    </div>
+    <div class="approval-percentage">${percentage}%</div>
+  `;
 
       leaderboardList.appendChild(leaderboardItem);
     });
