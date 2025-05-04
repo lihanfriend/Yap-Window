@@ -834,7 +834,6 @@
         20;
 
       let adjacentMessageDiv = null;
-      f;
       const timeThreshold = 5 * 60 * 1000;
 
       if (prepend) {
