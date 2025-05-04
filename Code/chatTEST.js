@@ -3724,6 +3724,9 @@ Make sure to follow all the instructions while answering questions.
 
   function initializeVotingSystem() {
     document
+      .getElementById("vote-bots-button")
+      ?.addEventListener("click", openVotingScreen);
+    document
       .getElementById("submit-votes")
       ?.addEventListener("click", submitVotes);
     document
