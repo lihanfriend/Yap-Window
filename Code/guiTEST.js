@@ -1038,6 +1038,7 @@ a:hover {
   margin-left: 16px;
   padding: 4px 0;
 }
+
 /* Voting System Styles */
 #voting-screen, #leaderboard-screen {
   display: flex;
@@ -1049,6 +1050,7 @@ a:hover {
   background-color: ${isDark ? "#333" : "#fff"};
   height: 100%;
   overflow-y: auto;
+  box-sizing: border-box;
 }
 
 #voting-header, #leaderboard-header {
@@ -1057,10 +1059,15 @@ a:hover {
   margin-bottom: 20px;
 }
 
+#voting-header h2, #leaderboard-header h2 {
+  margin-bottom: 8px;
+}
+
 #voting-description {
   font-size: 14px;
   margin-bottom: 20px;
   color: ${isDark ? "#bbb" : "#555"};
+  max-width: 600px;
 }
 
 #voting-container, #leaderboard-container {
@@ -1080,11 +1087,12 @@ a:hover {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 12px 15px;
-  margin-bottom: 10px;
-  border-radius: 8px;
+  padding: 10px 15px;
+  margin-bottom: 12px;
+  border-radius: 6px;
   background-color: ${isDark ? "#444" : "#f5f5f5"};
   transition: transform 0.2s, background-color 0.2s;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
 }
 
 .voting-item:hover {
@@ -1093,6 +1101,7 @@ a:hover {
 
 .bot-info {
   flex: 1;
+  padding-right: 15px;
 }
 
 .bot-name {
@@ -1102,21 +1111,17 @@ a:hover {
   color: ${isDark ? "#fff" : "#222"};
 }
 
-.bot-description {
-  font-size: 13px;
-  color: ${isDark ? "#ccc" : "#666"};
-  line-height: 1.4;
-}
-
 .vote-options {
   display: flex;
-  gap: 10px;
+  gap: 8px;
+  flex-shrink: 0;
 }
 
 .vote-button {
-  padding: 8px 16px;
-  border-radius: 20px;
+  padding: 6px 12px;
+  border-radius: 16px;
   font-weight: bold;
+  font-size: 13px;
   cursor: pointer;
   border: none;
   transition: all 0.2s ease;
@@ -1150,21 +1155,23 @@ a:hover {
 
 .vote-button:hover:not(.selected) {
   opacity: 0.9;
-  transform: translateY(-2px);
+  transform: translateY(-1px);
 }
 
 #voting-buttons, #leaderboard-buttons {
   display: flex;
-  gap: 15px;
+  gap: 12px;
   margin-top: 20px;
   justify-content: center;
   width: 100%;
+  flex-wrap: wrap;
 }
 
 .voting-button {
-  padding: 10px 20px;
+  padding: 8px 16px;
   border-radius: 6px;
   font-weight: 500;
+  font-size: 14px;
   cursor: pointer;
   transition: all 0.2s ease;
   border: none;
@@ -1175,7 +1182,7 @@ a:hover {
 .voting-button:hover {
   transform: translateY(-2px);
   background-color: ${isDark ? "#607d8b" : "#42a5f5"};
-  box-shadow: 0 3px 8px rgba(0,0,0,0.2);
+  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
 }
 
 .voting-button:active {
@@ -1193,7 +1200,8 @@ a:hover {
 /* Leaderboard specific styles */
 .leaderboard-item {
   position: relative;
-  padding-right: 60px;
+  padding: 12px 15px;
+  margin-bottom: 10px;
 }
 
 .approval-bar-container {
@@ -1219,7 +1227,7 @@ a:hover {
   right: 15px;
   top: 12px;
   font-weight: bold;
-  font-size: 18px;
+  font-size: 16px;
   color: ${isDark ? "#8bc34a" : "#388e3c"};
 }
 
@@ -1303,6 +1311,16 @@ a:hover {
 .bot-tooltip:hover .tooltip-text {
   visibility: visible;
   opacity: 1;
+}
+
+/* Error message */
+.error-message {
+  color: ${isDark ? "#ff6b6b" : "#d32f2f"};
+  text-align: center;
+  padding: 15px;
+  background-color: ${isDark ? "#3e2727" : "#ffebee"};
+  border-radius: 6px;
+  margin-bottom: 15px;
 }
   `;
   }
