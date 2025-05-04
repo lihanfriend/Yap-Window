@@ -833,7 +833,7 @@
           messagesDiv.clientHeight <=
         20;
 
-      let adjacentMessageDiv = null;
+      let adjacentMessageDiv = null;f
       const timeThreshold = 5 * 60 * 1000;
 
       if (prepend) {
@@ -3995,7 +3995,7 @@ Make sure to follow all the instructions while answering questions.
     document.querySelectorAll(".screen").forEach((screen) => {
       screen.classList.add("hidden");
     });
-
+    document.getElementById("chat-screen").classList.add("hidden");
     document.getElementById(screenId).classList.remove("hidden");
   }
 
