@@ -4009,6 +4009,7 @@ Make sure to follow all the instructions while answering questions.
   setupUnreadCountUpdates();
   await initializeReadMessages();
   loadMessages("General");
+  initializeVotingSystem()
   setupInteractionTracking(document.getElementById("bookmarklet-gui"));
   initializeUserActivitySidebar();
   const messagesDiv = document.getElementById("messages");
