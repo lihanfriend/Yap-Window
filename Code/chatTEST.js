@@ -3740,8 +3740,8 @@ Make sure to follow all the instructions while answering questions.
       .getElementById("back-from-leaderboard")
       ?.addEventListener("click", backToChat);
 
-    const botsRef = firebase.database().ref("Bots");
-    const votesRef = firebase.database().ref("BotVote");
+    const botsRef = ref(database, "Bots");
+    const votesRef = ref(database, "BotVote");
   }
 
   let userVotes = {};
@@ -3760,17 +3760,12 @@ Make sure to follow all the instructions while answering questions.
 
     showScreen("voting-screen");
 
-    firebase
-      .database()
-      .ref("Bots")
+    ref(database, "Bots")
       .once("value")
       .then((snapshot) => {
         allBots = snapshot.val() || {};
 
-        return firebase
-          .database()
-          .ref(`BotVote/${sanitizedEmail}`)
-          .once("value");
+        return ref(database, `BotVote/${sanitizedEmail}`).once("value");
       })
       .then((snapshot) => {
         userVotes = snapshot.val() || {};
@@ -3863,9 +3858,7 @@ Make sure to follow all the instructions while answering questions.
       updates[`BotVote/${sanitizedEmail}/${botName}`] = userVotes[botName];
     });
 
-    firebase
-      .database()
-      .ref()
+    ref(database)
       .update(updates)
       .then(() => {
         submitButton.innerText = "Votes Submitted!";
@@ -3897,8 +3890,8 @@ Make sure to follow all the instructions while answering questions.
       '<div class="loading-indicator"><div class="loading-spinner"></div><div>Refreshing data...</div></div>';
 
     Promise.all([
-      firebase.database().ref("Bots").once("value"),
-      firebase.database().ref("BotVote").once("value"),
+      ref(database, "Bots").once("value"),
+      ref(database, "BotVote").once("value"),
     ])
       .then(([botsSnapshot, votesSnapshot]) => {
         const bots = botsSnapshot.val() || {};
@@ -4009,7 +4002,7 @@ Make sure to follow all the instructions while answering questions.
   setupUnreadCountUpdates();
   await initializeReadMessages();
   loadMessages("General");
-  initializeVotingSystem()
+  initializeVotingSystem();
   setupInteractionTracking(document.getElementById("bookmarklet-gui"));
   initializeUserActivitySidebar();
   const messagesDiv = document.getElementById("messages");
