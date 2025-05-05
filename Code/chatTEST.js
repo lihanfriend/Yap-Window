@@ -3759,7 +3759,7 @@ Make sure to follow all the instructions while answering questions.
     const sanitizedEmail = sanitizeEmail(email);
     const votingList = document.getElementById("voting-list");
     votingList.innerHTML =
-      '<div class="loading-indicator"><div class="loading-spinner"></div><div>Loading bots...</div></div>';
+      '<div class="loading-indicator"><div>Loading bots...</div></div>';
 
     showScreen("voting-screen");
 
@@ -3866,13 +3866,7 @@ Make sure to follow all the instructions while answering questions.
           submitButton.disabled = false;
           submitButton.innerText = "Update Votes";
 
-          if (
-            confirm(
-              "Your votes have been saved! Would you like to view the leaderboard?",
-            )
-          ) {
             viewLeaderboard();
-          }
         }, 1000);
       })
       .catch((error) => {
@@ -3885,7 +3879,7 @@ Make sure to follow all the instructions while answering questions.
   function viewLeaderboard() {
     const leaderboardList = document.getElementById("leaderboard-list");
     leaderboardList.innerHTML =
-      '<div class="loading-indicator"><div class="loading-spinner"></div><div>Loading results...</div></div>';
+      '<div class="loading-indicator"><div>Loading results...</div></div>';
 
     showScreen("leaderboard-screen");
     refreshLeaderboard();
@@ -3894,7 +3888,7 @@ Make sure to follow all the instructions while answering questions.
   function refreshLeaderboard() {
     const leaderboardList = document.getElementById("leaderboard-list");
     leaderboardList.innerHTML =
-      '<div class="loading-indicator"><div class="loading-spinner"></div><div>Refreshing data...</div></div>';
+      '<div class="loading-indicator"><div>Refreshing data...</div></div>';
 
     const botsRef = ref(database, "Bots");
     const votesRef = ref(database, "BotVote");
@@ -3970,7 +3964,7 @@ Make sure to follow all the instructions while answering questions.
       leaderboardItem.innerHTML = `
     <div class="bot-info" style="width: 100%;">
       <div class="bot-name">
-        ${index + 1}. ${botName}
+        ${botName}
         <span class="bot-tooltip">ℹ️
           <span class="tooltip-text">${data.description}</span>
         </span>
