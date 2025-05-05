@@ -108,7 +108,7 @@
 	padding: 20px;
 	box-sizing: border-box;
 	overflow-y: auto;
-	margin-top: 20px;
+	margin-top: 40px;
 	background-color: ${isDark ? "#333" : "#fff"};
 	color: ${isDark ? "#ddd" : "#333"};
 }
