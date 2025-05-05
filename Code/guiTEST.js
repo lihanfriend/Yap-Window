@@ -1057,6 +1057,7 @@ a:hover {
   width: 100%;
   text-align: center;
   margin-bottom: 20px;
+  border: 0px !important;
 }
 
 #voting-header h2, #leaderboard-header h2 {
@@ -1076,11 +1077,13 @@ a:hover {
   display: flex;
   flex-direction: column;
   align-items: center;
+  border: 0px !important;
 }
 
 #voting-list, #leaderboard-list {
   width: 100%;
   margin-bottom: 20px;
+  border: 0px !important;
 }
 
 .voting-item, .leaderboard-item {
@@ -1102,6 +1105,7 @@ a:hover {
 .bot-info {
   flex: 1;
   padding-right: 15px;
+  border: 0px !important;
 }
 
 .bot-name {
@@ -1109,12 +1113,14 @@ a:hover {
   font-size: 16px;
   margin-bottom: 4px;
   color: ${isDark ? "#fff" : "#222"};
+  border: 0px !important;
 }
 
 .vote-options {
   display: flex;
   gap: 8px;
   flex-shrink: 0;
+  border: 0px !important;
 }
 
 .vote-button {
@@ -1125,6 +1131,7 @@ a:hover {
   cursor: pointer;
   border: none;
   transition: all 0.2s ease;
+  border: 0px !important;
 }
 
 .vote-button.yes {
@@ -1165,6 +1172,7 @@ a:hover {
   justify-content: center;
   width: 100%;
   flex-wrap: wrap;
+  border: 0px !important;
 }
 
 .voting-button {
@@ -1177,6 +1185,7 @@ a:hover {
   border: none;
   background-color: ${isDark ? "#546e7a" : "#64b5f6"};
   color: white;
+  border: 0px !important;
 }
 
 .voting-button:hover {
@@ -1245,22 +1254,6 @@ a:hover {
   width: 100%;
   padding: 30px 0;
 }
-
-.loading-spinner {
-  width: 40px;
-  height: 40px;
-  border: 4px solid ${isDark ? "#444" : "#f3f3f3"};
-  border-top: 4px solid ${isDark ? "#80cbc4" : "#3498db"};
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
-  margin-bottom: 15px;
-}
-
-@keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-}
-
 .no-votes-message {
   text-align: center;
   padding: 20px;
