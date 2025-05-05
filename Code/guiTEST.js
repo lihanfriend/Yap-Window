@@ -1096,6 +1096,7 @@ a:hover {
   background-color: ${isDark ? "#444" : "#f5f5f5"};
   transition: transform 0.2s, background-color 0.2s;
   box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  flex-direction: column;
 }
 
 .voting-item:hover {
@@ -1114,6 +1115,7 @@ a:hover {
   margin-bottom: 4px;
   color: ${isDark ? "#fff" : "#222"};
   border: 0px !important;
+  text-align: center;
 }
 
 .vote-options {
