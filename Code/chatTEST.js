@@ -3798,14 +3798,19 @@ Make sure to follow all the instructions while answering questions.
       const voteItem = document.createElement("div");
       voteItem.className = "voting-item";
       voteItem.innerHTML = `
-  <div class="bot-info">
-    <div class="bot-name">${botName}</div>
-  </div>
-  <div class="vote-options">
-    <button class="vote-button yes ${userVote === true ? "selected" : ""}" data-bot="${botName}">Yes</button>
-    <button class="vote-button no ${userVote === false ? "selected" : ""}" data-bot="${botName}">No</button>
-  </div>
-`;
+        <div class="bot-info">
+          <div class="bot-name">
+            ${botName}
+            <span class="bot-tooltip">ℹ️
+              <span class="tooltip-text">${allBots[botName] || "No description available"}</span>
+            </span>
+          </div>
+        </div>
+        <div class="vote-options">
+          <button class="vote-button yes ${userVote === true ? "selected" : ""}" data-bot="${botName}">Yes</button>
+          <button class="vote-button no ${userVote === false ? "selected" : ""}" data-bot="${botName}">No</button>
+        </div>
+      `;
 
       votingList.appendChild(voteItem);
     });
