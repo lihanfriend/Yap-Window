@@ -3974,7 +3974,6 @@ Make sure to follow all the instructions while answering questions.
       </div>
       <div class="vote-count">${data.yesVotes} of ${data.totalVotes} votes</div>
     </div>
-    <div class="approval-percentage">${percentage}%</div>
   `;
 
       leaderboardList.appendChild(leaderboardItem);
