@@ -1167,8 +1167,8 @@ a:hover {
 
 #voting-buttons, #leaderboard-buttons {
   display: flex;
-  gap: 12px;
-  margin-top: 20px;
+  gap: 0px;
+  margin-top: 0px;
   justify-content: center;
   width: 100%;
   flex-wrap: wrap;
@@ -1186,6 +1186,7 @@ a:hover {
   background-color: ${isDark ? "#546e7a" : "#64b5f6"};
   color: white;
   border: 0px !important;
+  margin: 5px 0 !important;
 }
 
 .voting-button:hover {
@@ -1211,6 +1212,7 @@ a:hover {
   position: relative;
   padding: 12px 15px;
   margin-bottom: 10px;
+  border: 0px !important;
 }
 
 .approval-bar-container {
@@ -1221,6 +1223,7 @@ a:hover {
   border-radius: 4px;
   margin-top: 8px;
   overflow: hidden;
+  border: 0px !important;
 }
 
 .approval-bar {
@@ -1229,6 +1232,7 @@ a:hover {
   background: linear-gradient(to right, #4caf50, #8bc34a);
   border-radius: 4px;
   transition: width 1s ease-out;
+  border: 0px !important;
 }
 
 .approval-percentage {
@@ -1238,27 +1242,22 @@ a:hover {
   font-weight: bold;
   font-size: 16px;
   color: ${isDark ? "#8bc34a" : "#388e3c"};
+  border: 0px !important;
 }
 
 .vote-count {
   font-size: 12px;
   color: ${isDark ? "#bbb" : "#777"};
   margin-top: 4px;
+  border: 0px !important;
 }
 
-.loading-indicator {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
-  padding: 30px 0;
-}
 .no-votes-message {
   text-align: center;
   padding: 20px;
   color: ${isDark ? "#bbb" : "#777"};
   font-style: italic;
+  border: 0px !important;
 }
 
 /* Tooltip */
@@ -1269,6 +1268,7 @@ a:hover {
   font-size: 14px;
   color: ${isDark ? "#aaa" : "#777"};
   cursor: help;
+  border: 0px !important;
 }
 
 .bot-tooltip .tooltip-text {
@@ -1288,6 +1288,7 @@ a:hover {
   transition: opacity 0.3s;
   font-size: 12px;
   font-weight: normal;
+  border: 0px !important;
 }
 
 .bot-tooltip .tooltip-text::after {
@@ -1299,6 +1300,7 @@ a:hover {
   border-width: 5px;
   border-style: solid;
   border-color: ${isDark ? "#212121" : "#555"} transparent transparent transparent;
+  border: 0px !important;
 }
 
 .bot-tooltip:hover .tooltip-text {
