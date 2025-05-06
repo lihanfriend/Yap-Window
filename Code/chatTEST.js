@@ -635,7 +635,7 @@
 
       Object.keys(accounts).forEach((formattedEmail) => {
         const account = accounts[formattedEmail];
-        const lastInteract = account.LastInteract || 0;
+        let lastInteract = account.LastInteract || 0;
         if (formattedEmail === currentUserFormattedEmail) {
           lastInteract = currentTime;
         }
