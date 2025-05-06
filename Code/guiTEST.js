@@ -1319,6 +1319,109 @@ a:hover {
   border-radius: 6px;
   margin-bottom: 15px;
 }
+
+.dropdown-container {
+  position: relative;
+  display: inline-block;
+}
+.settings-dropdown {
+  position: absolute;
+  top: 40px;
+  left: -10px;
+  background-color: ${isDark ? "#444" : "#fff"};
+  border: 1px solid ${isDark ? "#666" : "#ddd"};
+  border-radius: 4px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  z-index: 1000;
+  min-width: 100px;
+  display: none;
+}
+.dropdown-option {
+  padding: 8px 12px;
+  color: ${isDark ? "#eee" : "#333"};
+  cursor: pointer;
+  transition: background-color 0.2s;
+  font-size: 14px;
+}
+.dropdown-option:hover {
+  background-color: ${isDark ? "#555" : "#f0f0f0"};
+}
+.dropdown-option.selected {
+  background-color: ${isDark ? "#666" : "#e0e0e0"};
+  font-weight: bold;
+}
+
+.fake-message {
+  /* Make fake messages look more like normal messages */
+  padding: 3px 8px;
+  margin-bottom: 3px;
+  border-radius: 5px;
+  font-size: 12px;
+  width: 95%;
+  max-width: 95%;
+  word-wrap: break-word;
+  background-color: ${isDark ? "#2a323c" : "#f0f7ff"};
+  color: ${isDark ? "#e2e8f0" : "#1a365d"};
+  text-align: left;
+}
+.jimmy-bot-header {
+  font-weight: bold;
+  margin-bottom: 3px;
+  color: ${isDark ? "#90cdf4" : "#4299e1"};
+  font-size: 12px;
+}
+.jimmy-bot-content {
+  margin-bottom: 6px;
+  font-size: 12px;
+}
+.corrected-message {
+  margin: 6px 0;
+  padding: 6px;
+  border-radius: 4px;
+  background-color: ${isDark ? "#36394a" : "#e6f7ff"};
+  border-left: 2px solid ${isDark ? "#90cdf4" : "#4299e1"};
+  font-size: 12px;
+}
+.jimmy-bot-buttons {
+  display: flex;
+  gap: 8px;
+  margin-top: 6px;
+  justify-content: flex-end;
+}
+.jimmy-yes-btn, .jimmy-no-btn {
+  padding: 4px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+  border: none;
+  transition: all 0.2s ease;
+  font-weight: 500;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+}
+.jimmy-yes-btn {
+  background-color: ${isDark ? "#38a169" : "#48bb78"};
+  color: white;
+  border: 1px solid ${isDark ? "#2f855a" : "#38a169"};
+}
+.jimmy-no-btn {
+  background-color: ${isDark ? "#e53e3e" : "#f56565"};
+  color: white;
+  border: 1px solid ${isDark ? "#c53030" : "#e53e3e"};
+}
+.jimmy-yes-btn:hover {
+  background-color: ${isDark ? "#2f855a" : "#38a169"};
+  transform: translateY(-1px);
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.2);
+}
+.jimmy-no-btn:hover {
+  background-color: ${isDark ? "#c53030" : "#e53e3e"};
+  transform: translateY(-1px);
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.2);
+}
+.jimmy-yes-btn:active, .jimmy-no-btn:active {
+  transform: translateY(0);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
   `;
   }
 
@@ -1434,6 +1537,14 @@ a:hover {
       <button id="read-all" class="setting-button">📖</button>
       <button id="hide-left-sidebar" class="setting-button">☰</button>
       <button id="user-activity" class="setting-button">👥</button>
+      <div class="dropdown-container">
+        <button id="g-setting" class="setting-button">✍️</button>
+        <div id="g-dropdown" class="settings-dropdown">
+          <div class="dropdown-option" data-value="on">On</div>
+          <div class="dropdown-option" data-value="ask">Ask</div>
+          <div class="dropdown-option" data-value="off">Off</div>
+        </div>
+      </div>
       <button id="modify-channel" class="setting-button" style="display: none">✏️</button>
       <button id="vote-bots-button" class="setting-button">🗳️</button>
    </div>
