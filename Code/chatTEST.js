@@ -12919,6 +12919,8 @@ Make sure to follow all the instructions while answering questions.
           }
         }
       } else if (pureMessage.trim().toLowerCase() === "/24") {
+          isSending = false;
+        sendButton.disabled = false;
         const newMessageRef = push(messagesRef);
         await update(newMessageRef, {
           User: email,
