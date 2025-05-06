@@ -12241,6 +12241,13 @@
     return snap.exists();
   }
 
+  let shell;
+  await (async () => {
+    shell = await new Shell(database, auth);
+
+    await shell.initCwd();
+  })();
+
   async function sendMessage() {
     /*   if (isSending) return;
     isSending = true;
