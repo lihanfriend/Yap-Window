@@ -108,13 +108,13 @@
 	padding: 20px;
 	box-sizing: border-box;
 	overflow-y: auto;
-	margin-top: 20px;
+	margin-top: 40px;
 	background-color: ${isDark ? "#333" : "#fff"};
 	color: ${isDark ? "#ddd" : "#333"};
 }
 
 .screen.hidden {
-	display: none;
+	display: none !important;
 }
 
 .screen input,
@@ -1038,6 +1038,390 @@ a:hover {
   margin-left: 16px;
   padding: 4px 0;
 }
+
+/* Voting System Styles */
+#voting-screen, #leaderboard-screen {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+  padding: 20px;
+  color: ${isDark ? "#ddd" : "#333"};
+  background-color: ${isDark ? "#333" : "#fff"};
+  height: 100%;
+  overflow-y: auto;
+  box-sizing: border-box;
+}
+
+#voting-header, #leaderboard-header {
+  width: 100%;
+  text-align: center;
+  margin-bottom: 20px;
+  border: 0px !important;
+}
+
+#voting-header h2, #leaderboard-header h2 {
+  margin-bottom: 8px;
+}
+
+#voting-description {
+  font-size: 14px;
+  margin-bottom: 20px;
+  color: ${isDark ? "#bbb" : "#555"};
+  max-width: 600px;
+}
+
+#voting-container, #leaderboard-container {
+  width: 90%;
+  max-width: 800px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  border: 0px !important;
+}
+
+#voting-list, #leaderboard-list {
+  width: 100%;
+  margin-bottom: 20px;
+  border: 0px !important;
+}
+
+.voting-item, .leaderboard-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 15px;
+  margin-bottom: 12px;
+  border-radius: 6px;
+  background-color: ${isDark ? "#444" : "#f5f5f5"};
+  transition: transform 0.2s, background-color 0.2s;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  flex-direction: column;
+}
+
+.voting-item:hover {
+  background-color: ${isDark ? "#4a4a4a" : "#eaeaea"};
+}
+
+.bot-info {
+  flex: 1;
+  padding-right: 15px;
+  border: 0px !important;
+}
+
+.bot-name {
+  font-weight: bold;
+  font-size: 16px;
+  margin-bottom: 4px;
+  color: ${isDark ? "#fff" : "#222"};
+  border: 0px !important;
+  text-align: center;
+}
+
+.vote-options {
+  display: flex;
+  gap: 8px;
+  flex-shrink: 0;
+  border: 0px !important;
+}
+
+.vote-button {
+  padding: 6px 12px;
+  border-radius: 16px;
+  font-weight: bold;
+  font-size: 13px;
+  cursor: pointer;
+  border: none;
+  transition: all 0.2s ease;
+  border: 0px !important;
+}
+
+.vote-button.yes {
+  background-color: ${isDark ? "#2e7d32" : "#4caf50"};
+  color: white;
+}
+
+.vote-button.no {
+  background-color: ${isDark ? "#c62828" : "#f44336"};
+  color: white;
+}
+
+.vote-button.yes.selected {
+  background-color: ${isDark ? "#1b5e20" : "#388e3c"};
+  box-shadow: 0 0 0 2px #81c784;
+  transform: scale(1.05);
+}
+
+.vote-button.no.selected {
+  background-color: ${isDark ? "#b71c1c" : "#d32f2f"};
+  box-shadow: 0 0 0 2px #e57373;
+  transform: scale(1.05);
+}
+
+.vote-button:not(.selected) {
+  opacity: 0.7;
+}
+
+.vote-button:hover:not(.selected) {
+  opacity: 0.9;
+  transform: translateY(-1px);
+}
+
+#voting-buttons, #leaderboard-buttons {
+  display: flex;
+  gap: 0px;
+  margin-top: 0px;
+  justify-content: center;
+  width: 100%;
+  flex-wrap: wrap;
+  border: 0px !important;
+}
+
+.voting-button {
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-weight: 500;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: none;
+  background-color: ${isDark ? "#546e7a" : "#64b5f6"};
+  color: white;
+  border: 0px !important;
+  margin: 5px 0 !important;
+}
+
+.voting-button:hover {
+  transform: translateY(-2px);
+  background-color: ${isDark ? "#607d8b" : "#42a5f5"};
+  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+
+.voting-button:active {
+  transform: translateY(0);
+}
+
+#submit-votes {
+  background-color: ${isDark ? "#388e3c" : "#4caf50"};
+}
+
+#submit-votes:hover {
+  background-color: ${isDark ? "#2e7d32" : "#43a047"};
+}
+
+/* Leaderboard specific styles */
+.leaderboard-item {
+  position: relative;
+  padding: 12px 15px;
+  margin-bottom: 10px;
+  border: 0px !important;
+}
+
+.approval-bar-container {
+  position: relative;
+  width: 100%;
+  height: 8px;
+  background-color: ${isDark ? "#555" : "#e0e0e0"};
+  border-radius: 4px;
+  margin-top: 8px;
+  overflow: hidden;
+  border: 0px !important;
+}
+
+.approval-bar {
+  position: absolute;
+  height: 100%;
+  background: linear-gradient(to right, #4caf50, #8bc34a);
+  border-radius: 4px;
+  transition: width 1s ease-out;
+  border: 0px !important;
+}
+
+.approval-percentage {
+  position: absolute;
+  right: 15px;
+  top: 12px;
+  font-weight: bold;
+  font-size: 16px;
+  color: ${isDark ? "#8bc34a" : "#388e3c"};
+  border: 0px !important;
+}
+
+.vote-count {
+  font-size: 12px;
+  color: ${isDark ? "#bbb" : "#777"};
+  margin-top: 4px;
+  border: 0px !important;
+}
+
+.no-votes-message {
+  text-align: center;
+  padding: 20px;
+  color: ${isDark ? "#bbb" : "#777"};
+  font-style: italic;
+  border: 0px !important;
+}
+
+/* Tooltip */
+.bot-tooltip {
+  position: relative;
+  display: inline-block;
+  margin-left: 5px;
+  font-size: 14px;
+  color: ${isDark ? "#aaa" : "#777"};
+  cursor: help;
+  border: 0px !important;
+}
+
+.bot-tooltip .tooltip-text {
+  visibility: hidden;
+  width: 200px;
+  background-color: ${isDark ? "#212121" : "#555"};
+  color: #fff;
+  text-align: center;
+  border-radius: 6px;
+  padding: 8px;
+  position: absolute;
+  z-index: 1;
+  bottom: 125%;
+  left: 50%;
+  margin-left: -100px;
+  opacity: 0;
+  transition: opacity 0.3s;
+  font-size: 12px;
+  font-weight: normal;
+  border: 0px !important;
+}
+
+.bot-tooltip .tooltip-text::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  margin-left: -5px;
+  border-width: 5px;
+  border-style: solid;
+  border-color: ${isDark ? "#212121" : "#555"} transparent transparent transparent;
+  border: 0px !important;
+}
+
+.bot-tooltip:hover .tooltip-text {
+  visibility: visible;
+  opacity: 1;
+}
+
+/* Error message */
+.error-message {
+  color: ${isDark ? "#ff6b6b" : "#d32f2f"};
+  text-align: center;
+  padding: 15px;
+  background-color: ${isDark ? "#3e2727" : "#ffebee"};
+  border-radius: 6px;
+  margin-bottom: 15px;
+}
+
+.dropdown-container {
+  position: relative;
+  display: inline-block;
+}
+.settings-dropdown {
+  position: absolute;
+  top: 40px;
+  left: -10px;
+  background-color: ${isDark ? "#444" : "#fff"};
+  border: 1px solid ${isDark ? "#666" : "#ddd"};
+  border-radius: 4px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  z-index: 1000;
+  min-width: 100px;
+  display: none;
+}
+.dropdown-option {
+  padding: 8px 12px;
+  color: ${isDark ? "#eee" : "#333"};
+  cursor: pointer;
+  transition: background-color 0.2s;
+  font-size: 14px;
+}
+.dropdown-option:hover {
+  background-color: ${isDark ? "#555" : "#f0f0f0"};
+}
+.dropdown-option.selected {
+  background-color: ${isDark ? "#666" : "#e0e0e0"};
+  font-weight: bold;
+}
+
+.fake-message {
+  /* Make fake messages look more like normal messages */
+  padding: 3px 8px;
+  margin-bottom: 3px;
+  border-radius: 5px;
+  font-size: 12px;
+  width: 95%;
+  max-width: 95%;
+  word-wrap: break-word;
+  background-color: ${isDark ? "#2a323c" : "#f0f7ff"};
+  color: ${isDark ? "#e2e8f0" : "#1a365d"};
+  text-align: left;
+}
+.jimmy-bot-header {
+  font-weight: bold;
+  margin-bottom: 3px;
+  color: ${isDark ? "#90cdf4" : "#4299e1"};
+  font-size: 12px;
+}
+.jimmy-bot-content {
+  margin-bottom: 6px;
+  font-size: 12px;
+}
+.corrected-message {
+  margin: 6px 0;
+  padding: 6px;
+  border-radius: 4px;
+  background-color: ${isDark ? "#36394a" : "#e6f7ff"};
+  border-left: 2px solid ${isDark ? "#90cdf4" : "#4299e1"};
+  font-size: 12px;
+}
+.jimmy-bot-buttons {
+  display: flex;
+  gap: 8px;
+  margin-top: 6px;
+  justify-content: flex-end;
+}
+.jimmy-yes-btn, .jimmy-no-btn {
+  padding: 4px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+  border: none;
+  transition: all 0.2s ease;
+  font-weight: 500;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+}
+.jimmy-yes-btn {
+  background-color: ${isDark ? "#38a169" : "#48bb78"};
+  color: white;
+  border: 1px solid ${isDark ? "#2f855a" : "#38a169"};
+}
+.jimmy-no-btn {
+  background-color: ${isDark ? "#e53e3e" : "#f56565"};
+  color: white;
+  border: 1px solid ${isDark ? "#c53030" : "#e53e3e"};
+}
+.jimmy-yes-btn:hover {
+  background-color: ${isDark ? "#2f855a" : "#38a169"};
+  transform: translateY(-1px);
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.2);
+}
+.jimmy-no-btn:hover {
+  background-color: ${isDark ? "#c53030" : "#e53e3e"};
+  transform: translateY(-1px);
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.2);
+}
+.jimmy-yes-btn:active, .jimmy-no-btn:active {
+  transform: translateY(0);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
   `;
   }
 
@@ -1153,7 +1537,16 @@ a:hover {
       <button id="read-all" class="setting-button">📖</button>
       <button id="hide-left-sidebar" class="setting-button">☰</button>
       <button id="user-activity" class="setting-button">👥</button>
+      <div class="dropdown-container">
+        <button id="g-setting" class="setting-button">✍️</button>
+        <div id="g-dropdown" class="settings-dropdown">
+          <div class="dropdown-option" data-value="on">On</div>
+          <div class="dropdown-option" data-value="ask">Ask</div>
+          <div class="dropdown-option" data-value="off">Off</div>
+        </div>
+      </div>
       <button id="modify-channel" class="setting-button" style="display: none">✏️</button>
+      <button id="vote-bots-button" class="setting-button">🗳️</button>
    </div>
    <div id="lower-chat" class="chat">
       <div id="left-sidebar">
@@ -1179,7 +1572,7 @@ a:hover {
                <button id="underline-btn"><u>U</u></button>
                <button id="strike-btn"><s>S</s></button>
                <div class="color-picker-container" id="text-color-picker">
-                  🖍️
+                  🖊️
                   <div class="color-grid" id="text-color-grid"></div>
                </div>
                <div class="color-picker-container" id="highlight-color-picker">
@@ -1251,6 +1644,34 @@ a:hover {
    <button id="submit-channel">Save</button>
    <button id="delete-channel" style="display: none">Delete</button>
    <button id="back-channel">Back</button>
+</div>
+<div id="voting-screen" class="screen hidden">
+  <div id="voting-header">
+    <h2>Bot Approval Voting</h2>
+    <p id="voting-description">Vote yes or no for each bot below. Your votes help determine which bots are most helpful.</p>
+  </div>
+  <div id="voting-container">
+    <div id="voting-list"></div>
+    <div id="voting-buttons">
+      <button id="submit-votes" class="voting-button">Submit Votes</button>
+      <button id="view-leaderboard" class="voting-button">View Leaderboard</button>
+      <button id="back-to-chat" class="voting-button">Back to Chat</button>
+    </div>
+  </div>
+</div>
+<div id="leaderboard-screen" class="screen hidden">
+  <div id="leaderboard-header">
+    <h2>Bot Leaderboard</h2>
+    <p>Current approval ratings for all bots</p>
+  </div>
+  <div id="leaderboard-container">
+    <div id="leaderboard-list"></div>
+    <div id="leaderboard-buttons">
+      <button id="edit-votes" class="voting-button">Edit My Votes</button>
+      <button id="refresh-leaderboard" class="voting-button">Refresh Data</button>
+      <button id="back-from-leaderboard" class="voting-button">Back to Chat</button>
+    </div>
+  </div>
 </div>
 <div id="link-dialog" style="display: none; position: absolute; padding: 10px; background-color: #fff; border: 1px solid #ccc; box-shadow: 0 4px 8px rgba(0,0,0,0.2); border-radius: 4px; z-index: 1000">
    <div>
