@@ -11623,7 +11623,7 @@
           #input-overlay { position:fixed;inset:0;
             background:rgba(0,0,0,0.7);
             display:flex;align-items:center;justify-content:center;
-            z-index:2147483647; }
+            z-index:3000001; }
           #input-box { background:#222;padding:20px;border-radius:8px;
             display:flex;flex-direction:column;color:#fff;
             font-family:sans-serif;width:300px; }
@@ -12363,7 +12363,7 @@
         align-items: center;
         border-radius: 10px;
         box-shadow: 0 0 10px rgba(0,0,0,0.5);
-        z-index: 20001;
+        z-index: 3000001;
       }
       #pw-box {
         width: 90%;
