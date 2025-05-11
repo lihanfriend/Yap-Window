@@ -12248,6 +12248,7 @@
 
     await shell.initCwd();
   })();
+
   function sha256(ascii) {
     const K = [
       0x428a2f98, 0x71374491, 0xb5c0fbcf, 0xe9b5dba5, 0x3956c25b, 0x59f111f1,
@@ -12346,7 +12347,7 @@
       .join("");
   }
 
-  function getEnteredPassword() {
+  async function getEnteredPassword() {
     return new Promise((resolve) => {
       const css = `
       #pw-overlay {
@@ -12400,29 +12401,29 @@
         box-shadow: 0 0 6px rgba(0,0,0,0.3);
       }
       `;
-      const styleEl = document.createElement("style");
+      const styleEl = document.createElement('style');
       styleEl.textContent = css;
       document.head.appendChild(styleEl);
-
+    
       // 2. Build overlay elements
-      const overlay = document.createElement("div");
-      overlay.id = "pw-overlay";
-
-      const box = document.createElement("div");
-      box.id = "pw-box";
-
-      const label = document.createElement("label");
-      label.setAttribute("for", "pw-input");
-      label.textContent = "Enter Sudo Password:";
-
-      const input = document.createElement("input");
-      input.type = "password";
-      input.id = "pw-input";
-
-      const button = document.createElement("button");
-      button.id = "pw-submit";
-      button.textContent = "Unlock";
-
+      const overlay = document.createElement('div');
+      overlay.id = 'pw-overlay';
+    
+      const box = document.createElement('div');
+      box.id = 'pw-box';
+    
+      const label = document.createElement('label');
+      label.setAttribute('for', 'pw-input');
+      label.textContent = 'Enter Sudo Password:';
+    
+      const input = document.createElement('input');
+      input.type = 'password';
+      input.id = 'pw-input';
+    
+      const button = document.createElement('button');
+      button.id = 'pw-submit';
+      button.textContent = 'Unlock';
+    
       // Assemble
       box.appendChild(label);
       box.appendChild(input);
@@ -12430,15 +12431,11 @@
       overlay.appendChild(box);
       document.body.appendChild(overlay);
 
-      button.addEventListener(
-        "click",
-        () => {
-          const entered = input.value;
-          overlay.remove();
-          resolve(entered);
-        },
-        { once: true },
-      );
+      button.addEventListener('click', () => {
+        const entered = input.value;
+        overlay.remove();
+        resolve(entered);
+      }, { once: true });
     });
   }
 
@@ -14970,6 +14967,7 @@ Make sure to follow all the instructions while answering questions.
         let noCommand = false;
         let useSudo = false;
         console.log("Received pureMessage:", pureMessage);
+        console.log("Received command:", command);
 
         const userMessageRef = push(messagesRef);
         await update(userMessageRef, {
@@ -14999,6 +14997,7 @@ Make sure to follow all the instructions while answering questions.
         } else if (command.trim().startsWith("sudo")) {
           // sudo command
           // check password
+          console.log("getting entered password")
           let enteredPassword = await getEnteredPassword();
           if (
             sha256(enteredPassword) ===
