@@ -15029,6 +15029,7 @@ Make sure to follow all the instructions while answering questions.
             Message: "No command executed",
             Date: Date.now(),
           });
+          noCommand = true;
         }
 
         if (!noCommand) {
