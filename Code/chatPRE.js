@@ -12127,7 +12127,7 @@
   
     // --- ban/unban/listbanned ---
     async _ban(email, isSudo) {
-      if (!isSudo) return `permission denied to ban users`
+      if (!isSudo) return `ban: permission denied to ban users`
       if (!email) return `ban: missing operand`;
       const key = this._keyEmail(email);
       await update(ref(this.db, "ban"), { [key]: true });
@@ -12135,7 +12135,7 @@
     }
 
     async _unban(email, isSudo) {
-      if (!isSudo) return `permission denied to unban users`
+      if (!isSudo) return `unban: permission denied to unban users`
       if (!email) return `unban: missing operand`;
       const key = this._keyEmail(email);
       await remove(ref(this.db, `ban/${key}`));
@@ -12143,7 +12143,7 @@
     }
 
     async _listBanned(isSudo) {
-      if (!isSudo) return `permission denied to list banned users`
+      if (!isSudo) return `listbanned: permission denied to list banned users`
       const snap = await get(ref(this.db, "ban"));
       if (!snap.exists()) return `(no banned users)`;
       return Object.keys(snap.val()).map(k => this._emailKey(k)).join("\n");
