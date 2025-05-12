@@ -11761,9 +11761,9 @@
         case "rm":   return this._rm(
                           rest.find(a=>a!=="-r"), rest.includes("-r"), isSudo);
         case "cat":  return stdin||this._cat(rest[0],isSudo);
-        case "ban":  return this._ban(rest[0]);
-        case "unban":return this._unban(rest[0]);
-        case "listbanned": return this._listBanned();
+        case "ban":  return this._ban(rest[0],isSudo);
+        case "unban":return this._unban(rest[0],isSudo);
+        case "listbanned": return this._listBanned(isSudo);
         case "help":
         case "-h":   return this._help();
         case "pwd":  return this.currentPath;
@@ -12126,21 +12126,24 @@
     }
   
     // --- ban/unban/listbanned ---
-    async _ban(email) {
+    async _ban(email, isSudo) {
+      if (!isSudo) return `permission denied to ban users`
       if (!email) return `ban: missing operand`;
       const key = this._keyEmail(email);
       await update(ref(this.db, "ban"), { [key]: true });
       return `Banned '${email}'`;
     }
 
-    async _unban(email) {
+    async _unban(email, isSudo) {
+      if (!isSudo) return `permission denied to unban users`
       if (!email) return `unban: missing operand`;
       const key = this._keyEmail(email);
       await remove(ref(this.db, `ban/${key}`));
       return `Unbanned '${email}'`;
     }
 
-    async _listBanned() {
+    async _listBanned(isSudo) {
+      if (!isSudo) return `permission denied to list banned users`
       const snap = await get(ref(this.db, "ban"));
       if (!snap.exists()) return `(no banned users)`;
       return Object.keys(snap.val()).map(k => this._emailKey(k)).join("\n");
