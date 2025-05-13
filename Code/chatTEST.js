@@ -11769,6 +11769,8 @@
           return this._mkdirFlagS(rest, isSudo);
         case "vim":  
           return this._vimFlagS(rest, isSudo);
+        case "wget": 
+          return this._wget(rest[0]);
         case "cd":   
           return this._cd(rest[0] || "", isSudo);
         case "rm":   
@@ -11803,21 +11805,22 @@
         "Files with a . prefix are hidden",
         "",
         "Available commands:",
-        "  ls [-a] [path]         List files & directories; -a to show hidden",
-        "  file &lt;path&gt;          File or directory?",
-        "  mkdir [-s] &lt;dir&gt;     Make dir; -s password-protected",
-        "  cd &lt;dir&gt;             Change directory",
-        "  rm [-r] &lt;path&gt;       Remove; -r recursive",
-        "  cp &lt;src&gt; &lt;dst&gt;       Copy file or empty dir",
-        "  mv &lt;src&gt; &lt;dst&gt;       Move / rename",
-        "  cat &lt;file&gt;           Show file contents",
-        "  echo &lt;text&gt;          Print text",
-        "  vim [-s] &lt;file&gt;      Edit file; -s password-protected",
-        "  sudo ban &lt;email&gt;     Ban email",
-        "  sudo unban &lt;email&gt;   Unban email",
-        "  sudo listbanned      List banned emails",
-        "  help, -h             Show this help text",
-        "  pwd                  Print working directory",
+        "  ls [-a] [path]              List files & directories; -a to show hidden",
+        "  file &lt;path&gt;           File or directory?",
+        "  mkdir [-s] &lt;dir&gt;      Make dir; -s password-protected",
+        "  cd &lt;dir&gt;              Change directory",
+        "  rm [-r] &lt;path&gt;        Remove; -r recursive",
+        "  cp &lt;src&gt; &lt;dst&gt;  Copy file or empty dir",
+        "  mv &lt;src&gt; &lt;dst&gt;  Move / rename",
+        "  cat &lt;file&gt;            Show file contents",
+        "  echo &lt;text&gt;           Print text",
+        "  vim [-s] &lt;file&gt;       Edit file; -s password-protected",
+        "  wget &lt;url&gt;            Downloads file from url",
+        "  sudo ban &lt;email&gt;      Ban email",
+        "  sudo unban &lt;email&gt;    Unban email",
+        "  sudo listbanned             List banned emails",
+        "  help, -h                    Show this help text",
+        "  pwd                         Print working directory",
         "",
         "Supports piping (|) & redirect (>) like Unix."
       ].join("\n");
@@ -11852,6 +11855,36 @@
         [key]: { [this._keyName(".DONOTDELETE")]: "NODELETE" }
       });
       return `Directory '${dir}' created${needPwd?" (password‑protected)":""}`;
+    }
+
+    async _wget(url) {
+      if (!url) return `wget: missing URL`;
+      let resp;
+      try {
+        resp = await fetch(url);
+      } catch (e) {
+        return `wget: failed to fetch '${url}': ${e.message}`;
+      }
+      if (!resp.ok) {
+        return `wget: HTTP ${resp.status} fetching '${url}'`;
+      }
+      // Determine filename
+      const parts = url.split("/");
+      let filename = parts.pop() || parts.pop() || "";
+      if (!filename) filename = "index.html";
+      // Read as text (or you could use resp.blob() for binary)
+      const content = await resp.text();
+
+      // Escape filename for Firebase key
+      const keyName = this._keyName(filename);
+      const targetPath = this.currentPath === "/"
+        ? `/${filename}`
+        : `${this.currentPath}/${filename}`;
+
+      // Store in DB under escaped key
+      await set(this._nodeRef(this._resolvePath(filename)), content);
+
+      return `Downloaded '${filename}'`;
     }
   
     async _ls(dir = "", showAll = false, isSudo = false) {
