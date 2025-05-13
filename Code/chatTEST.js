@@ -11798,6 +11798,10 @@
     // --- Help (escaped < >) ---
     async _help() {
       return [
+        "&lt;&gt; shows required argument",
+        "[] shows optional argument",
+        "Files with a . prefix are hidden",
+        "",
         "Available commands:",
         "  ls [-a] [path]         List files & directories; -a to show hidden",
         "  file &lt;path&gt;          File or directory?",
@@ -11845,7 +11849,7 @@
       }
 
       await update(this._nodeRef(parent), {
-        [key]: { [this._keyName("DONOTDELETE")]: "NODELETE" }
+        [key]: { [this._keyName(".DONOTDELETE")]: "NODELETE" }
       });
       return `Directory '${dir}' created${needPwd?" (password‑protected)":""}`;
     }
@@ -12000,7 +12004,7 @@
       if (!snap.exists()) return `rm: no such file or dir: ${target}`;
 
       // Prevent placeholder removal
-      if (path.split("/").pop() === this._keyName("DONOTDELETE") && !isSudo) {
+      if (path.split("/").pop() === this._keyName(".DONOTDELETE") && !isSudo) {
         return `rm: permission denied to remove placeholder`;
       }
 
