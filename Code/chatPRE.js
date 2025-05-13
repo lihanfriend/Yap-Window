@@ -11836,7 +11836,7 @@
       if (this._isPwDir(path) && !isSudo) {
         return `ls: permission denied to access metadata`;
       }
-  
+
       if (!isSudo) {
         const pwdSnap = await get(this._pwRef(path));
         if (pwdSnap.exists()) {
@@ -11846,23 +11846,38 @@
           }
         }
       }
-  
+
       const val = snap.val();
       if (typeof val === "string") {
         return `📄 ${this._nameKey(dir || path.split("/").pop())}`;
       }
+
       const keys = Object.keys(val);
       if (!keys.length) return `(empty directory)`;
-      const lines = await Promise.all(keys.map(async k => {
+
+      // Build list of { name, isFile } entries
+      const entries = await Promise.all(keys.map(async k => {
         const nm = this._nameKey(k);
         const cp = path === "/" ? `/${nm}` : `${path}/${nm}`;
         const cs = await get(this._nodeRef(cp));
-        return (cs.exists() && typeof cs.val() === "string")
-          ? `📄 ${nm}`
-          : `📁 ${nm}`;
+        const isFile = cs.exists() && typeof cs.val() === "string";
+        return { nm, isFile };
       }));
-      return lines.join("\n");
+
+      // Sort: directories first, then files; each group alphabetically
+      entries.sort((a, b) => {
+        if (a.isFile === b.isFile) {
+          return a.nm.localeCompare(b.nm);
+        }
+        return a.isFile ? 1 : -1;
+      });
+
+      // Map to display strings
+      return entries
+        .map(e => (e.isFile ? `📄 ${e.nm}` : `📁 ${e.nm}`))
+        .join("\n");
     }
+
   
     // --- file with password check ---
     async _file(target, isSudo) {
