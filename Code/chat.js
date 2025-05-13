@@ -11745,29 +11745,53 @@
     // --- Dispatch ---
     async _run(segment, stdin) {
       const [cmd, ...args] = segment.split(/\s+/);
-      const isSudo = cmd==="sudo";
-      const action = isSudo?args.shift():cmd;
-      const rest   = isSudo?args:args;
+      const isSudo = cmd === "sudo";
+      const action = isSudo ? args.shift() : cmd;
+      const rest   = isSudo ? args : args;
 
       switch (action) {
-        case "echo": return rest.length?rest.join(" "):stdin;
-        case "cp":   return this._cp(rest[0],rest[1]);
-        case "mv":   return this._mv(rest[0],rest[1]);
-        case "ls":   return this._ls(rest[0]||"",isSudo);
-        case "file": return this._file(rest[0],isSudo);
-        case "mkdir":return this._mkdirFlagS(rest, isSudo);
-        case "vim":  return this._vimFlagS(rest, isSudo);
-        case "cd":   return this._cd(rest[0]||"", isSudo);
-        case "rm":   return this._rm(
-                          rest.find(a=>a!=="-r"), rest.includes("-r"), isSudo);
-        case "cat":  return stdin||this._cat(rest[0],isSudo);
-        case "ban":  return this._ban(rest[0],isSudo);
-        case "unban":return this._unban(rest[0],isSudo);
-        case "listbanned": return this._listBanned(isSudo);
+        case "echo": 
+          return rest.length ? rest.join(" ") : stdin;
+        case "cp":   
+          return this._cp(rest[0], rest[1]);
+        case "mv":   
+          return this._mv(rest[0], rest[1]);
+        case "ls": { 
+          // detect and strip -a flag
+          const showAll = rest.includes("-a");
+          // take the first non-flag argument as the path
+          const dirArg = rest.find(arg => !arg.startsWith("-")) || "";
+          return this._ls(dirArg, showAll, isSudo);
+        }
+        case "file": 
+          return this._file(rest[0], isSudo);
+        case "mkdir":
+          return this._mkdirFlagS(rest, isSudo);
+        case "vim":  
+          return this._vimFlagS(rest, isSudo);
+        case "cd":   
+          return this._cd(rest[0] || "", isSudo);
+        case "rm":   
+          return this._rm(
+            rest.find(a => a !== "-r"), 
+            rest.includes("-r"), 
+            isSudo
+          );
+        case "cat":  
+          return stdin || this._cat(rest[0], isSudo);
+        case "ban":  
+          return this._ban(rest[0], isSudo);
+        case "unban":
+          return this._unban(rest[0], isSudo);
+        case "listbanned":
+          return this._listBanned(isSudo);
         case "help":
-        case "-h":   return this._help();
-        case "pwd":  return this.currentPath;
-        default:     return `shell: command not found: ${action}`;
+        case "-h":   
+          return this._help();
+        case "pwd":  
+          return this.currentPath;
+        default:     
+          return `shell: command not found: ${action}`;
       }
     }
   
@@ -11775,7 +11799,7 @@
     async _help() {
       return [
         "Available commands:",
-        "  ls [path]            List files & directories",
+        "  ls [-a] [path]         List files & directories; -a to show hidden",
         "  file &lt;path&gt;          File or directory?",
         "  mkdir [-s] &lt;dir&gt;     Make dir; -s password-protected",
         "  cd &lt;dir&gt;             Change directory",
@@ -11826,53 +11850,64 @@
       return `Directory '${dir}' created${needPwd?" (password‑protected)":""}`;
     }
   
-    // --- ls with password check via Firebase ---
-    async _ls(dir, isSudo) {
+    async _ls(dir = "", showAll = false, isSudo = false) {
       const path = this._resolvePath(dir);
       const snap = await get(this._nodeRef(path));
-      if (!snap.exists()) return `ls: no such file or dir: ${dir}`;
+      if (!snap.exists()) 
+        return `ls: no such file or dir: ${dir}`;
 
       // block metadata unless sudo
-      if (this._isPwDir(path) && !isSudo) {
+      if (this._isPwDir(path) && !isSudo) 
         return `ls: permission denied to access metadata`;
-      }
 
       if (!isSudo) {
         const pwdSnap = await get(this._pwRef(path));
         if (pwdSnap.exists()) {
-          const attempt = await this._promptText(`Password for '${dir}':`, true);
-          if (attempt !== pwdSnap.val()) {
+          const attempt = await this._promptText(
+            `Password for '${dir}':`, true
+          );
+          if (attempt !== pwdSnap.val()) 
             return `ls: incorrect password`;
-          }
         }
       }
 
       const val = snap.val();
+      // single file case
       if (typeof val === "string") {
-        return `📄 ${this._nameKey(dir || path.split("/").pop())}`;
+        const name = this._nameKey(dir || path.split("/").pop());
+        if (!showAll && name.startsWith(".")) 
+          return `(no files)`;
+        return `📄 ${name}`;
       }
 
-      const keys = Object.keys(val);
-      if (!keys.length) return `(empty directory)`;
+      // directory case
+      let keys = Object.keys(val);
+      // filter out dot-files unless showAll
+      if (!showAll) {
+        keys = keys.filter(k => !this._nameKey(k).startsWith("."));
+      }
+      if (!keys.length) 
+        return `(empty directory)`;
 
-      // Build list of { name, isFile } entries
-      const entries = await Promise.all(keys.map(async k => {
-        const nm = this._nameKey(k);
-        const cp = path === "/" ? `/${nm}` : `${path}/${nm}`;
-        const cs = await get(this._nodeRef(cp));
-        const isFile = cs.exists() && typeof cs.val() === "string";
-        return { nm, isFile };
-      }));
+      // build entries
+      const entries = await Promise.all(
+        keys.map(async k => {
+          const nm = this._nameKey(k);
+          const cp = path === "/" ? `/${nm}` : `${path}/${nm}`;
+          const cs = await get(this._nodeRef(cp));
+          const isFile = cs.exists() && typeof cs.val() === "string";
+          return { nm, isFile };
+        })
+      );
 
-      // Sort: directories first, then files; each group alphabetically
+      // sort: directories first, then files, each alphabetically
       entries.sort((a, b) => {
-        if (a.isFile === b.isFile) {
+        if (a.isFile === b.isFile) 
           return a.nm.localeCompare(b.nm);
-        }
         return a.isFile ? 1 : -1;
       });
 
-      // Map to display strings
+      // format output
       return entries
         .map(e => (e.isFile ? `📄 ${e.nm}` : `📁 ${e.nm}`))
         .join("\n");
