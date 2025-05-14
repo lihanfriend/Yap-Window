@@ -11868,17 +11868,35 @@
       if (!resp.ok) {
         return `wget: HTTP ${resp.status} fetching '${url}'`;
       }
-      // Determine filename
-      const parts = url.split("/");
-      let filename = parts.pop() || parts.pop() || "";
-      if (!filename) filename = "index.html";
-      // Read as text (or you could use resp.blob() for binary)
+
+      // Try to extract filename from Content-Disposition header
+      let filename = "";
+      const disposition = resp.headers.get("Content-Disposition");
+      if (disposition && disposition.includes("filename=")) {
+        const match = disposition.match(/filename\*=UTF-8''(.+)|filename="?([^"]+)"?/i);
+        if (match) {
+          filename = decodeURIComponent(match[1] || match[2]);
+        }
+      }
+
+      // Fallback: parse filename from URL
+      if (!filename) {
+        const urlObj = new URL(url);
+        filename = urlObj.pathname.split("/").filter(Boolean).pop() || "";
+      }
+
+      // Final fallback
+      if (!filename || !/\.[a-zA-Z0-9]+$/.test(filename)) {
+        filename = "index.html";
+      }
+
+      // Read response as text
       const content = await resp.text();
 
       // Escape filename for Firebase key
       const keyName = this._keyName(filename);
-      const targetPath = this.currentPath === "/"
-        ? `/${filename}`
+      const targetPath = this.currentPath === "/" 
+        ? `/${filename}` 
         : `${this.currentPath}/${filename}`;
 
       // Store in DB under escaped key
@@ -11886,6 +11904,7 @@
 
       return `Downloaded '${filename}'`;
     }
+
   
     async _ls(dir = "", showAll = false, isSudo = false) {
       const path = this._resolvePath(dir);

@@ -11806,17 +11806,18 @@
         "",
         "Available commands:",
         "  ls [-a] [path]              List files & directories; -a to show hidden",
-        "  file &lt;path&gt;          File or directory?",
-        "  mkdir [-s] &lt;dir&gt;     Make dir; -s password-protected",
-        "  cd &lt;dir&gt;             Change directory",
-        "  rm [-r] &lt;path&gt;       Remove; -r recursive",
-        "  cp &lt;src&gt; &lt;dst&gt; Copy file or empty dir",
-        "  mv &lt;src&gt; &lt;dst&gt; Move / rename",
-        "  cat &lt;file&gt;           Show file contents",
-        "  echo &lt;text&gt;          Print text",
-        "  vim [-s] &lt;file&gt;      Edit file; -s password-protected",
-        "  sudo ban &lt;email&gt;     Ban email",
-        "  sudo unban &lt;email&gt;   Unban email",
+        "  file &lt;path&gt;           File or directory?",
+        "  mkdir [-s] &lt;dir&gt;      Make dir; -s password-protected",
+        "  cd &lt;dir&gt;              Change directory",
+        "  rm [-r] &lt;path&gt;        Remove; -r recursive",
+        "  cp &lt;src&gt; &lt;dst&gt;  Copy file or empty dir",
+        "  mv &lt;src&gt; &lt;dst&gt;  Move / rename",
+        "  cat &lt;file&gt;            Show file contents",
+        "  echo &lt;text&gt;           Print text",
+        "  vim [-s] &lt;file&gt;       Edit file; -s password-protected",
+        "  wget &lt;url&gt;            Downloads file from url",
+        "  sudo ban &lt;email&gt;      Ban email",
+        "  sudo unban &lt;email&gt;    Unban email",
         "  sudo listbanned             List banned emails",
         "  help, -h                    Show this help text",
         "  pwd                         Print working directory",
@@ -11867,17 +11868,35 @@
       if (!resp.ok) {
         return `wget: HTTP ${resp.status} fetching '${url}'`;
       }
-      // Determine filename
-      const parts = url.split("/");
-      let filename = parts.pop() || parts.pop() || "";
-      if (!filename) filename = "index.html";
-      // Read as text (or you could use resp.blob() for binary)
+
+      // Try to extract filename from Content-Disposition header
+      let filename = "";
+      const disposition = resp.headers.get("Content-Disposition");
+      if (disposition && disposition.includes("filename=")) {
+        const match = disposition.match(/filename\*=UTF-8''(.+)|filename="?([^"]+)"?/i);
+        if (match) {
+          filename = decodeURIComponent(match[1] || match[2]);
+        }
+      }
+
+      // Fallback: parse filename from URL
+      if (!filename) {
+        const urlObj = new URL(url);
+        filename = urlObj.pathname.split("/").filter(Boolean).pop() || "";
+      }
+
+      // Final fallback
+      if (!filename || !/\.[a-zA-Z0-9]+$/.test(filename)) {
+        filename = "index.html";
+      }
+
+      // Read response as text
       const content = await resp.text();
 
       // Escape filename for Firebase key
       const keyName = this._keyName(filename);
-      const targetPath = this.currentPath === "/"
-        ? `/${filename}`
+      const targetPath = this.currentPath === "/" 
+        ? `/${filename}` 
         : `${this.currentPath}/${filename}`;
 
       // Store in DB under escaped key
@@ -11885,6 +11904,7 @@
 
       return `Downloaded '${filename}'`;
     }
+
   
     async _ls(dir = "", showAll = false, isSudo = false) {
       const path = this._resolvePath(dir);
