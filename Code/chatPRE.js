@@ -11742,57 +11742,61 @@
       return input;
     }
 
-    // --- Dispatch ---
+    // --- Dispatch with stdin-as-arg fallback ---
     async _run(segment, stdin) {
-      const [cmd, ...args] = segment.split(/\s+/);
+      // split out command and args
+      let [cmd, ...args] = segment.split(/\s+/);
+
+      // if no explicit args but we have piped stdin, use it
+      if (args.length === 0 && stdin !== "") {
+        args = [stdin];
+      }
+
       const isSudo = cmd === "sudo";
       const action = isSudo ? args.shift() : cmd;
-      const rest   = isSudo ? args : args;
+      const rest   = isSudo ? args        : args;
 
       switch (action) {
-        case "echo": 
+        case "echo":
           return rest.length ? rest.join(" ") : stdin;
-        case "cp":   
+        case "cp":
           return this._cp(rest[0], rest[1]);
-        case "mv":   
+        case "mv":
           return this._mv(rest[0], rest[1]);
-        case "ls": { 
-          // detect and strip -a flag
+        case "ls": {
           const showAll = rest.includes("-a");
-          // take the first non-flag argument as the path
-          const dirArg = rest.find(arg => !arg.startsWith("-")) || "";
+          const dirArg  = rest.find(arg => !arg.startsWith("-")) || "";
           return this._ls(dirArg, showAll, isSudo);
         }
-        case "file": 
+        case "file":
           return this._file(rest[0], isSudo);
         case "mkdir":
           return this._mkdirFlagS(rest, isSudo);
-        case "vim":  
+        case "vim":
           return this._vimFlagS(rest, isSudo);
-        case "wget": 
-          return this._wget(rest[0]);
-        case "cd":   
+        case "cd":
           return this._cd(rest[0] || "", isSudo);
-        case "rm":   
+        case "rm":
           return this._rm(
-            rest.find(a => a !== "-r"), 
-            rest.includes("-r"), 
+            rest.find(a => a !== "-r"),
+            rest.includes("-r"),
             isSudo
           );
-        case "cat":  
+        case "cat":
+          // if there's piped input, echo it; otherwise read file
           return stdin || this._cat(rest[0], isSudo);
-        case "ban":  
+        case "ban":
           return this._ban(rest[0], isSudo);
         case "unban":
           return this._unban(rest[0], isSudo);
         case "listbanned":
           return this._listBanned(isSudo);
         case "help":
-        case "-h":   
+        case "-h":
           return this._help();
-        case "pwd":  
+        case "pwd":
           return this.currentPath;
-        default:     
+        default:
           return `shell: command not found: ${action}`;
       }
     }
@@ -11815,7 +11819,6 @@
         "  cat &lt;file&gt;            Show file contents",
         "  echo &lt;text&gt;           Print text",
         "  vim [-s] &lt;file&gt;       Edit file; -s password-protected",
-        "  wget &lt;url&gt;            Downloads file from url",
         "  sudo ban &lt;email&gt;      Ban email",
         "  sudo unban &lt;email&gt;    Unban email",
         "  sudo listbanned             List banned emails",
@@ -11856,55 +11859,6 @@
       });
       return `Directory '${dir}' created${needPwd?" (password‑protected)":""}`;
     }
-
-    async _wget(url) {
-      if (!url) return `wget: missing URL`;
-      let resp;
-      try {
-        resp = await fetch(url);
-      } catch (e) {
-        return `wget: failed to fetch '${url}': ${e.message}`;
-      }
-      if (!resp.ok) {
-        return `wget: HTTP ${resp.status} fetching '${url}'`;
-      }
-
-      // Try to extract filename from Content-Disposition header
-      let filename = "";
-      const disposition = resp.headers.get("Content-Disposition");
-      if (disposition && disposition.includes("filename=")) {
-        const match = disposition.match(/filename\*=UTF-8''(.+)|filename="?([^"]+)"?/i);
-        if (match) {
-          filename = decodeURIComponent(match[1] || match[2]);
-        }
-      }
-
-      // Fallback: parse filename from URL
-      if (!filename) {
-        const urlObj = new URL(url);
-        filename = urlObj.pathname.split("/").filter(Boolean).pop() || "";
-      }
-
-      // Final fallback
-      if (!filename || !/\.[a-zA-Z0-9]+$/.test(filename)) {
-        filename = "index.html";
-      }
-
-      // Read response as text
-      const content = await resp.text();
-
-      // Escape filename for Firebase key
-      const keyName = this._keyName(filename);
-      const targetPath = this.currentPath === "/" 
-        ? `/${filename}` 
-        : `${this.currentPath}/${filename}`;
-
-      // Store in DB under escaped key
-      await set(this._nodeRef(this._resolvePath(filename)), content);
-
-      return `Downloaded '${filename}'`;
-    }
-
   
     async _ls(dir = "", showAll = false, isSudo = false) {
       const path = this._resolvePath(dir);
