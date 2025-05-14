@@ -11757,64 +11757,84 @@
       }
 
 
-    // --- Dispatch with stdin-as-arg fallback ---
+    // --- Dispatch with stdin-as-filename fallback for cat, no wget ---
     async _run(segment, stdin) {
       // split out command and args
       let [cmd, ...args] = segment.split(/\s+/);
 
-      // if no explicit args but we have piped stdin, use it
-      if (args.length === 0 && stdin !== "") {
-        args = [stdin];
+      // commands under sudo
+      const isSudo = cmd === "sudo";
+      if (isSudo) {
+        cmd = args.shift();
       }
 
-      const isSudo = cmd === "sudo";
-      const action = isSudo ? args.shift() : cmd;
-      const rest   = isSudo ? args        : args;
-
-      switch (action) {
+      switch (cmd) {
         case "echo":
-          return rest.length ? rest.join(" ") : stdin;
+          // echo prints its args, or stdin if no args
+          return args.length ? args.join(" ") : stdin;
+
         case "cp":
-          return this._cp(rest[0], rest[1]);
+          return this._cp(args[0], args[1]);
+
         case "mv":
-          return this._mv(rest[0], rest[1]);
+          return this._mv(args[0], args[1]);
+
         case "ls": {
-          const showAll = rest.includes("-a");
-          const dirArg  = rest.find(arg => !arg.startsWith("-")) || "";
+          const showAll = args.includes("-a");
+          const dirArg  = args.find(a => !a.startsWith("-")) || "";
           return this._ls(dirArg, showAll, isSudo);
         }
+
         case "file":
-          return this._file(rest[0], isSudo);
+          return this._file(args[0], isSudo);
+
         case "mkdir":
-          return this._mkdirFlagS(rest, isSudo);
+          return this._mkdirFlagS(args, isSudo);
+
         case "vim":
-          return this._vimFlagS(rest, isSudo);
+          return this._vimFlagS(args, isSudo);
+
         case "cd":
-          return this._cd(rest[0] || "", isSudo);
+          return this._cd(args[0] || "", isSudo);
+
         case "rm":
           return this._rm(
-            rest.find(a => a !== "-r"),
-            rest.includes("-r"),
+            args.find(a => a !== "-r"),
+            args.includes("-r"),
             isSudo
           );
+
         case "cat":
-          // if there's piped input, echo it; otherwise read file
-          return stdin || this._cat(rest[0], isSudo);
+          // explicit filename wins; else if stdin non-empty, treat that as filename
+          if (args.length) {
+            return this._cat(args[0], isSudo);
+          } else if (stdin !== "") {
+            return this._cat(stdin.trim(), isSudo);
+          } else {
+            return `cat: missing operand`;
+          }
+
         case "ban":
-          return this._ban(rest[0], isSudo);
+          return this._ban(args[0], isSudo);
+
         case "unban":
-          return this._unban(rest[0], isSudo);
+          return this._unban(args[0], isSudo);
+
         case "listbanned":
           return this._listBanned(isSudo);
+
         case "help":
         case "-h":
           return this._help();
+
         case "pwd":
           return this.currentPath;
+
         default:
-          return `shell: command not found: ${action}`;
+          return `shell: command not found: ${cmd}`;
       }
     }
+
   
     // --- Help (escaped < >) ---
     async _help() {
