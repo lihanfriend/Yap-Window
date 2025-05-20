@@ -371,7 +371,6 @@
 	word-wrap: break-word;
 	background-color: ${isDark ? "#444" : "#e0e0e0"};
 	color: ${isDark ? "#ccc" : "#333"};
-  white-space: pre-wrap;
 }
 
 .message.sent {
@@ -1547,7 +1546,6 @@ a:hover {
         </div>
       </div>
       <button id="modify-channel" class="setting-button" style="display: none">✏️</button>
-      <button id="vote-bots-button" class="setting-button">🗳️</button>
    </div>
    <div id="lower-chat" class="chat">
       <div id="left-sidebar">
