@@ -11,28 +11,10 @@
     ADMIN: "[ADMIN]",
     SNAKE: "[Snake Game]",
     24: "[24]",
-    PRIME: "[Prime Bot]",
     ARCHFIEND: "[Archfiend Dice]",
     TIGGY: "[Tiggy]",
     TIGGYBOT: "[Tiggy Bot]",
-    TAM: "[Twelve Angry Men]",
-    J1: "[Foreman]",
-    J2: "[Juror 2]",
-    J3: "[Juror 3]",
-    J4: "[Juror 4]",
-    J5: "[Juror 5]",
-    J6: "[Juror 6]",
-    J7: "[Juror 7]",
-    J8: "[Juror 8]",
-    J9: "[Juror 9]",
-    J10: "[Juror 10]",
-    J11: "[Juror 11]",
-    J12: "[Juror 12]",
-    LOVE: "[Love Bot]",
-    CLICKER: "[Clicker Game]",
     JIMMY: "[Jimmy Bot]",
-    SHELL: "[Shell]",
-    TAU: "[Tau Game]",
   };
   const users = {};
   const email = auth.currentUser.email;
@@ -12416,95 +12398,7 @@ Make sure to follow all the instructions while answering questions.
             });
           }
         }
-      } else if (pureMessage.trim().toLowerCase().startsWith("/prime")) {
-        const args = pureMessage.trim().split(" ");
-        const userMessageRef = push(messagesRef);
-        await update(userMessageRef, {
-          User: email,
-          Message: pureMessage,
-          Date: Date.now(),
-        });
-
-        if (args[1] === "single") {
-          const number = parseInt(args[2], 10);
-          if (isNaN(number)) {
-            const errorMessageRef = push(messagesRef);
-            await update(errorMessageRef, {
-              User: "[Prime Bot]",
-              Message:
-                "Please provide a valid number for the single value check. Usage: /prime single <number>",
-              Date: Date.now(),
-            });
-          } else {
-            const isPrime = (n) => {
-              if (n <= 1) return false;
-              for (let i = 2; i * i <= n; i++) {
-                if (n % i === 0) return false;
-              }
-              return true;
-            };
-            const result = isPrime(number)
-              ? `${number} is a prime number.`
-              : `${number} is not a prime number.`;
-            const botMessageRef = push(messagesRef);
-            await update(botMessageRef, {
-              User: "[Prime Bot]",
-              Message: result,
-              Date: Date.now(),
-            });
-          }
-        } else if (args[1] === "range") {
-          const start = parseInt(args[2], 10);
-          const end = parseInt(args[3], 10);
-          if (isNaN(start) || isNaN(end)) {
-            const errorMessageRef = push(messagesRef);
-            await update(errorMessageRef, {
-              User: "[Prime Bot]",
-              Message:
-                "Please provide valid start and end numbers for the range check. Usage: /prime range <start> <end>",
-              Date: Date.now(),
-            });
-          } else if (start > end) {
-            const errorMessageRef = push(messagesRef);
-            await update(errorMessageRef, {
-              User: "[Prime Bot]",
-              Message:
-                "The start number must be less than or equal to the end number.",
-              Date: Date.now(),
-            });
-          } else {
-            const primes = [];
-            for (let i = start; i <= end; i++) {
-              const isPrime = (n) => {
-                if (n <= 1) return false;
-                for (let i = 2; i * i <= n; i++) {
-                  if (n % i === 0) return false;
-                }
-                return true;
-              };
-              if (isPrime(i)) primes.push(i);
-            }
-            const result =
-              primes.length > 0
-                ? `The prime numbers between ${start} and ${end} are: ${primes.join(", ")}`
-                : `No prime numbers found between ${start} and ${end}.`;
-            const botMessageRef = push(messagesRef);
-            await update(botMessageRef, {
-              User: "[Prime Bot]",
-              Message: result,
-              Date: Date.now(),
-            });
-          }
-        } else {
-          const errorMessageRef = push(messagesRef);
-          await update(errorMessageRef, {
-            User: "[Prime Bot]",
-            Message:
-              "Invalid command. Use /prime single <number> or /prime range <start> <end>.",
-            Date: Date.now(),
-          });
-        } // Add this block at line 2015
-      } else if (pureMessage.trim().toLowerCase().startsWith("/dice ")) {
+      } else if (pureMessage.trim().toLowerCase().startsWith("/roll ")) {
         const userMessageRef = push(messagesRef);
         await update(userMessageRef, {
           User: email,
@@ -12517,7 +12411,7 @@ Make sure to follow all the instructions while answering questions.
           const errorMessageRef = push(messagesRef);
           await update(errorMessageRef, {
             User: BOT_USERS.RNG,
-            Message: "Please specify a valid number of sides (e.g., /dice 6)",
+            Message: "Please specify a valid number of sides (e.g., /roll 6)",
             Date: Date.now(),
           });
           return;
