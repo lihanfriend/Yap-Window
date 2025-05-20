@@ -12435,7 +12435,7 @@ Make sure to follow all the instructions while answering questions.
           Date: Date.now(),
         });
 
-        if (result == 7) {
+        if (result == 7 && sides == 6) {
           await sleep(1000);
           const archfiend1 = push(messagesRef);
           await update(archfiend1, {
