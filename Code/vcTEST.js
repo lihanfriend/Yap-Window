@@ -38,11 +38,14 @@ javascript: (async function () {
       <div id="mainContent" style="display: none;">
         <div style="background-color: white; border-radius: 8px; padding: 15px; margin-bottom: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-            <h3 style="margin: 0;">Room: <span id="roomName">General</span></h3>
+            <h3 style="margin: 0;">Room: <span id="currentRoomName">Not Joined</span></h3>
             <div>
               <button id="muteToggleButton" style="padding: 8px 12px; background-color: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer; display: flex; align-items: center; gap: 5px;">
                 <span class="material-icons">mic</span>
                 <span id="muteButtonText">Mute</span>
+              </button>
+              <button id="leaveRoomButton" style="padding: 8px 12px; background-color: #f44336; color: white; border: none; border-radius: 4px; cursor: pointer; margin-left: 10px;">
+                Leave Room
               </button>
             </div>
           </div>
@@ -52,6 +55,44 @@ javascript: (async function () {
           <div id="participantsList" style="border: 1px solid #eee; border-radius: 4px; padding: 10px; max-height: 300px; overflow-y: auto;">
             <h4 style="margin-top: 0; color: #555; border-bottom: 1px solid #eee; padding-bottom: 8px;">Participants</h4>
             <div id="participantsContainer"></div>
+          </div>
+        </div>
+
+        <div id="roomManagement" style="background-color: white; border-radius: 8px; padding: 15px; margin-bottom: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+          <h3 style="margin-top: 0;">Room Management</h3>
+
+          <div style="margin-bottom: 15px;">
+            <h4>Create New Room</h4>
+            <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+              <input type="text" id="newRoomName" placeholder="Room name" style="flex: 1; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+              <input type="password" id="newRoomPassword" placeholder="Password (optional)" style="flex: 1; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+              <button id="createRoomButton" style="padding: 8px 16px; background-color: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                Create Room
+              </button>
+            </div>
+          </div>
+
+          <div>
+            <h4>Available Rooms</h4>
+            <div id="roomList" style="border: 1px solid #eee; border-radius: 4px; padding: 10px; max-height: 200px; overflow-y: auto;">
+              <div id="roomsContainer"></div>
+            </div>
+          </div>
+        </div>
+
+        <div id="passwordModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); z-index: 1000; justify-content: center; align-items: center;">
+          <div style="background-color: white; padding: 20px; border-radius: 8px; width: 300px;">
+            <h3 style="margin-top: 0;">Room Password</h3>
+            <p id="passwordModalRoomName" style="margin-bottom: 10px;"></p>
+            <input type="password" id="roomPasswordInput" placeholder="Enter password" style="width: 100%; padding: 8px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 4px;">
+            <div style="display: flex; justify-content: flex-end; gap: 10px;">
+              <button id="cancelPasswordButton" style="padding: 8px 16px; background-color: #f44336; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                Cancel
+              </button>
+              <button id="submitPasswordButton" style="padding: 8px 16px; background-color: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                Join
+              </button>
+            </div>
           </div>
         </div>
 
@@ -90,6 +131,8 @@ javascript: (async function () {
       set,
       remove,
       onValue,
+      get,
+      update,
     } = await import(
       "https://www.gstatic.com/firebasejs/11.0.2/firebase-database.js"
     );
@@ -116,11 +159,10 @@ javascript: (async function () {
     let isMuted = false;
     let peerConnections = {};
     let userVolumes = {};
-    const roomId = "voiceChat";
-
-    const roomRef = ref(db, `rooms/${roomId}`);
-    const participantsRef = ref(db, `rooms/${roomId}/participants`);
-    const signalsRef = ref(db, `rooms/${roomId}/signals`);
+    let currentRoomId = null;
+    let currentRoomName = null;
+    let currentRoomPassword = null;
+    let passwordModalRoomId = null;
 
     const rtcConfig = {
       iceServers: [
@@ -147,7 +189,7 @@ javascript: (async function () {
         document.getElementById("mainContent").style.display = "block";
 
         log(`Signed in as: ${myEmail} (${myId})`);
-        startVoiceChat();
+        updateRoomList();
       } else {
         myId = null;
         myEmail = null;
@@ -175,6 +217,52 @@ javascript: (async function () {
       });
     });
 
+    document
+      .getElementById("createRoomButton")
+      .addEventListener("click", () => {
+        const roomName = document.getElementById("newRoomName").value.trim();
+        const password = document
+          .getElementById("newRoomPassword")
+          .value.trim();
+
+        if (!roomName) {
+          setStatus("Please enter a room name");
+          return;
+        }
+
+        createRoom(roomName, password || null);
+      });
+
+    document.getElementById("leaveRoomButton").addEventListener("click", () => {
+      leaveCurrentRoom();
+    });
+
+    document
+      .getElementById("cancelPasswordButton")
+      .addEventListener("click", () => {
+        document.getElementById("passwordModal").style.display = "none";
+        passwordModalRoomId = null;
+      });
+
+    document
+      .getElementById("submitPasswordButton")
+      .addEventListener("click", () => {
+        const password = document.getElementById("roomPasswordInput").value;
+        if (passwordModalRoomId) {
+          joinRoom(passwordModalRoomId, password);
+        }
+        document.getElementById("passwordModal").style.display = "none";
+        passwordModalRoomId = null;
+      });
+
+    function showPasswordModal(roomId, roomName) {
+      passwordModalRoomId = roomId;
+      document.getElementById("passwordModalRoomName").textContent =
+        `Enter password for "${roomName}"`;
+      document.getElementById("roomPasswordInput").value = "";
+      document.getElementById("passwordModal").style.display = "flex";
+    }
+
     function cleanupOnSignOut() {
       if (localStream) {
         localStream.getTracks().forEach((track) => track.stop());
@@ -184,22 +272,147 @@ javascript: (async function () {
       Object.values(peerConnections).forEach((pc) => pc.close());
       peerConnections = {};
 
-      if (myId) {
-        remove(ref(db, `rooms/${roomId}/participants/${myId}`));
+      if (myId && currentRoomId) {
+        remove(ref(db, `rooms/${currentRoomId}/participants/${myId}`));
+        checkAndDeleteEmptyRoom(currentRoomId);
       }
 
       document.getElementById("participantsContainer").innerHTML = "";
       document.getElementById("audioElementsContainer").innerHTML = "";
+      currentRoomId = null;
+      currentRoomName = null;
     }
 
-    async function startVoiceChat() {
+    function leaveCurrentRoom() {
+      if (!currentRoomId) return;
+
+      if (localStream) {
+        localStream.getTracks().forEach((track) => track.stop());
+        localStream = null;
+      }
+
+      Object.values(peerConnections).forEach((pc) => pc.close());
+      peerConnections = {};
+
+      if (myId) {
+        remove(ref(db, `rooms/${currentRoomId}/participants/${myId}`));
+        checkAndDeleteEmptyRoom(currentRoomId);
+      }
+
+      document.getElementById("participantsContainer").innerHTML = "";
+      document.getElementById("audioElementsContainer").innerHTML = "";
+      document.getElementById("currentRoomName").textContent = "Not Joined";
+      setStatus("Left the room");
+
+      currentRoomId = null;
+      currentRoomName = null;
+    }
+
+    async function checkAndDeleteEmptyRoom(roomId) {
+      const participantsRef = ref(db, `rooms/${roomId}/participants`);
+      const snapshot = await get(participantsRef);
+
+      if (!snapshot.exists()) {
+        remove(ref(db, `rooms/${roomId}`));
+        log(`Deleted empty room: ${roomId}`);
+        updateRoomList();
+      }
+    }
+
+    async function createRoom(roomName, password) {
+      if (!myId) return;
+
       try {
-        await startLocalAudio();
-        await joinRoom();
-        setStatus("Connected! Waiting for others to join...");
+        setStatus(`Creating room "${roomName}"...`);
+
+        const newRoomRef = push(ref(db, "rooms"));
+        const roomId = newRoomRef.key;
+
+        await set(newRoomRef, {
+          name: roomName,
+          createdAt: Date.now(),
+          createdBy: myId,
+          password: password || null,
+        });
+
+        log(`Created new room: ${roomName} (${roomId})`);
+        setStatus(`Room "${roomName}" created successfully`);
+
+        joinRoom(roomId, password);
+
+        updateRoomList();
       } catch (error) {
-        log(`Error starting voice chat: ${error.message}`);
-        setStatus(`Error: ${error.message}`);
+        log(`Error creating room: ${error.message}`);
+        setStatus(`Error creating room: ${error.message}`);
+      }
+    }
+
+    async function updateRoomList() {
+      if (!myId) return;
+
+      try {
+        const roomsRef = ref(db, "rooms");
+        const snapshot = await get(roomsRef);
+
+        const roomsContainer = document.getElementById("roomsContainer");
+        roomsContainer.innerHTML = "";
+
+        if (!snapshot.exists()) {
+          roomsContainer.innerHTML = "<p>No rooms available. Create one!</p>";
+          return;
+        }
+
+        const rooms = snapshot.val();
+        let hasRooms = false;
+
+        for (const roomId in rooms) {
+          const room = rooms[roomId];
+          hasRooms = true;
+
+          const roomEl = document.createElement("div");
+          roomEl.style.display = "flex";
+          roomEl.style.justifyContent = "space-between";
+          roomEl.style.alignItems = "center";
+          roomEl.style.padding = "8px";
+          roomEl.style.margin = "4px 0";
+          roomEl.style.borderRadius = "4px";
+          roomEl.style.backgroundColor = "#f9f9f9";
+
+          const roomInfo = document.createElement("div");
+          roomInfo.innerHTML = `
+            <strong>${room.name}</strong>
+            <div style="font-size: 12px; color: #666;">
+              ${room.password ? "🔒 Password protected" : "🔓 Open access"}
+            </div>
+          `;
+
+          const joinButton = document.createElement("button");
+          joinButton.textContent = "Join";
+          joinButton.style.padding = "6px 12px";
+          joinButton.style.background = "#4CAF50";
+          joinButton.style.color = "white";
+          joinButton.style.border = "none";
+          joinButton.style.borderRadius = "4px";
+          joinButton.style.cursor = "pointer";
+
+          joinButton.addEventListener("click", () => {
+            if (room.password) {
+              showPasswordModal(roomId, room.name);
+            } else {
+              joinRoom(roomId);
+            }
+          });
+
+          roomEl.appendChild(roomInfo);
+          roomEl.appendChild(joinButton);
+          roomsContainer.appendChild(roomEl);
+        }
+
+        if (!hasRooms) {
+          roomsContainer.innerHTML = "<p>No rooms available. Create one!</p>";
+        }
+      } catch (error) {
+        log(`Error updating room list: ${error.message}`);
       }
     }
 
@@ -207,7 +420,6 @@ javascript: (async function () {
       const audio = document.createElement("audio");
       audio.id = `audio-${userId}`;
       audio.autoplay = true;
-
       audio.controls = false;
       audio.muted = false;
 
@@ -318,7 +530,7 @@ javascript: (async function () {
       peerConnection.onicecandidate = (event) => {
         if (event.candidate) {
           log(`Sending ICE candidate to ${participantId}`);
-          push(signalsRef, {
+          push(ref(db, `rooms/${currentRoomId}/signals`), {
             type: "ice",
             sender: myId,
             receiver: participantId,
@@ -381,8 +593,53 @@ javascript: (async function () {
       return peerConnection;
     }
 
-    async function joinRoom() {
-      const myParticipantRef = ref(db, `rooms/${roomId}/participants/${myId}`);
+    async function joinRoom(roomId, password = null) {
+      if (!myId) return;
+
+      if (currentRoomId) {
+        leaveCurrentRoom();
+      }
+
+      try {
+        const roomRef = ref(db, `rooms/${roomId}`);
+        const roomSnapshot = await get(roomRef);
+
+        if (!roomSnapshot.exists()) {
+          setStatus("Room does not exist");
+          return;
+        }
+
+        const room = roomSnapshot.val();
+
+        if (room.password && room.password !== password) {
+          setStatus("Incorrect password");
+          return;
+        }
+
+        currentRoomId = roomId;
+        currentRoomName = room.name;
+        document.getElementById("currentRoomName").textContent = room.name;
+
+        await startLocalAudio();
+        await joinRoomParticipants();
+
+        setStatus(`Joined room "${room.name}"!`);
+        updateRoomList();
+      } catch (error) {
+        log(`Error joining room: ${error.message}`);
+        setStatus(`Error: ${error.message}`);
+      }
+    }
+
+    async function joinRoomParticipants() {
+      if (!currentRoomId || !myId) return;
+
+      const myParticipantRef = ref(
+        db,
+        `rooms/${currentRoomId}/participants/${myId}`,
+      );
+      const participantsRef = ref(db, `rooms/${currentRoomId}/participants`);
+      const signalsRef = ref(db, `rooms/${currentRoomId}/signals`);
 
       await set(myParticipantRef, {
         timestamp: Date.now(),
@@ -393,6 +650,13 @@ javascript: (async function () {
 
       window.addEventListener("beforeunload", () => {
         remove(myParticipantRef);
+        checkAndDeleteEmptyRoom(currentRoomId);
+      });
+
+      addParticipantToUI({
+        id: myId,
+        email: myEmail,
+        muted: isMuted,
       });
 
       onChildAdded(participantsRef, (snapshot) => {
@@ -490,6 +754,9 @@ javascript: (async function () {
 
         const emailSpan = document.createElement("span");
         emailSpan.textContent = participant.email;
+        if (participant.id === myId) {
+          emailSpan.textContent += " (You)";
+        }
 
         participantEl.appendChild(muteIcon);
         participantEl.appendChild(emailSpan);
@@ -531,7 +798,7 @@ javascript: (async function () {
         await peerConnection.setLocalDescription(offer);
 
         log(`Sending offer to ${participantId}`);
-        push(signalsRef, {
+        push(ref(db, `rooms/${currentRoomId}/signals`), {
           type: "offer",
           sender: myId,
           receiver: participantId,
@@ -564,7 +831,7 @@ javascript: (async function () {
         await peerConnection.setLocalDescription(answer);
 
         log(`Sending answer to ${senderId}`);
-        push(signalsRef, {
+        push(ref(db, `rooms/${currentRoomId}/signals`), {
           type: "answer",
           sender: myId,
           receiver: senderId,
@@ -638,21 +905,15 @@ javascript: (async function () {
           });
         }
 
-        if (myId) {
-          set(ref(db, `rooms/${roomId}/participants/${myId}/muted`), isMuted);
+        if (myId && currentRoomId) {
+          set(
+            ref(db, `rooms/${currentRoomId}/participants/${myId}/muted`),
+            isMuted,
+          );
         }
 
         log(`Microphone ${isMuted ? "muted" : "unmuted"}`);
       });
-
-    const myParticipant = {
-      id: myId,
-      email: myEmail,
-      muted: isMuted,
-    };
-    if (myId && myEmail) {
-      addParticipantToUI(myParticipant);
-    }
   } catch (error) {
     log(`Initialization error: ${error.message}`);
     setStatus(`Error: ${error.message}`);
