@@ -1546,7 +1546,6 @@ a:hover {
         </div>
       </div>
       <button id="modify-channel" class="setting-button" style="display: none">✏️</button>
-      <button id="vote-bots-button" class="setting-button">🗳️</button>
    </div>
    <div id="lower-chat" class="chat">
       <div id="left-sidebar">
