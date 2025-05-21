@@ -10,7 +10,7 @@ javascript: (async function () {
   };
 
   document.write(`
-    <div style="font-family: sans-serif; padding: 20px; max-width: 800px; margin: 0 auto; background-color: #f9f9f9; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); color: black;">
+   <div style="font-family: sans-serif; padding: 20px; max-width: 800px; margin: 0 auto; background-color: #f9f9f9; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); color: black;">
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
       <h2 style="margin: 0; color: black;">Voice Chat</h2>
       <div id="userInfo" style="display: none; color: black;">
@@ -57,7 +57,6 @@ javascript: (async function () {
       </div>
       ...
   </div>
-
   `);
 
   const materialIconsLink = document.createElement("link");
