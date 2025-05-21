@@ -10,93 +10,54 @@ javascript: (async function () {
   };
 
   document.write(`
-    <div style="font-family: sans-serif; padding: 20px; max-width: 800px; margin: 0 auto; background-color: #f9f9f9; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-        <h2 style="margin: 0; color: #333;">Voice Chat</h2>
-        <div id="userInfo" style="display: none;">
-          <span id="userEmail" style="font-weight: bold;"></span>
-          <button id="signOutButton" style="margin-left: 10px; padding: 5px 10px; background-color: #f44336; color: white; border: none; border-radius: 4px; cursor: pointer;">Sign Out</button>
-        </div>
-        <div id="authButtons">
-          <button id="signInButton" style="padding: 8px 16px; background-color: #4285F4; color: white; border: none; border-radius: 4px; cursor: pointer; display: flex; align-items: center; gap: 8px;">
-            <svg width="18" height="18" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48">
-              <path fill="#FFC107" d="M43.611,20.083H42V20H24v8h11.303c-1.649,4.657-6.08,8-11.303,8c-6.627,0-12-5.373-12-12c0-6.627,5.373-12,12-12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C12.955,4,4,12.955,4,24c0,11.045,8.955,20,20,20c11.045,0,20-8.955,20-20C44,22.659,43.862,21.35,43.611,20.083z"/>
-              <path fill="#FF3D00" d="M6.306,14.691l6.571,4.819C14.655,15.108,18.961,12,24,12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C16.318,4,9.656,8.337,6.306,14.691z"/>
-              <path fill="#4CAF50" d="M24,44c5.166,0,9.86-1.977,13.409-5.192l-6.19-5.238C29.211,35.091,26.715,36,24,36c-5.202,0-9.619-3.317-11.283-7.946l-6.522,5.025C9.505,39.556,16.227,44,24,44z"/>
-              <path fill="#1976D2" d="M43.611,20.083H42V20H24v8h11.303c-0.792,2.237-2.231,4.166-4.087,5.571c0.001-0.001,0.002-0.001,0.003-0.002l6.19,5.238C36.971,39.205,44,34,44,24C44,22.659,43.862,21.35,43.611,20.083z"/>
-            </svg>
-            Sign in with Google
-          </button>
-        </div>
+    <div style="font-family: sans-serif; padding: 20px; max-width: 800px; margin: 0 auto; background-color: #f9f9f9; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); color: black;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+      <h2 style="margin: 0; color: black;">Voice Chat</h2>
+      <div id="userInfo" style="display: none; color: black;">
+        <span id="userEmail" style="font-weight: bold;"></span>
+        <button id="signOutButton" style="margin-left: 10px; padding: 5px 10px; background-color: #f44336; color: white; border: none; border-radius: 4px; cursor: pointer;">Sign Out</button>
       </div>
-
-      <div id="preAuthContent" style="text-align: center; padding: 40px 0;">
-        <h3>Please sign in to join the voice chat</h3>
-        <p>You need to authenticate with Google to use this application.</p>
-      </div>
-
-      <div id="mainContent" style="display: none;">
-        <div style="background-color: white; border-radius: 8px; padding: 15px; margin-bottom: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
-          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-            <h3 style="margin: 0;">Room: <span id="currentRoomName">Not Joined</span></h3>
-            <button id="leaveRoomButton" style="padding: 8px 12px; background-color: #f44336; color: white; border: none; border-radius: 4px; cursor: pointer; margin-left: 10px; display: none;">
-                Leave Room
-            </button>
-            <button id="muteToggleButton" style="padding: 8px 12px; background-color: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer; display: flex; align-items: center; gap: 5px;">
-              <span class="material-icons">mic</span>
-              <span id="muteButtonText">Mute</span>
-            </button>
-          </div>
-
-          <div id="statusBar" style="background-color: #f1f1f1; color: #666; padding: 8px; border-radius: 4px; font-size: 14px; text-align: center; margin-bottom: 10px;"></div>
-
-          <div id="participantsList" style="border: 1px solid #eee; border-radius: 4px; padding: 10px; max-height: 300px; overflow-y: auto;">
-            <h4 style="margin-top: 0; color: #555; border-bottom: 1px solid #eee; padding-bottom: 8px;">Participants</h4>
-            <div id="participantsContainer"></div>
-          </div>
-        </div>
-
-        <div id="roomManagement" style="background-color: white; border-radius: 8px; padding: 15px; margin-bottom: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
-          <h3 style="margin-top: 0;">Room Management</h3>
-
-          <div style="margin-bottom: 15px;">
-            <h4>Create New Room</h4>
-            <div style="display: flex; gap: 10px; margin-bottom: 10px;">
-              <input type="text" id="newRoomName" placeholder="Room name" style="flex: 1; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
-              <input type="password" id="newRoomPassword" placeholder="Password (optional)" style="flex: 1; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
-              <button id="createRoomButton" style="padding: 8px 16px; background-color: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer;">
-                Create Room
-              </button>
-            </div>
-          </div>
-
-          <div>
-            <h4>Available Rooms</h4>
-            <div id="roomList" style="border: 1px solid #eee; border-radius: 4px; padding: 10px; max-height: 200px; overflow-y: auto;">
-              <div id="roomsContainer">Loading rooms...</div>
-            </div>
-          </div>
-        </div>
-
-        <div id="passwordModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); z-index: 1000; justify-content: center; align-items: center;">
-          <div style="background-color: white; padding: 20px; border-radius: 8px; width: 300px;">
-            <h3 style="margin-top: 0;">Room Password</h3>
-            <p id="passwordModalRoomName" style="margin-bottom: 10px;"></p>
-            <input type="password" id="roomPasswordInput" placeholder="Enter password" style="width: 100%; padding: 8px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 4px;">
-            <div style="display: flex; justify-content: flex-end; gap: 10px;">
-              <button id="cancelPasswordButton" style="padding: 8px 16px; background-color: #f44336; color: white; border: none; border-radius: 4px; cursor: pointer;">
-                Cancel
-              </button>
-              <button id="submitPasswordButton" style="padding: 8px 16px; background-color: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer;">
-                Join
-              </button>
-            </div>
-          </div>
-        </div>
-
-        <div id="audioElementsContainer" style="display: none;"></div>
+      <div id="authButtons">
+        <button id="signInButton" style="padding: 8px 16px; background-color: #4285F4; color: white; border: none; border-radius: 4px; cursor: pointer; display: flex; align-items: center; gap: 8px;">
+          <svg width="18" height="18" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48">
+            <path fill="#FFC107" d="M43.611,20.083H42V20H24v8h11.303c-1.649,4.657-6.08,8-11.303,8c-6.627,0-12-5.373-12-12c0-6.627,5.373-12,12-12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C12.955,4,4,12.955,4,24c0,11.045,8.955,20,20,20c11.045,0,20-8.955,20-20C44,22.659,43.862,21.35,43.611,20.083z"/>
+            <path fill="#FF3D00" d="M6.306,14.691l6.571,4.819C14.655,15.108,18.961,12,24,12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C16.318,4,9.656,8.337,6.306,14.691z"/>
+            <path fill="#4CAF50" d="M24,44c5.166,0,9.86-1.977,13.409-5.192l-6.19-5.238C29.211,35.091,26.715,36,24,36c-5.202,0-9.619-3.317-11.283-7.946l-6.522,5.025C9.505,39.556,16.227,44,24,44z"/>
+            <path fill="#1976D2" d="M43.611,20.083H42V20H24v8h11.303c-0.792,2.237-2.231,4.166-4.087,5.571c0.001-0.001,0.002-0.001,0.003-0.002l6.19,5.238C36.971,39.205,44,34,44,24C44,22.659,43.862,21.35,43.611,20.083z"/>
+          </svg>
+          Sign in with Google
+        </button>
       </div>
     </div>
+  
+    <div id="preAuthContent" style="text-align: center; padding: 40px 0; color: black;">
+      <h3>Please sign in to join the voice chat</h3>
+      <p>You need to authenticate with Google to use this application.</p>
+    </div>
+  
+    <div id="mainContent" style="display: none; color: black;">
+      <div style="background-color: white; border-radius: 8px; padding: 15px; margin-bottom: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+          <h3 style="margin: 0;">Room: <span id="currentRoomName">Not Joined</span></h3>
+          <button id="leaveRoomButton" style="padding: 8px 12px; background-color: #f44336; color: white; border: none; border-radius: 4px; cursor: pointer; margin-left: 10px; display: none;">
+              Leave Room
+          </button>
+          <button id="muteToggleButton" style="padding: 8px 12px; background-color: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer; display: flex; align-items: center; gap: 5px;">
+            <span class="material-icons">mic</span>
+            <span id="muteButtonText">Mute</span>
+          </button>
+        </div>
+  
+        <div id="statusBar" style="background-color: #f1f1f1; color: black; padding: 8px; border-radius: 4px; font-size: 14px; text-align: center; margin-bottom: 10px;"></div>
+  
+        <div id="participantsList" style="border: 1px solid #eee; border-radius: 4px; padding: 10px; max-height: 300px; overflow-y: auto; color: black;">
+          <h4 style="margin-top: 0; color: black; border-bottom: 1px solid #eee; padding-bottom: 8px;">Participants</h4>
+          <div id="participantsContainer"></div>
+        </div>
+      </div>
+      ...
+  </div>
+
   `);
 
   const materialIconsLink = document.createElement("link");
