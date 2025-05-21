@@ -39,15 +39,13 @@ javascript: (async function () {
         <div style="background-color: white; border-radius: 8px; padding: 15px; margin-bottom: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
             <h3 style="margin: 0;">Room: <span id="currentRoomName">Not Joined</span></h3>
-            <div>
-              <button id="muteToggleButton" style="padding: 8px 12px; background-color: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer; display: flex; align-items: center; gap: 5px;">
-                <span class="material-icons">mic</span>
-                <span id="muteButtonText">Mute</span>
-              </button>
-              <button id="leaveRoomButton" style="padding: 8px 12px; background-color: #f44336; color: white; border: none; border-radius: 4px; cursor: pointer; margin-left: 10px; display: none;">
+            <button id="leaveRoomButton" style="padding: 8px 12px; background-color: #f44336; color: white; border: none; border-radius: 4px; cursor: pointer; margin-left: 10px; display: none;">
                 Leave Room
-              </button>
-            </div>
+            </button>
+            <button id="muteToggleButton" style="padding: 8px 12px; background-color: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer; display: flex; align-items: center; gap: 5px;">
+              <span class="material-icons">mic</span>
+              <span id="muteButtonText">Mute</span>
+            </button>
           </div>
 
           <div id="statusBar" style="background-color: #f1f1f1; color: #666; padding: 8px; border-radius: 4px; font-size: 14px; text-align: center; margin-bottom: 10px;"></div>
