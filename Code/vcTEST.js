@@ -44,7 +44,7 @@ javascript: (async function () {
                 <span class="material-icons">mic</span>
                 <span id="muteButtonText">Mute</span>
               </button>
-              <button id="leaveRoomButton" style="padding: 8px 12px; background-color: #f44336; color: white; border: none; border-radius: 4px; cursor: pointer; margin-left: 10px;">
+              <button id="leaveRoomButton" style="padding: 8px 12px; background-color: #f44336; color: white; border: none; border-radius: 4px; cursor: pointer; margin-left: 10px; display: none;">
                 Leave Room
               </button>
             </div>
@@ -75,7 +75,7 @@ javascript: (async function () {
           <div>
             <h4>Available Rooms</h4>
             <div id="roomList" style="border: 1px solid #eee; border-radius: 4px; padding: 10px; max-height: 200px; overflow-y: auto;">
-              <div id="roomsContainer"></div>
+              <div id="roomsContainer">Loading rooms...</div>
             </div>
           </div>
         </div>
@@ -163,6 +163,7 @@ javascript: (async function () {
     let currentRoomName = null;
     let currentRoomPassword = null;
     let passwordModalRoomId = null;
+    let roomListListener = null;
 
     const rtcConfig = {
       iceServers: [
@@ -189,7 +190,7 @@ javascript: (async function () {
         document.getElementById("mainContent").style.display = "block";
 
         log(`Signed in as: ${myEmail} (${myId})`);
-        updateRoomList();
+        setupRoomListListener();
       } else {
         myId = null;
         myEmail = null;
@@ -255,6 +256,15 @@ javascript: (async function () {
         passwordModalRoomId = null;
       });
 
+    function setupRoomListListener() {
+      if (roomListListener) {
+        roomListListener();
+      }
+
+      const roomsRef = ref(db, "rooms");
+      roomListListener = onValue(roomsRef, updateRoomList);
+    }
+
     function showPasswordModal(roomId, roomName) {
       passwordModalRoomId = roomId;
       document.getElementById("passwordModalRoomName").textContent =
@@ -281,6 +291,11 @@ javascript: (async function () {
       document.getElementById("audioElementsContainer").innerHTML = "";
       currentRoomId = null;
       currentRoomName = null;
+
+      if (roomListListener) {
+        roomListListener();
+        roomListListener = null;
+      }
     }
 
     function leaveCurrentRoom() {
@@ -302,6 +317,7 @@ javascript: (async function () {
       document.getElementById("participantsContainer").innerHTML = "";
       document.getElementById("audioElementsContainer").innerHTML = "";
       document.getElementById("currentRoomName").textContent = "Not Joined";
+      document.getElementById("leaveRoomButton").style.display = "none";
       setStatus("Left the room");
 
       currentRoomId = null;
@@ -315,7 +331,6 @@ javascript: (async function () {
       if (!snapshot.exists()) {
         remove(ref(db, `rooms/${roomId}`));
         log(`Deleted empty room: ${roomId}`);
-        updateRoomList();
       }
     }
 
@@ -339,31 +354,27 @@ javascript: (async function () {
         setStatus(`Room "${roomName}" created successfully`);
 
         joinRoom(roomId, password);
-
-        updateRoomList();
       } catch (error) {
         log(`Error creating room: ${error.message}`);
         setStatus(`Error creating room: ${error.message}`);
       }
     }
 
-    async function updateRoomList() {
+    async function updateRoomList(snapshot) {
       if (!myId) return;
 
       try {
-        const roomsRef = ref(db, "rooms");
-        const snapshot = await get(roomsRef);
-
         const roomsContainer = document.getElementById("roomsContainer");
-        roomsContainer.innerHTML = "";
 
-        if (!snapshot.exists()) {
+        if (!snapshot || !snapshot.exists()) {
           roomsContainer.innerHTML = "<p>No rooms available. Create one!</p>";
           return;
         }
 
         const rooms = snapshot.val();
         let hasRooms = false;
+
+        roomsContainer.innerHTML = "";
 
         for (const roomId in rooms) {
           const room = rooms[roomId];
@@ -380,28 +391,33 @@ javascript: (async function () {
 
           const roomInfo = document.createElement("div");
           roomInfo.innerHTML = `
-            <strong>${room.name}</strong>
+            <strong>${room.name || "Unnamed Room"}</strong>
             <div style="font-size: 12px; color: #666;">
               ${room.password ? "🔒 Password protected" : "🔓 Open access"}
             </div>
           `;
 
           const joinButton = document.createElement("button");
-          joinButton.textContent = "Join";
+          joinButton.textContent = roomId === currentRoomId ? "Joined" : "Join";
           joinButton.style.padding = "6px 12px";
-          joinButton.style.background = "#4CAF50";
+          joinButton.style.background =
+            roomId === currentRoomId ? "#cccccc" : "#4CAF50";
           joinButton.style.color = "white";
           joinButton.style.border = "none";
           joinButton.style.borderRadius = "4px";
-          joinButton.style.cursor = "pointer";
+          joinButton.style.cursor =
+            roomId === currentRoomId ? "default" : "pointer";
+          joinButton.disabled = roomId === currentRoomId;
 
-          joinButton.addEventListener("click", () => {
-            if (room.password) {
-              showPasswordModal(roomId, room.name);
-            } else {
-              joinRoom(roomId);
-            }
-          });
+          if (roomId !== currentRoomId) {
+            joinButton.addEventListener("click", () => {
+              if (room.password) {
+                showPasswordModal(roomId, room.name);
+              } else {
+                joinRoom(roomId);
+              }
+            });
+          }
 
           roomEl.appendChild(roomInfo);
           roomEl.appendChild(joinButton);
@@ -619,12 +635,13 @@ javascript: (async function () {
         currentRoomId = roomId;
         currentRoomName = room.name;
         document.getElementById("currentRoomName").textContent = room.name;
+        document.getElementById("leaveRoomButton").style.display =
+          "inline-block";
 
         await startLocalAudio();
         await joinRoomParticipants();
 
         setStatus(`Joined room "${room.name}"!`);
-        updateRoomList();
       } catch (error) {
         log(`Error joining room: ${error.message}`);
         setStatus(`Error: ${error.message}`);
